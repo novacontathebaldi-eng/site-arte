@@ -185,7 +185,7 @@ const SortableCategoryItem: React.FC<SortableCategoryItemProps> = ({ category, o
 
 // Define a type for the tabs in the admin UI to handle the split view
 // FIX: Added missing OrderStatus types to allow correct assignment.
-type OrderTabKey = 'accepted' | 'reserved' | 'pronto' | 'emRota' | 'completed' | 'cancelled' | OrderStatus;
+type OrderTabKey = 'processing' | 'reserved' | 'pronto' | 'emRota' | 'completed' | 'cancelled' | OrderStatus;
 
 
 export const AdminSection: React.FC<AdminSectionProps> = (props) => {
@@ -222,7 +222,7 @@ export const AdminSection: React.FC<AdminSectionProps> = (props) => {
     const [orderSearchTerm, setOrderSearchTerm] = useState('');
     const [orderFilters, setOrderFilters] = useState({ orderType: '', paymentMethod: '', paymentStatus: '', orderStatus: '' });
     const [showFilters, setShowFilters] = useState(false);
-    const [activeOrdersTab, setActiveOrdersTab] = useState<OrderTabKey>('accepted');
+    const [activeOrdersTab, setActiveOrdersTab] = useState<OrderTabKey>('processing');
     const [isTrashVisible, setIsTrashVisible] = useState(false);
     const [selectedOrderIds, setSelectedOrderIds] = useState(new Set<string>());
 
@@ -338,8 +338,8 @@ export const AdminSection: React.FC<AdminSectionProps> = (props) => {
     // Counter for the main "Pedidos" tab. Sums all active orders.
     const activeOrdersCount = useMemo(() => {
         // Active statuses are all those that are not final (completed, cancelled) or meta-states (deleted).
-        // FIX: Added 'reserved' and 'ready' to the list of active statuses.
-        const activeStatuses: OrderStatus[] = ['pending', 'accepted', 'reserved', 'ready'];
+        // FIX: Replaced old statuses with new ones ('processing', 'shipped') and added 'awaiting-payment' to the list of active statuses.
+        const activeStatuses: OrderStatus[] = ['pending', 'awaiting-payment', 'processing', 'reserved', 'ready', 'shipped'];
         return orders.filter(o => activeStatuses.includes(o.status)).length;
     }, [orders]);
 
@@ -469,12 +469,12 @@ export const AdminSection: React.FC<AdminSectionProps> = (props) => {
     const getOrderTabCount = (tab: OrderTabKey) => {
         switch(tab) {
             case 'pronto':
-                // FIX: Corrected comparison for `ready` status which is now part of OrderStatus
+                // FIX: Corrected status filter to 'ready' and maintained order type check for specificity.
                 return filteredOrders.filter(o => o.status === 'ready' && o.customer.orderType === 'pickup').length;
             case 'emRota':
-                 // FIX: Corrected comparison for `ready` status which is now part of OrderStatus
-                 return filteredOrders.filter(o => o.status === 'ready' && o.customer.orderType === 'delivery').length;
-            case 'accepted':
+                 // FIX: Corrected status filter to 'shipped' for delivery orders, aligning with the new status flow.
+                 return filteredOrders.filter(o => o.status === 'shipped' && o.customer.orderType === 'delivery').length;
+            case 'processing':
             case 'reserved':
             case 'completed':
             case 'cancelled':
@@ -487,11 +487,11 @@ export const AdminSection: React.FC<AdminSectionProps> = (props) => {
     const tabOrders = useMemo(() => {
         switch (activeOrdersTab) {
             case 'pronto':
-                // FIX: Corrected comparison for `ready` status which is now part of OrderStatus
+                // FIX: Corrected status filter to 'ready' for pickup orders.
                 return filteredOrders.filter(o => o.status === 'ready' && o.customer.orderType === 'pickup');
             case 'emRota':
-                // FIX: Corrected comparison for `ready` status which is now part of OrderStatus
-                return filteredOrders.filter(o => o.status === 'ready' && o.customer.orderType === 'delivery');
+                // FIX: Corrected status filter to 'shipped' for delivery orders.
+                return filteredOrders.filter(o => o.status === 'shipped' && o.customer.orderType === 'delivery');
             default:
                 return filteredOrders.filter(o => o.status === activeOrdersTab);
         }
@@ -683,7 +683,8 @@ export const AdminSection: React.FC<AdminSectionProps> = (props) => {
     
     if (!isCurrentUserAdmin) return null;
 
-    const OrderStatusTabs: OrderTabKey[] = ['accepted', 'reserved', 'pronto', 'emRota', 'completed', 'cancelled'];
+    // FIX: Replaced 'accepted' with 'processing' to match the new status flow.
+    const OrderStatusTabs: OrderTabKey[] = ['processing', 'reserved', 'pronto', 'emRota', 'completed', 'cancelled'];
 
     return (
         <>
@@ -880,7 +881,7 @@ export const AdminSection: React.FC<AdminSectionProps> = (props) => {
                                                         onClick={() => handleOrderSubTabClick(tabKey)} 
                                                         className={`relative flex-shrink-0 inline-flex items-center gap-2 py-2 px-4 font-semibold text-sm ${activeOrdersTab === tabKey && !isTrashVisible ? 'border-b-2 border-accent text-accent' : 'text-gray-500 hover:text-gray-700'}`}
                                                     >
-                                                        {{accepted: 'Aceitos', reserved: 'Reservas', pronto: 'Prontos', emRota: 'Em Rota', completed: 'Finalizados', cancelled: 'Cancelados'}[tabKey]}
+                                                        {{processing: 'Em Preparo', reserved: 'Reservas', pronto: 'Prontos', emRota: 'Em Rota', completed: 'Finalizados', cancelled: 'Cancelados'}[tabKey]}
                                                         {showCounter && <span className="bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">{count}</span>}
                                                     </button>
                                                     )

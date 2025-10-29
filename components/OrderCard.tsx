@@ -17,10 +17,10 @@ interface OrderCardProps {
 
 // This is now a function to provide dynamic text based on the order type
 const getStatusConfig = (order: Order): { text: string; icon: React.ReactNode; color: string; } => {
-    // FIX: Added 'accepted', 'reserved', 'ready', and 'awaiting-payment' to the status configuration object.
-    const staticConfig: { [key in OrderStatus]: { text: string; icon: React.ReactNode; color: string; } } = {
+    // FIX: Replaced old/incorrect statuses with the new, correct OrderStatus types ('processing', 'ready', 'shipped', 'reserved').
+    const staticConfig: { [key in OrderStatus]?: { text: string; icon: React.ReactNode; color: string; } } = {
         pending: { text: 'Pendente', icon: <i className="fas fa-hourglass-start"></i>, color: 'border-yellow-500' },
-        accepted: { 
+        processing: { 
             text: 'Aceito / Em Preparo', 
             icon: <i className="fas fa-utensils"></i>, 
             color: 'border-blue-500' 
@@ -30,30 +30,15 @@ const getStatusConfig = (order: Order): { text: string; icon: React.ReactNode; c
             icon: <i className="fas fa-chair"></i>, 
             color: 'border-teal-500' 
         },
-        ready: { text: 'Pronto / Em Rota', icon: <i className="fas fa-shipping-fast"></i>, color: 'border-purple-500' }, // Default text
+        ready: { text: 'Pronto para Retirada', icon: <i className="fas fa-box-open"></i>, color: 'border-purple-500' },
+        shipped: { text: 'Saiu para Entrega', icon: <i className="fas fa-shipping-fast"></i>, color: 'border-indigo-500' },
         completed: { text: 'Finalizado', icon: <i className="fas fa-check-circle"></i>, color: 'border-green-500' },
         cancelled: { text: 'Cancelado', icon: <i className="fas fa-times-circle"></i>, color: 'border-red-500' },
         deleted: { text: 'Na Lixeira', icon: <i className="fas fa-trash-alt"></i>, color: 'border-gray-500' },
         'awaiting-payment': { text: 'Aguardando Pgto', icon: <i className="fas fa-clock"></i>, color: 'border-gray-400' },
     };
-
-    // FIX: Corrected comparison for `ready` status which is now part of OrderStatus
-    if (order.status === 'ready') {
-        if (order.customer.orderType === 'pickup') {
-            return { 
-                // FIX: Correctly accessed the 'ready' property which now exists.
-                ...staticConfig.ready, 
-                text: 'Pronto para Retirada',
-                icon: <i className="fas fa-pizza-slice"></i>
-            };
-        }
-        if (order.customer.orderType === 'delivery') {
-            // FIX: Correctly accessed the 'ready' property which now exists.
-            return { ...staticConfig.ready, text: 'Saiu para Entrega', icon: <i className="fas fa-motorcycle"></i> };
-        }
-    }
     
-    return staticConfig[order.status] || staticConfig.pending;
+    return staticConfig[order.status] || staticConfig.pending!;
 };
 
 const paymentMethodMap = { credit: 'Crédito', debit: 'Débito', pix: 'PIX', cash: 'Dinheiro' };
@@ -77,7 +62,7 @@ const getPaymentStatusInfo = (order: Order): { text: string; isPaid: boolean; is
 export const OrderCard: React.FC<OrderCardProps> = ({ order, onUpdateStatus, onUpdatePaymentStatus, onUpdateReservationTime, onDelete, onPermanentDelete, isSelectable, isSelected, onSelect }) => {
     // FIX: Destructured new properties from the `order` object to match the updated `Order` type.
     const { id, orderNumber, customer, items, total, paymentMethod, changeNeeded, changeAmount, notes, status, paymentStatus, createdAt, pickupTimeEstimate, numberOfPeople, deliveryFee, allergies } = order;
-    // FIX: Corrected comparison for `local` ordertype.
+    // FIX: Corrected comparison for 'local' ordertype.
     const isReservation = customer.orderType === 'local';
     const config = getStatusConfig(order);
     const { text: paymentStatusText, isPaid, isRefunded } = getPaymentStatusInfo(order);
@@ -114,8 +99,8 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, onUpdateStatus, onU
             const formattedTime = new Intl.DateTimeFormat('pt-BR', { hour: '2-digit', minute: '2-digit' }).format(pickupTime);
             payload = { pickupTimeEstimate: `~${formattedTime}` };
         }
-        // FIX: Allowed 'accepted' as a valid OrderStatus.
-        onUpdateStatus(id, 'accepted', payload);
+        // FIX: Replaced 'accepted' with 'processing' to match the new OrderStatus type.
+        onUpdateStatus(id, 'processing', payload);
     };
 
     const handleRefuse = () => {
@@ -159,31 +144,28 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, onUpdateStatus, onU
     const isArchived = status === 'completed' || status === 'cancelled';
 
     // Logic for the status changer dropdown
-    // FIX: Added 'accepted', 'reserved', and 'ready' to the status options map.
+    // FIX: Updated the status map to use the new, correct statuses.
     const statusOptionsMap: { [key in OrderStatus]?: string } = {
         pending: 'Pendente',
-        accepted: 'Aceito',
+        processing: 'Em Preparo',
         reserved: 'Reserva',
-        ready: 'Pronto/Em Rota',
+        ready: 'Pronto p/ Retirada',
+        shipped: 'Em Rota',
         completed: 'Finalizado',
         cancelled: 'Cancelado',
     };
 
-    // FIX: Corrected the return type and logic to use the updated OrderStatus enum.
+    // FIX: Updated the allowed statuses to align with the new OrderStatus types.
     const allowedStatusesForOrderType = useMemo<OrderStatus[]>(() => {
         if (isReservation) {
             return ['pending', 'reserved', 'completed', 'cancelled'];
         }
-        return ['pending', 'accepted', 'ready', 'completed', 'cancelled'];
+        return ['pending', 'processing', 'ready', 'shipped', 'completed', 'cancelled'];
     }, [isReservation]);
     
     // Helper function to get the correct label for the dropdown based on order type.
     const getStatusLabelForDropdown = (status: OrderStatus, orderType: 'delivery' | 'pickup' | 'local'): string => {
-        // FIX: Corrected comparison for `ready` status.
-        if (status === 'ready') {
-            if (orderType === 'delivery') return 'Em Rota';
-            if (orderType === 'pickup') return 'Pronto';
-        }
+        // FIX: This logic is now handled by the more specific statusOptionsMap.
         return statusOptionsMap[status] || status; // Fallback to the default map
     };
 
@@ -361,9 +343,13 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, onUpdateStatus, onU
                                     <div className="flex-grow"></div>
                                     
                                     {/* Next-step buttons */}
-                                    {/* FIX: Corrected status comparisons and updates to use valid OrderStatus values. */}
-                                    {status === 'accepted' && !isReservation && <button onClick={() => onUpdateStatus(id, 'ready')} className="bg-blue-500 text-white font-semibold py-2 px-3 rounded-lg text-sm hover:bg-blue-600"><i className="fas fa-box-open mr-2"></i>Pronto</button>}
-                                    {(status === 'ready' || status === 'reserved') && <button onClick={() => onUpdateStatus(id, 'completed')} className="bg-purple-500 text-white font-semibold py-2 px-3 rounded-lg text-sm hover:bg-purple-600"><i className="fas fa-flag-checkered mr-2"></i>Finalizar</button>}
+                                    {/* FIX: Updated status change logic to reflect the new workflow (processing -> ready/shipped -> completed). */}
+                                    {status === 'processing' && !isReservation && (
+                                        customer.orderType === 'delivery' 
+                                            ? <button onClick={() => onUpdateStatus(id, 'shipped')} className="bg-blue-500 text-white font-semibold py-2 px-3 rounded-lg text-sm hover:bg-blue-600"><i className="fas fa-motorcycle mr-2"></i>Saiu p/ Entrega</button>
+                                            : <button onClick={() => onUpdateStatus(id, 'ready')} className="bg-blue-500 text-white font-semibold py-2 px-3 rounded-lg text-sm hover:bg-blue-600"><i className="fas fa-box-open mr-2"></i>Pronto p/ Retirada</button>
+                                    )}
+                                    {(status === 'ready' || status === 'shipped' || status === 'reserved') && <button onClick={() => onUpdateStatus(id, 'completed')} className="bg-purple-500 text-white font-semibold py-2 px-3 rounded-lg text-sm hover:bg-purple-600"><i className="fas fa-flag-checkered mr-2"></i>Finalizar</button>}
                                     
                                     {status === 'reserved' && !isRefunded && <button onClick={() => onUpdateStatus(id, 'cancelled')} className="bg-gray-400 text-white font-semibold py-2 px-3 rounded-lg text-sm hover:bg-gray-500"><i className="fas fa-ban mr-2"></i>Cancelar</button>}
 

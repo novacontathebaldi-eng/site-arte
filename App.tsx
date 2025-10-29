@@ -75,7 +75,12 @@ const defaultSiteSettings: SiteSettings = {
     ]
 };
 
-const generateWhatsAppMessage = (details: OrderDetails, currentCart: CartItem[], total: number, orderNumber: number | null, isPaid: boolean) => {
+// FIX: Refactored function signature to accept the whole Order object, resolving a type mismatch.
+const generateWhatsAppMessage = (order: Order, currentCart: CartItem[]) => {
+    const details = order.customer;
+    const total = order.total ?? 0;
+    const orderNumber = order.orderNumber;
+    const isPaid = order.paymentStatus === 'paid' || order.paymentStatus === 'paid_online';
     const paymentMethodMap = { credit: 'Carte de crédit', debit: 'Carte de débit', pix: 'Virement bancaire', cash: 'Espèces' };
     const orderNumStr = orderNumber ? ` #${orderNumber}` : '';
 
@@ -114,16 +119,18 @@ const generateWhatsAppMessage = (details: OrderDetails, currentCart: CartItem[],
 
     message += `\n*🧾 RÉSUMÉ FINANCIER:*\n`;
     message += `*Sous-total:* ${subtotal.toLocaleString('fr-LU', { style: 'currency', currency: 'EUR' })}\n`;
-    if (details.orderType === 'delivery' && details.deliveryFee) {
-        message += `*Frais de livraison:* ${details.deliveryFee.toLocaleString('fr-LU', { style: 'currency', currency: 'EUR' })}\n`;
+    if (details.orderType === 'delivery' && order.deliveryFee) {
+        message += `*Frais de livraison:* ${order.deliveryFee.toLocaleString('fr-LU', { style: 'currency', currency: 'EUR' })}\n`;
     }
     message += `*TOTAL: ${total.toLocaleString('fr-LU', { style: 'currency', currency: 'EUR' })}*\n\n`;
 
     message += `*💳 PAIEMENT:*\n`;
-    message += `*Méthode:* ${paymentMethodMap[details.paymentMethod]}\n`;
+    if (order.paymentMethod) {
+        message += `*Méthode:* ${paymentMethodMap[order.paymentMethod]}\n`;
+    }
     
-    if (details.notes) {
-        message += `\n*📝 NOTES:*\n${details.notes}\n`;
+    if (order.notes) {
+        message += `\n*📝 NOTES:*\n${order.notes}\n`;
     }
     message += `\nMerci d'avoir choisi une de mes œuvres ! ✨`;
 
@@ -553,9 +560,7 @@ const App: React.FC = () => {
     };
 
     const handleSendWhatsApp = (order: Order) => {
-        const total = order.total || 0;
-        const isPaid = order.paymentStatus === 'paid' || order.paymentStatus === 'paid_online';
-        const messageUrl = generateWhatsAppMessage(order.customer, order.items || [], total, order.orderNumber, isPaid);
+        const messageUrl = generateWhatsAppMessage(order, order.items || []);
         window.open(messageUrl, '_blank');
         setConfirmedOrderData(null);
     };

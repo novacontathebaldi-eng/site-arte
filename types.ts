@@ -81,7 +81,8 @@ export interface OrderDetails {
     changeAmount?: string;
 }
 
-export type OrderStatus = 'pending' | 'awaiting-payment' | 'processing' | 'shipped' | 'completed' | 'cancelled' | 'deleted';
+// FIX: Updated OrderStatus to include legacy and new statuses to resolve type errors and support the full order lifecycle for art sales.
+export type OrderStatus = 'pending' | 'awaiting-payment' | 'processing' | 'ready' | 'shipped' | 'completed' | 'cancelled' | 'deleted' | 'reserved';
 export type PaymentStatus = 'pending' | 'paid' | 'paid_online' | 'refunded';
 
 export interface OrderCustomerDetails {

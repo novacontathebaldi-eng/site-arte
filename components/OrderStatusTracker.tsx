@@ -1,12 +1,13 @@
 import React, { useMemo } from 'react';
 import { Order, OrderStatus } from '../types';
 
-// FIX: Added 'accepted', 'reserved', 'ready', and 'awaiting-payment' to the status configuration object.
+// FIX: Updated the status configuration to use the new, correct OrderStatus types.
 const statusConfig: { [key in OrderStatus]?: { text: string; icon: string; color: string; } } = {
     pending: { text: 'Pendente', icon: 'fas fa-hourglass-start', color: 'text-yellow-500' },
-    accepted: { text: 'Em Preparo', icon: 'fas fa-utensils', color: 'text-blue-500' },
+    processing: { text: 'Em Preparo', icon: 'fas fa-utensils', color: 'text-blue-500' },
     reserved: { text: 'Reserva Confirmada', icon: 'fas fa-chair', color: 'text-teal-500' },
-    ready: { text: 'Pronto / Em Rota', icon: 'fas fa-shipping-fast', color: 'text-purple-500' },
+    ready: { text: 'Pronto p/ Retirada', icon: 'fas fa-box-open', color: 'text-purple-500' },
+    shipped: { text: 'Saiu p/ Entrega', icon: 'fas fa-shipping-fast', color: 'text-purple-500' },
     completed: { text: 'Finalizado', icon: 'fas fa-check-circle', color: 'text-green-500' },
     cancelled: { text: 'Cancelado', icon: 'fas fa-times-circle', color: 'text-red-500' },
     deleted: { text: 'Excluído', icon: 'fas fa-trash-alt', color: 'text-gray-500' },
@@ -52,25 +53,31 @@ export const OrderStatusTracker: React.FC<{ order: Order }> = ({ order }) => {
         );
     }
 
-    const steps = [
+    const steps = useMemo(() => [
         { id: 'pending', label: 'Pedido Recebido', icon: <i className="fas fa-receipt"></i> },
         { 
-            id: 'accepted', 
+            id: 'processing', 
             label: 'Em Preparo', 
             icon: <i className="fas fa-utensils"></i>
         },
         { 
-            id: 'ready', 
+            id: order.customer.orderType === 'delivery' ? 'shipped' : 'ready', 
             label: order.customer.orderType === 'delivery' ? 'Saiu p/ Entrega' : 'Pronto p/ Retirada', 
             icon: order.customer.orderType === 'delivery' 
                 ? <i className="fas fa-motorcycle"></i> 
                 : <i className="fas fa-pizza-slice"></i>
         },
         { id: 'completed', label: 'Finalizado', icon: <i className="fas fa-check"></i> }
-    ];
+    ], [order.customer.orderType]);
+    
+    // FIX: Corrected the status order array to use valid OrderStatus values and dynamically adjust for order type.
+    const statusOrder: OrderStatus[] = useMemo(() => 
+        order.customer.orderType === 'delivery' 
+            ? ['pending', 'processing', 'shipped', 'completed'] 
+            : ['pending', 'processing', 'ready', 'completed'],
+        [order.customer.orderType]
+    );
 
-    // FIX: Corrected the status order array to use valid OrderStatus values.
-    const statusOrder: OrderStatus[] = ['pending', 'accepted', 'ready', 'completed'];
     let currentStatusIndex = statusOrder.indexOf(order.status);
     
     // FIX: Corrected comparison for `awaiting-payment` status which is now part of OrderStatus
