@@ -1,0 +1,7 @@
+{
+  "name": "SITE DE ARTE",
+  "description": "Site de vendas de obras de arte.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
