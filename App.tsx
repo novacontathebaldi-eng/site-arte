@@ -76,7 +76,7 @@ const defaultSiteSettings: SiteSettings = {
 };
 
 // FIX: Refactored function signature to accept the whole Order object, resolving a type mismatch.
-const generateWhatsAppMessage = (order: Order, currentCart: CartItem[]) => {
+const generateWhatsAppMessage = (order: Order, currentCart: (Omit<CartItem, 'imageUrl'>)[]) => {
     const details = order.customer;
     const total = order.total ?? 0;
     const orderNumber = order.orderNumber;
