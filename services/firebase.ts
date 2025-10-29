@@ -7,14 +7,14 @@ import 'firebase/compat/storage';
 import 'firebase/compat/auth'; // Import for authentication
 import 'firebase/compat/functions'; // Import for Firebase Functions
 
-// New Firebase configuration for the art gallery project.
+// New Firebase configuration for the "thebaldi-me" project.
 const firebaseConfig = {
-  apiKey: "AIzaSyBctHb4KzodpCgxRcPNY4NuKFYX71-wSbQ",
-  authDomain: "arte-meeh.firebaseapp.com",
-  projectId: "arte-meeh",
-  storageBucket: "arte-meeh.firebasestorage.app",
-  messagingSenderId: "160070945903",
-  appId: "1:160070945903:web:5e881331486f459ca1519a"
+  apiKey: "AIzaSyAWVI9VHvxARMSM3JV-bXs_73UjKh25mn4",
+  authDomain: "thebaldi-me.firebaseapp.com",
+  projectId: "thebaldi-me",
+  storageBucket: "thebaldi-me.firebasestorage.app",
+  messagingSenderId: "794996190135",
+  appId: "1:794996190135:web:ec7ac21c07fc58847d5632"
 };
 
 
@@ -37,7 +37,7 @@ try {
     experimentalForceLongPolling: true,
   });
   
-  console.log("Firebase initialized successfully for ARTE-MEEH project.");
+  console.log("Firebase initialized successfully for thebaldi-me project.");
 } catch (error) {
   console.error('Failed to initialize Firebase. Check your firebaseConfig object in `services/firebase.ts`.', error);
 }
