@@ -5,7 +5,6 @@ interface ContactSectionProps {
     settings: SiteSettings;
 }
 
-// Helper function to process operating hours into structured groups
 function formatOperatingHoursGroups(operatingHours?: DaySchedule[]): { days: string, time: string }[] {
     if (!operatingHours?.length) return [];
     
@@ -27,7 +26,7 @@ function formatOperatingHoursGroups(operatingHours?: DaySchedule[]): { days: str
 
         let dayString;
         if (schedules.length === 7) {
-            dayString = 'Todos os dias';
+            dayString = 'Tous les jours';
         } else {
             const sequences: DaySchedule[][] = [];
             if (schedules.length > 0) {
@@ -42,55 +41,44 @@ function formatOperatingHoursGroups(operatingHours?: DaySchedule[]): { days: str
                 }
                 sequences.push(currentSequence);
             }
-            
-            // Handle Sunday-Saturday wrap-around (e.g., Fri, Sat, Sun)
-            if (sequences.length > 1 && sequences[0][0].dayOfWeek === 0 && schedules[schedules.length - 1].dayOfWeek === 6) {
-               const firstSeq = sequences.shift()!;
-               sequences[sequences.length - 1].push(...firstSeq);
-            }
 
             const formattedSequences = sequences.map(seq => {
                 if (seq.length === 1) return seq[0].dayName;
-                if (seq.length === 2) return `${seq[0].dayName} e ${seq[1].dayName}`;
-                return `De ${seq[0].dayName} a ${seq[seq.length - 1].dayName}`;
+                if (seq.length === 2) return `${seq[0].dayName} et ${seq[1].dayName}`;
+                return `De ${seq[0].dayName} à ${seq[seq.length - 1].dayName}`;
             });
-            dayString = formattedSequences.join(' e ');
+            dayString = formattedSequences.join(' et ');
         }
 
         const [openTime, closeTime] = timeKey.split('-');
         result.push({
             days: dayString,
-            time: `das ${openTime}h às ${closeTime}h`
+            time: `de ${openTime}h à ${closeTime}h`
         });
     }
     return result;
 }
 
-
 const formatOperatingHours = (operatingHours?: DaySchedule[]): string => {
     if (!operatingHours?.length) {
-        return 'Funcionamento não informado.';
+        return 'Horaires non communiqués.';
     }
-
     const openSchedules = operatingHours.filter(h => h.isOpen);
     if (openSchedules.length === 0) {
-        return 'Fechado todos os dias.';
+        return 'Fermé tous les jours.';
     }
-
     const groups = formatOperatingHoursGroups(operatingHours);
     if (groups.length === 0) {
-        return 'Fechado todos os dias.';
+        return 'Fermé tous les jours.';
     }
-
     return groups.map(group => `${group.days}, ${group.time}`).join(' | ');
 };
 
 
 export const ContactSection: React.FC<ContactSectionProps> = ({ settings }) => {
-    const address = "Rua Porfilio Furtado, 178, Centro - Santa Leopoldina, ES";
+    const address = "19 Rue de la Reine, L-2418 Luxembourg";
     const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(address)}`;
-    // Vou colocar um botão no personalizar para carlinhos mudar isso fácil heheheh
-    const facadeImageUrl = "https://firebasestorage.googleapis.com/v0/b/site-pizza-a2930.firebasestorage.app/o/fachada%2FFACHADA.png?alt=media&token=8010021e-a157-475e-8734-4ba56a3e967f";
+    const facadeImageUrl = "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=800";
     const operatingHoursText = formatOperatingHours(settings.operatingHours);
 
 
@@ -98,61 +86,55 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ settings }) => {
         <section id="contato" className="py-20 bg-white">
              <div className="container mx-auto px-4">
                 <div className="text-center mb-12">
-                     <span className="inline-block bg-brand-green-300 text-brand-green-700 px-4 py-2 rounded-full font-semibold text-sm mb-4">
-                        <i className="fas fa-map-marked-alt mr-2"></i>Venha nos Visitar
+                     <span className="inline-block bg-brand-accent/10 text-brand-secondary px-4 py-2 rounded-full font-semibold text-sm mb-4">
+                        <i className="fas fa-map-marked-alt mr-2"></i>Venez nous rendre visite
                     </span>
-                    <h2 className="text-4xl font-bold text-text-on-light">Nossa Casa</h2>
-                    <p className="text-lg text-gray-600 mt-2 max-w-2xl mx-auto">Estamos no coração de Santa Leopoldina, prontos para te receber com a melhor pizza do estado!</p>
+                    <h2 className="text-4xl font-serif font-bold text-text-primary">Notre Galerie</h2>
+                    <p className="text-lg text-text-secondary mt-2 max-w-2xl mx-auto">Situés au cœur de Luxembourg, nous sommes prêts à vous accueillir.</p>
                 </div>
 
-                <div className="grid lg:grid-cols-2 gap-12 items-stretch bg-brand-ivory-50 p-6 sm:p-8 rounded-2xl shadow-lg border border-brand-gold-600/20">
-                    {/* Left Column: Info & Image */}
+                <div className="grid lg:grid-cols-2 gap-12 items-stretch bg-brand-background p-6 sm:p-8 rounded-2xl shadow-lg border border-brand-accent/20">
                     <div className="flex flex-col space-y-6">
                         <img 
                             src={facadeImageUrl}
-                            alt="Ambiente aconchegante da pizzaria" 
+                            alt="Galerie d'art" 
                             className="rounded-xl shadow-lg w-full h-64 object-cover" 
                         />
-                        
                         <div className="space-y-4 flex-grow">
                             <div className="flex items-start gap-4">
-                                <i className="fas fa-map-marker-alt text-accent text-xl mt-1 w-6 text-center flex-shrink-0"></i>
+                                <i className="fas fa-map-marker-alt text-brand-secondary text-xl mt-1 w-6 text-center flex-shrink-0"></i>
                                 <div>
-                                    <h3 className="text-lg font-bold text-text-on-light">Nosso Endereço</h3>
-                                    <p className="text-gray-700">{address}</p>
+                                    <h3 className="text-lg font-bold text-text-primary">Notre Adresse</h3>
+                                    <p className="text-text-secondary">{address}</p>
                                 </div>
                             </div>
-                            
                             <div className="flex items-start gap-4">
-                                <i className="fas fa-clock text-accent text-xl mt-1 w-6 text-center flex-shrink-0"></i>
+                                <i className="fas fa-clock text-brand-secondary text-xl mt-1 w-6 text-center flex-shrink-0"></i>
                                 <div>
-                                    <h3 className="text-lg font-bold text-text-on-light">Funcionamento</h3>
-                                    <p className="text-gray-700">{operatingHoursText}</p>
+                                    <h3 className="text-lg font-bold text-text-primary">Horaires d'ouverture</h3>
+                                    <p className="text-text-secondary">{operatingHoursText}</p>
                                 </div>
                             </div>
                         </div>
-
                         <a 
                             href={googleMapsUrl} 
                             target="_blank" 
                             rel="noopener noreferrer" 
-                            className="mt-auto block text-center bg-accent text-white font-bold py-3 px-6 rounded-lg text-lg hover:bg-opacity-90 transition-all transform hover:scale-105"
+                            className="mt-auto block text-center bg-brand-primary text-white font-bold py-3 px-6 rounded-lg text-lg hover:opacity-90 transition-all transform hover:scale-105"
                         >
                             <i className="fas fa-directions mr-2"></i>
-                            Como Chegar
+                            Itinéraire
                         </a>
                     </div>
-
-                    {/* Right Column: Map */}
                     <div className="w-full h-full min-h-[400px] lg:min-h-full rounded-xl overflow-hidden shadow-lg">
                         <iframe
-                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3748.241517983617!2d-40.53186832476562!3d-20.040217981387614!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xb8567115982877%3A0x1994e098805f778d!2sR.%20Porf%C3%ADrio%20Furtado%2C%20178%20-%20Santa%20Leopoldina%2C%20ES%2C%2029640-000!5e0!3m2!1sen!2sbr!4v1719503456789!5m2!1sen!2sbr"
+                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2588.58625902047!2d6.128038315700207!3d49.61066997936846!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4795491a54779f6b%3A0x7052a5147883a48e!2s19%20Rue%20de%20la%20Reine%2C%202418%20Luxembourg!5e0!3m2!1sfr!2slu!4v1627832811555!5m2!1sfr!2slu"
                             className="w-full h-full"
                             style={{ border: 0 }}
                             allowFullScreen={true}
                             loading="lazy"
                             referrerPolicy="no-referrer-when-downgrade"
-                            title="Mapa da localização da Pizzaria Santa Sensação"
+                            title="Emplacement de la galerie d'art"
                         ></iframe>
                     </div>
                 </div>

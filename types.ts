@@ -1,6 +1,5 @@
 import firebase from 'firebase/compat/app';
 
-// FIX: Added 'bairro', 'localidade', 'state', 'isDeliveryArea' and replaced 'postalCode' with 'cep'.
 export interface Address {
     id: string;
     label: string; // e.g., 'Maison', 'Bureau'
@@ -9,8 +8,8 @@ export interface Address {
     complement?: string;
     city: string;
     cep: string;
-    bairro: string;
-    localidade: string;
+    bairro: string; // Could be district or area
+    localidade: string; // Could be locality or neighborhood
     state: string;
     isFavorite?: boolean;
     isDeliveryArea?: boolean;
@@ -59,26 +58,22 @@ export interface CartItem {
     quantity: number;
     imageUrl: string;
     dimensions: string;
-    // For half-and-half pizza feature (legacy but keeps types consistent)
-    isHalfAndHalf?: boolean;
-    secondHalf?: {
+    isHalfAndHalf?: boolean; // Legacy
+    secondHalf?: { // Legacy
         productId: string;
         name: string;
     };
 }
 
-// FIX: Added 'local' to orderType and new optional fields for delivery and payment.
 export interface OrderDetails {
     name: string;
     phone: string;
     orderType: 'delivery' | 'pickup' | 'local';
-    // Shipping details
     street?: string;
     number?: string;
     complement?: string;
     city?: string;
-    neighborhood?: string;
-    // Payment
+    neighborhood?: string; // Generic term for area/district
     paymentMethod: 'credit' | 'debit' | 'pix' | 'cash';
     notes: string;
     deliveryFee?: number;
@@ -86,35 +81,28 @@ export interface OrderDetails {
     changeAmount?: string;
 }
 
-// FIX: Updated OrderStatus to reflect the pizza restaurant workflow.
-export type OrderStatus = 'pending' | 'accepted' | 'reserved' | 'ready' | 'completed' | 'cancelled' | 'deleted' | 'awaiting-payment';
-// FIX: Added 'paid_online' to support online payments.
+export type OrderStatus = 'pending' | 'awaiting-payment' | 'processing' | 'shipped' | 'completed' | 'cancelled' | 'deleted';
 export type PaymentStatus = 'pending' | 'paid' | 'paid_online' | 'refunded';
 
-// FIX: Added 'local' to orderType and new fields for address and reservation details.
 export interface OrderCustomerDetails {
     name: string;
     phone: string;
     orderType: 'delivery' | 'pickup' | 'local';
-    // Address details
     street?: string;
     number?: string;
     complement?: string;
     city?: string;
     neighborhood?: string;
-    address?: string; // For backward compatibility / flexibility
-    // Reservation details
+    address?: string; 
     reservationDate?: string;
     reservationTime?: string;
 }
 
-// FIX: Updated Order type with several missing properties and made some optional for reservations.
 export interface Order {
     id: string;
     userId?: string;
     orderNumber: number;
     customer: OrderCustomerDetails;
-    // FIX: Changed type to include `id` to fix key errors in UI lists.
     items?: (Omit<CartItem, 'imageUrl'>)[];
     total?: number;
     deliveryFee?: number;
@@ -123,13 +111,11 @@ export interface Order {
     status: OrderStatus;
     paymentStatus: PaymentStatus;
     createdAt: firebase.firestore.Timestamp | any;
-    
-    // Missing properties
-    pickupTimeEstimate?: string;
+    pickupTimeEstimate?: string; // Legacy, can be repurposed for shipping estimate
     changeNeeded?: boolean;
     changeAmount?: string;
-    numberOfPeople?: number;
-    allergies?: string;
+    numberOfPeople?: number; // For reservations/visits
+    allergies?: string; // Legacy
     mercadoPagoDetails?: {
         qrCodeBase64: string;
         qrCode: string;
@@ -137,7 +123,7 @@ export interface Order {
 }
 
 export interface DaySchedule {
-    dayOfWeek: number; // 0 = Sunday, 6 = Saturday
+    dayOfWeek: number;
     dayName: string;
     isOpen: boolean;
     openTime: string; // HH:mm
@@ -188,7 +174,6 @@ export interface ChatMessage {
     content: string;
 }
 
-// Deprecated, but kept to prevent type errors in unused components
 export interface ReservationDetails {
     name: string;
     phone: string;

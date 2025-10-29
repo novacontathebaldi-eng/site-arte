@@ -12,7 +12,7 @@ const firebaseConfig = {
   apiKey: "AIzaSyBctHb4KzodpCgxRcPNY4NuKFYX71-wSbQ",
   authDomain: "arte-meeh.firebaseapp.com",
   projectId: "arte-meeh",
-  storageBucket: "arte-meeh.appspot.com",
+  storageBucket: "arte-meeh.firebasestorage.app",
   messagingSenderId: "160070945903",
   appId: "1:160070945903:web:5e881331486f459ca1519a"
 };
@@ -32,11 +32,12 @@ try {
   auth = firebase.auth();
   functions = firebase.functions();
   
+  // This setting might be useful in some environments, keeping it.
   db.settings({
     experimentalForceLongPolling: true,
   });
   
-  console.log("Firebase initialized successfully. Connecting to Firestore, Storage, Auth, and Functions...");
+  console.log("Firebase initialized successfully for ARTE-MEEH project.");
 } catch (error) {
   console.error('Failed to initialize Firebase. Check your firebaseConfig object in `services/firebase.ts`.', error);
 }

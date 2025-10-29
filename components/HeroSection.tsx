@@ -4,7 +4,7 @@ import { SiteSettings } from '../types';
 interface HeroSectionProps {
     settings: SiteSettings;
     isLoading: boolean;
-    onReserveClick: () => void; // Nova prop para abrir o modal de reserva
+    onReserveClick: () => void;
 }
 
 export const HeroSection: React.FC<HeroSectionProps> = ({ settings, isLoading, onReserveClick }) => {
@@ -12,7 +12,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ settings, isLoading, o
 
     useEffect(() => {
         const handleScroll = () => {
-            // A imagem começará a desaparecer após rolar um pouco e desaparecerá completamente após 400px.
             const fadeStart = 50;
             const fadeEnd = 400;
             const scrollPosition = window.scrollY;
@@ -31,11 +30,11 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ settings, isLoading, o
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
-    const scrollToCardapio = () => {
-        const cardapioSection = document.getElementById('cardapio');
-        if (cardapioSection) {
+    const scrollToGallery = () => {
+        const gallerySection = document.getElementById('galerie');
+        if (gallerySection) {
             const headerOffset = 80;
-            const elementPosition = cardapioSection.getBoundingClientRect().top;
+            const elementPosition = gallerySection.getBoundingClientRect().top;
             const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
             
             window.scrollTo({
@@ -50,8 +49,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ settings, isLoading, o
     const heroSubtitle = settings.heroSubtitle ?? '';
 
     return (
-        <section id="inicio" className="bg-brand-green-700 text-text-on-dark min-h-[calc(100vh-80px)] flex items-center justify-center pb-20 px-4 relative overflow-hidden">
-            {/* Camada da Imagem de Fundo com Fade */}
+        <section id="accueil" className="bg-brand-primary text-text-on-dark min-h-[calc(100vh-80px)] flex items-center justify-center pb-20 px-4 relative overflow-hidden">
             <div 
                 className="absolute inset-0 bg-cover bg-center" 
                 style={{
@@ -60,7 +58,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ settings, isLoading, o
                     transition: 'opacity 0.1s ease-out'
                 }}
             ></div>
-            {/* Camada de Escurecimento para Contraste com Fade */}
             <div 
                 className="absolute inset-0 bg-black/60"
                 style={{
@@ -68,63 +65,43 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ settings, isLoading, o
                     transition: 'opacity 0.1s ease-out'
                 }}
             ></div>
-            {/* Gradiente para transição suave para a cor de fundo sólida */}
-            <div className="absolute inset-0 bg-gradient-to-t from-brand-green-700 via-brand-green-700/80 to-transparent"></div>
+            <div className="absolute inset-0 bg-gradient-to-t from-brand-primary via-brand-primary/80 to-transparent"></div>
             
             <div className="container mx-auto text-center z-10">
                 <div className="inline-block bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full border border-white/20 mb-6">
-                    <p className="font-semibold text-sm flex items-center gap-2"><i className="fas fa-award text-brand-gold-600"></i> {heroSlogan}</p>
+                    <p className="font-semibold text-sm flex items-center gap-2"><i className="fas fa-palette text-brand-accent"></i> {heroSlogan}</p>
                 </div>
-                <h1 className="text-4xl md:text-6xl font-extrabold mb-4 leading-tight">
-                    {heroTitle.split(' ').map((word, index, arr) => 
-                        word.toLowerCase() === 'santa' || word.toLowerCase() === 'sensação' 
-                        ? <span key={index} className="text-brand-gold-600">{word} </span> 
-                        : <span key={index}>{word} </span>
-                    )}
+                <h1 className="text-4xl md:text-6xl font-serif font-extrabold mb-4 leading-tight">
+                   {heroTitle}
                 </h1>
-                <p className="text-lg md:text-xl font-medium text-brand-ivory-50/90 mb-8 max-w-2xl mx-auto">
+                <p className="text-lg md:text-xl font-medium text-brand-background/90 mb-8 max-w-2xl mx-auto">
                     {heroSubtitle}
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                     <button 
-                        onClick={scrollToCardapio} 
+                        onClick={scrollToGallery} 
                         disabled={isLoading}
-                        className="bg-brand-gold-600 text-text-on-dark font-bold py-3 px-8 rounded-xl text-lg hover:bg-opacity-90 transition-all transform hover:scale-105 disabled:bg-opacity-70 disabled:cursor-not-allowed flex items-center justify-center min-w-[280px]"
+                        className="bg-brand-secondary text-white font-bold py-3 px-8 rounded-lg text-lg hover:opacity-90 transition-all transform hover:scale-105 disabled:bg-opacity-70 disabled:cursor-not-allowed flex items-center justify-center min-w-[280px]"
                     >
                         {isLoading ? (
                             <>
                                 <i className="fas fa-spinner fa-spin mr-2"></i>
-                                <span>Carregando cardápio...</span>
+                                <span>Chargement...</span>
                             </>
                         ) : (
                             <>
-                                <i className="fas fa-pizza-slice mr-2"></i>
-                                <span>Ver Cardápio e Pedir</span>
+                                <i className="fas fa-image mr-2"></i>
+                                <span>Voir la Galerie</span>
                             </>
                         )}
                     </button>
                     <button 
                         onClick={onReserveClick} 
-                        className="bg-brand-gold-600 text-text-on-dark font-bold py-3 px-8 rounded-xl text-lg hover:bg-opacity-90 transition-all transform hover:scale-105 flex items-center justify-center min-w-[280px]"
+                        className="bg-transparent border-2 border-brand-secondary text-white font-bold py-3 px-8 rounded-lg text-lg hover:bg-brand-secondary transition-all transform hover:scale-105 flex items-center justify-center min-w-[280px]"
                     >
                         <i className="fas fa-calendar-alt mr-2"></i>
-                        <span>Fazer uma Reserva</span>
+                        <span>Prendre rendez-vous</span>
                     </button>
-                </div>
-
-                <div className="mt-8 flex justify-center gap-3">
-                    <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full border border-white/20 text-brand-ivory-50/90">
-                        <i className="fas fa-motorcycle text-brand-gold-600"></i>
-                        <span className="font-semibold text-sm">Delivery</span>
-                    </div>
-                    <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full border border-white/20 text-brand-ivory-50/90">
-                        <i className="fas fa-shopping-bag text-brand-gold-600"></i>
-                        <span className="font-semibold text-sm">Retirada</span>
-                    </div>
-                    <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full border border-white/20 text-brand-ivory-50/90">
-                        <i className="fas fa-utensils text-brand-gold-600"></i>
-                        <span className="font-semibold text-sm">No Local</span>
-                    </div>
                 </div>
             </div>
         </section>
