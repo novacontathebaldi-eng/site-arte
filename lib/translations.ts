@@ -101,10 +101,53 @@ export const translations = {
       passwordMismatch: 'Les nouveaux mots de passe ne correspondent pas.',
     },
     about: {
-        title: 'À propos de l\'artiste'
+      title: 'À propos de l\'Artiste',
+      heroKnownAs: 'Connue sous le nom de',
+      heroLocation: 'Basée au Luxembourg',
+      biographyTitle: 'Biographie',
+      biographyText: "Melissa Pelussi, connue dans le monde de l'art sous le nom de Meeh, est une artiste contemporaine basée au Luxembourg dont l'œuvre jette un pont entre les médiums traditionnels et numériques. Née avec une passion innée pour la couleur et la forme, Meeh a développé un style distinctif qui capture l'essence de l'esthétique européenne moderne tout en rendant hommage aux traditions artistiques classiques.\n\nSon parcours artistique a commencé par la peinture, où elle a exploré l'interaction de la lumière et de l'ombre à travers l'huile et l'acrylique. Au fil des ans, son expression créative s'est étendue à la conception de bijoux, où chaque pièce devient une sculpture portable, et à l'art numérique, où elle repousse les limites de la technologie et de l'imagination.",
+      statementTitle: 'Ma Philosophie',
+      statementText: '"L\'art n\'est pas ce que vous voyez, mais ce que vous faites voir aux autres."',
+      journeyTitle: 'Parcours Artistique',
+      timeline: [
+        { year: '2015', event: 'Début de l\'exploration de la peinture à l\'huile.' },
+        { year: '2017', event: 'Première exposition solo dans une galerie locale.' },
+        { year: '2019', event: 'Expansion vers la création de bijoux artisanaux.' },
+        { year: '2021', event: 'Immersion dans l\'art numérique et les NFT.' },
+        { year: '2023', event: 'Lancement de la boutique en ligne officielle.' },
+      ],
+      exhibitionsTitle: 'Expositions & Salons',
+      exhibitions: [
+        { name: 'Formes & Couleurs', location: 'Galerie d\'Art, Luxembourg', date: 'Octobre 2017' },
+        { name: 'Fusion Numérique', location: 'ArtTech Festival, Berlin', date: 'Juin 2021' },
+        { name: 'Art Luxembourg 2023', location: 'Luxexpo The Box', date: 'Novembre 2023' },
+      ],
+      viewArtwork: 'Voir Mes Œuvres',
     },
     contact: {
-        title: 'Contactez-nous'
+      title: 'Contactez-nous',
+      formTitle: 'Entrer en contact',
+      fullNameLabel: 'Nom complet',
+      emailLabel: 'Adresse e-mail',
+      subjectLabel: 'Sujet',
+      messageLabel: 'Message',
+      sendMessageButton: 'Envoyer le message',
+      infoTitle: 'Informations de Contact',
+      artistName: 'Melissa Pelussi (Meeh)',
+      artistDescription: 'Artiste contemporaine basée au Luxembourg',
+      studioLocation: 'Visites en studio sur rendez-vous uniquement.',
+      faqTitle: 'Questions Fréquemment Posées',
+      faq: [
+        { q: 'Combien de temps prend la livraison ?', a: 'La livraison au Luxembourg prend 1-2 jours, dans l\'UE 3-7 jours, et pour le Brésil 10-20 jours.' },
+        { q: 'Acceptez-vous les commandes personnalisées ?', a: 'Oui, Melissa accepte un nombre limité de commandes personnalisées chaque année. Veuillez utiliser le formulaire de contact avec le sujet "Demande de commande personnalisée" pour discuter de votre projet.' },
+        { q: 'Quels moyens de paiement acceptez-vous ?', a: 'Nous acceptons les principales cartes de crédit (Visa, Mastercard), PayPal et Pix pour les clients au Brésil.' },
+      ],
+      subjectOptions: {
+        artwork: 'Intérêt pour une œuvre',
+        commission: 'Demande de commande personnalisée',
+        shipping: 'Question sur la livraison',
+        general: 'Demande générale',
+      }
     },
     checkout: {
         title: 'Paiement',
@@ -361,11 +404,54 @@ export const translations = {
       error: 'An error occurred.',
       passwordMismatch: 'The new passwords do not match.',
     },
-     about: {
-        title: 'About the Artist'
+    about: {
+      title: 'About the Artist',
+      heroKnownAs: 'Known as',
+      heroLocation: 'Based in Luxembourg',
+      biographyTitle: 'Biography',
+      biographyText: "Melissa Pelussi, known in the art world as Meeh, is a contemporary artist based in Luxembourg whose work bridges the gap between traditional and digital mediums. Born with an innate passion for color and form, Meeh has developed a distinctive style that captures the essence of modern European aesthetics while paying homage to classical artistic traditions.\n\nHer artistic journey began with painting, where she explored the interplay of light and shadow through oil and acrylic. Over the years, her creative expression expanded to include jewelry design, where each piece becomes a wearable sculpture, and digital art, where she pushes the boundaries of technology and imagination.",
+      statementTitle: 'My Philosophy',
+      statementText: '"Art is not what you see, but what you make others see."',
+      journeyTitle: 'Artistic Journey',
+      timeline: [
+        { year: '2015', event: 'Began exploring oil painting.' },
+        { year: '2017', event: 'First solo exhibition at a local gallery.' },
+        { year: '2019', event: 'Expanded into crafting artisan jewelry.' },
+        { year: '2021', event: 'Dived into the world of digital art and NFTs.' },
+        { year: '2023', event: 'Launched the official online store.' },
+      ],
+      exhibitionsTitle: 'Exhibitions & Shows',
+      exhibitions: [
+        { name: 'Shapes & Hues', location: 'Art Gallery, Luxembourg', date: 'October 2017' },
+        { name: 'Digital Fusion', location: 'ArtTech Festival, Berlin', date: 'June 2021' },
+        { name: 'Art Luxembourg 2023', location: 'Luxexpo The Box', date: 'November 2023' },
+      ],
+      viewArtwork: 'View My Artwork',
     },
     contact: {
-        title: 'Contact Us'
+      title: 'Contact Us',
+      formTitle: 'Get in Touch',
+      fullNameLabel: 'Full Name',
+      emailLabel: 'Email Address',
+      subjectLabel: 'Subject',
+      messageLabel: 'Message',
+      sendMessageButton: 'Send Message',
+      infoTitle: 'Contact Information',
+      artistName: 'Melissa Pelussi (Meeh)',
+      artistDescription: 'Contemporary Artist based in Luxembourg',
+      studioLocation: 'Studio visits by appointment only.',
+      faqTitle: 'Frequently Asked Questions',
+      faq: [
+        { q: 'How long does shipping take?', a: 'Shipping in Luxembourg takes 1-2 days, within the EU 3-7 days, and to Brazil 10-20 days.' },
+        { q: 'Do you accept commissions?', a: 'Yes, Melissa accepts a limited number of commissions each year. Please use the contact form with the subject "Commission Inquiry" to discuss your project.' },
+        { q: 'What payment methods do you accept?', a: 'We accept major credit cards (Visa, Mastercard), PayPal, and Pix for customers in Brazil.' },
+      ],
+      subjectOptions: {
+        artwork: 'Interest in artwork',
+        commission: 'Commission inquiry',
+        shipping: 'Shipping question',
+        general: 'General inquiry',
+      }
     },
     checkout: {
         title: 'Checkout',
@@ -623,10 +709,53 @@ export const translations = {
       passwordMismatch: 'Die neuen Passwörter stimmen nicht überein.',
     },
      about: {
-        title: 'Über die Künstlerin'
+      title: 'Über die Künstlerin',
+      heroKnownAs: 'Bekannt als',
+      heroLocation: 'Ansässig in Luxemburg',
+      biographyTitle: 'Biografie',
+      biographyText: "Melissa Pelussi, in der Kunstwelt als Meeh bekannt, ist eine zeitgenössische Künstlerin aus Luxemburg, deren Arbeit die Lücke zwischen traditionellen und digitalen Medien schließt. Geboren mit einer angeborenen Leidenschaft für Farbe und Form, hat Meeh einen unverwechselbaren Stil entwickelt, der die Essenz der modernen europäischen Ästhetik einfängt und gleichzeitig den klassischen künstlerischen Traditionen huldigt.\n\nIhre künstlerische Reise begann mit der Malerei, wo sie das Zusammenspiel von Licht und Schatten durch Öl und Acryl erforschte. Im Laufe der Jahre erweiterte sich ihr kreativer Ausdruck auf Schmuckdesign, bei dem jedes Stück zu einer tragbaren Skulptur wird, und digitale Kunst, wo sie die Grenzen von Technologie und Vorstellungskraft überschreitet.",
+      statementTitle: 'Meine Philosophie',
+      statementText: '"Kunst ist nicht das, was du siehst, sondern das, was du andere sehen lässt."',
+      journeyTitle: 'Künstlerischer Werdegang',
+      timeline: [
+        { year: '2015', event: 'Beginn der Erforschung der Ölmalerei.' },
+        { year: '2017', event: 'Erste Einzelausstellung in einer lokalen Galerie.' },
+        { year: '2019', event: 'Erweiterung um die Herstellung von handwerklichem Schmuck.' },
+        { year: '2021', event: 'Eintauchen in die Welt der digitalen Kunst und NFTs.' },
+        { year: '2023', event: 'Start des offiziellen Online-Shops.' },
+      ],
+      exhibitionsTitle: 'Ausstellungen & Shows',
+      exhibitions: [
+        { name: 'Formen & Farben', location: 'Kunstgalerie, Luxemburg', date: 'Oktober 2017' },
+        { name: 'Digitale Fusion', location: 'ArtTech Festival, Berlin', date: 'Juni 2021' },
+        { name: 'Art Luxemburg 2023', location: 'Luxexpo The Box', date: 'November 2023' },
+      ],
+      viewArtwork: 'Meine Kunstwerke ansehen',
     },
     contact: {
-        title: 'Kontakt'
+      title: 'Kontaktieren Sie uns',
+      formTitle: 'Nehmen Sie Kontakt auf',
+      fullNameLabel: 'Vollständiger Name',
+      emailLabel: 'E-Mail-Adresse',
+      subjectLabel: 'Betreff',
+      messageLabel: 'Nachricht',
+      sendMessageButton: 'Nachricht senden',
+      infoTitle: 'Kontaktinformationen',
+      artistName: 'Melissa Pelussi (Meeh)',
+      artistDescription: 'Zeitgenössische Künstlerin ansässig in Luxemburg',
+      studioLocation: 'Studiobesuche nur nach Vereinbarung.',
+      faqTitle: 'Häufig gestellte Fragen',
+      faq: [
+        { q: 'Wie lange dauert der Versand?', a: 'Der Versand in Luxemburg dauert 1-2 Tage, innerhalb der EU 3-7 Tage und nach Brasilien 10-20 Tage.' },
+        { q: 'Nehmen Sie Auftragsarbeiten an?', a: 'Ja, Melissa nimmt jedes Jahr eine begrenzte Anzahl von Auftragsarbeiten an. Bitte verwenden Sie das Kontaktformular mit dem Betreff "Anfrage für Auftragsarbeit", um Ihr Projekt zu besprechen.' },
+        { q: 'Welche Zahlungsmethoden akzeptieren Sie?', a: 'Wir akzeptieren die gängigen Kreditkarten (Visa, Mastercard), PayPal und Pix für Kunden in Brasilien.' },
+      ],
+      subjectOptions: {
+        artwork: 'Interesse an einem Kunstwerk',
+        commission: 'Anfrage für Auftragsarbeit',
+        shipping: 'Frage zum Versand',
+        general: 'Allgemeine Anfrage',
+      }
     },
     checkout: {
         title: 'Kasse',
@@ -883,11 +1012,54 @@ export const translations = {
       error: 'Ocorreu um erro.',
       passwordMismatch: 'As novas senhas não correspondem.',
     },
-     about: {
-        title: 'Sobre a Artista'
+    about: {
+      title: 'Sobre a Artista',
+      heroKnownAs: 'Conhecida como',
+      heroLocation: 'Baseada em Luxemburgo',
+      biographyTitle: 'Biografia',
+      biographyText: "Melissa Pelussi, conhecida no mundo da arte como Meeh, é uma artista contemporânea baseada em Luxemburgo, cujo trabalho preenche a lacuna entre os meios tradicionais e digitais. Nascida com uma paixão inata por cores e formas, Meeh desenvolveu um estilo distinto que captura a essência da estética europeia moderna, ao mesmo tempo que presta homenagem às tradições artísticas clássicas.\n\nSua jornada artística começou com a pintura, onde explorou a interação de luz e sombra através do óleo e acrílico. Ao longo dos anos, sua expressão criativa expandiu-se para incluir o design de joias, onde cada peça se torna uma escultura vestível, e a arte digital, onde ela ultrapassa os limites da tecnologia e da imaginação.",
+      statementTitle: 'Minha Filosofia',
+      statementText: '"A arte não é o que você vê, mas o que você faz os outros verem."',
+      journeyTitle: 'Jornada Artística',
+      timeline: [
+        { year: '2015', event: 'Começou a explorar a pintura a óleo.' },
+        { year: '2017', event: 'Primeira exposição individual em uma galeria local.' },
+        { year: '2019', event: 'Expandiu para a criação de joias artesanais.' },
+        { year: '2021', event: 'Mergulhou no mundo da arte digital e dos NFTs.' },
+        { year: '2023', event: 'Lançamento da loja online oficial.' },
+      ],
+      exhibitionsTitle: 'Exposições e Mostras',
+      exhibitions: [
+        { name: 'Formas e Tons', location: 'Galeria de Arte, Luxemburgo', date: 'Outubro 2017' },
+        { name: 'Fusão Digital', location: 'Festival ArtTech, Berlim', date: 'Junho 2021' },
+        { name: 'Arte Luxemburgo 2023', location: 'Luxexpo The Box', date: 'Novembro 2023' },
+      ],
+      viewArtwork: 'Ver Minhas Obras',
     },
     contact: {
-        title: 'Contato'
+      title: 'Entre em Contato',
+      formTitle: 'Fale Conosco',
+      fullNameLabel: 'Nome Completo',
+      emailLabel: 'Endereço de E-mail',
+      subjectLabel: 'Assunto',
+      messageLabel: 'Mensagem',
+      sendMessageButton: 'Enviar Mensagem',
+      infoTitle: 'Informações de Contato',
+      artistName: 'Melissa Pelussi (Meeh)',
+      artistDescription: 'Artista Contemporânea baseada em Luxemburgo',
+      studioLocation: 'Visitas ao estúdio apenas com hora marcada.',
+      faqTitle: 'Perguntas Frequentes',
+      faq: [
+        { q: 'Quanto tempo leva o envio?', a: 'O envio em Luxemburgo leva de 1 a 2 dias, dentro da UE de 3 a 7 dias, e para o Brasil de 10 a 20 dias.' },
+        { q: 'Você aceita encomendas?', a: 'Sim, a Melissa aceita um número limitado de encomendas por ano. Por favor, use o formulário de contato com o assunto "Pedido de Encomenda" para discutir seu projeto.' },
+        { q: 'Quais métodos de pagamento vocês aceitam?', a: 'Aceitamos os principais cartões de crédito (Visa, Mastercard), PayPal e Pix para clientes no Brasil.' },
+      ],
+      subjectOptions: {
+        artwork: 'Interesse em uma obra de arte',
+        commission: 'Pedido de encomenda',
+        shipping: 'Dúvida sobre o envio',
+        general: 'Dúvida geral',
+      }
     },
     checkout: {
         title: 'Finalizar Compra',

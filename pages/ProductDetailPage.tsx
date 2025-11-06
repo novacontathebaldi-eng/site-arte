@@ -16,7 +16,7 @@ const ProductDetailPage: React.FC = () => {
   const { language, t } = useTranslation();
   const { addItem } = useCart();
   const { showToast } = useToast();
-  const { wishlist, addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
 
 
   const [product, setProduct] = useState<Product | null>(null);
