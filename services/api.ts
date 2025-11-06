@@ -1,5 +1,5 @@
-import { mockProducts, mockOrders } from '../lib/mockData';
-import { Product, Order } from '../types';
+import { mockProducts, mockOrders, mockAddresses, mockWishlist } from '../lib/mockData';
+import { Product, Order, Address, AddressWithId, Wishlist, DashboardStats } from '../types';
 
 // Este arquivo simula a comunicação com o seu backend (as Vercel Functions e o Firebase).
 // Em um projeto real, aqui você faria chamadas de rede (usando `fetch` ou `axios`)
@@ -84,3 +84,87 @@ export const getOrderById = (orderId: string): Promise<Order | undefined> => {
         }, API_DELAY);
     });
 };
+
+// --- Funções da API para Endereços ---
+
+export const getAddresses = (userId: string): Promise<AddressWithId[]> => {
+  console.log(`Fetching addresses for user: ${userId}`);
+  return new Promise(resolve => setTimeout(() => resolve([...mockAddresses]), API_DELAY));
+};
+
+export const addAddress = (userId: string, address: Address): Promise<AddressWithId> => {
+  console.log(`Adding address for user: ${userId}`);
+  return new Promise(resolve => {
+    setTimeout(() => {
+      if (address.isDefault) {
+        mockAddresses.forEach(a => a.isDefault = false);
+      }
+      const newAddress: AddressWithId = { ...address, id: `addr-${Date.now()}` };
+      mockAddresses.push(newAddress);
+      resolve(newAddress);
+    }, API_DELAY);
+  });
+};
+
+export const updateAddress = (userId: string, addressId: string, address: Address): Promise<AddressWithId> => {
+  console.log(`Updating address ${addressId} for user: ${userId}`);
+  return new Promise(resolve => {
+    setTimeout(() => {
+       if (address.isDefault) {
+        mockAddresses.forEach(a => a.isDefault = false);
+      }
+      const index = mockAddresses.findIndex(a => a.id === addressId);
+      mockAddresses[index] = { ...address, id: addressId };
+      resolve(mockAddresses[index]);
+    }, API_DELAY);
+  });
+};
+
+export const deleteAddress = (userId: string, addressId: string): Promise<void> => {
+    console.log(`Deleting address ${addressId} for user: ${userId}`);
+    return new Promise(resolve => {
+        setTimeout(() => {
+            const index = mockAddresses.findIndex(a => a.id === addressId);
+            if (index > -1) {
+                mockAddresses.splice(index, 1);
+            }
+            resolve();
+        }, API_DELAY);
+    });
+};
+
+// --- Funções da API para Wishlist ---
+
+export const getWishlist = (userId: string): Promise<Wishlist> => {
+    console.log(`Fetching wishlist for user: ${userId}`);
+    return new Promise(resolve => setTimeout(() => resolve({ ...mockWishlist }), API_DELAY));
+};
+
+export const updateWishlist = (userId: string, wishlist: Wishlist): Promise<Wishlist> => {
+    console.log(`Updating wishlist for user: ${userId}`);
+    return new Promise(resolve => {
+        setTimeout(() => {
+            // FIX: Cannot assign to 'mockWishlist' because it is an import.
+            // Mutate the object instead of reassigning it.
+            mockWishlist.items = wishlist.items;
+            mockWishlist.userId = wishlist.userId;
+            resolve({ ...mockWishlist });
+        }, API_DELAY);
+    });
+}
+
+// --- Funções da API para Dashboard ---
+export const getUserDashboardStats = (userId: string): Promise<DashboardStats> => {
+    console.log(`Fetching stats for user: ${userId}`);
+    return new Promise(resolve => {
+        setTimeout(() => {
+            const totalSpent = mockOrders.reduce((sum, order) => sum + order.pricing.total, 0);
+            const stats: DashboardStats = {
+                totalOrders: mockOrders.length,
+                totalSpent: totalSpent,
+                wishlistCount: mockWishlist.items.length
+            };
+            resolve(stats);
+        }, API_DELAY);
+    });
+}

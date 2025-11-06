@@ -1,4 +1,4 @@
-import { Product, Order } from '../types';
+import { Product, Order, AddressWithId, Wishlist } from '../types';
 
 // Este arquivo simula seu banco de dados (Firestore).
 // Criamos uma lista de produtos de exemplo com todos os detalhes, incluindo as traduções.
@@ -331,7 +331,8 @@ export const mockOrders: Order[] = [
             city: 'Luxembourg',
             postalCode: 'L-1234',
             country: 'Luxembourg',
-            phone: '+352 123 456 789'
+            phone: '+352 123 456 789',
+            isDefault: true,
         },
         paymentMethod: { type: 'card', last4: '4242', brand: 'Visa' },
         paymentStatus: 'paid',
@@ -368,12 +369,13 @@ export const mockOrders: Order[] = [
         ],
         pricing: { subtotal: 850, shipping: 15, discount: 50, tax: 160, total: 975 },
         shippingAddress: {
-            recipientName: 'John Doe',
+            recipientName: 'Jane Smith',
             addressLine1: '456 Culture Avenue',
             city: 'Paris',
             postalCode: '75001',
             country: 'France',
-            phone: '+33 1 23 45 67 89'
+            phone: '+33 1 23 45 67 89',
+            isDefault: false,
         },
         paymentMethod: { type: 'paypal' },
         paymentStatus: 'paid',
@@ -387,3 +389,35 @@ export const mockOrders: Order[] = [
         updatedAt: '2024-06-21T16:45:00Z',
     }
 ];
+
+export let mockAddresses: AddressWithId[] = [
+    {
+        id: 'addr-1',
+        recipientName: 'John Doe',
+        addressLine1: '123 Art Street',
+        city: 'Luxembourg',
+        postalCode: 'L-1234',
+        country: 'Luxembourg',
+        phone: '+352 123 456 789',
+        isDefault: true,
+    },
+    {
+        id: 'addr-2',
+        recipientName: 'John Doe',
+        company: 'Art Enthusiasts Inc.',
+        addressLine1: '456 Culture Avenue',
+        city: 'Paris',
+        postalCode: '75001',
+        country: 'France',
+        phone: '+33 1 23 45 67 89',
+        isDefault: false,
+    },
+];
+
+export let mockWishlist: Wishlist = {
+    userId: 'mock-user-id',
+    items: [
+        { productId: '5', addedAt: '2024-06-15T10:00:00Z' },
+        { productId: '7', addedAt: '2024-06-18T14:30:00Z' },
+    ]
+};
