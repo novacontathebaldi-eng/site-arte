@@ -56,8 +56,8 @@ export interface Product {
 
 // Tipos para os filtros do catálogo.
 export interface Filters {
+  query: string;
   category: string;
-  priceRange: [number, number];
   availability: string;
 }
 
@@ -196,3 +196,6 @@ export interface DashboardStats {
     totalSpent: number;
     wishlistCount: number;
 }
+
+// --- TIPOS PARA CHECKOUT ---
+export type CheckoutStep = 'address' | 'payment' | 'review';

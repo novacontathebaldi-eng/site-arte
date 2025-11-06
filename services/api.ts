@@ -1,5 +1,5 @@
 import { mockProducts, mockOrders, mockAddresses, mockWishlist } from '../lib/mockData';
-import { Product, Order, Address, AddressWithId, Wishlist, DashboardStats } from '../types';
+import { Product, Order, Address, AddressWithId, Wishlist, DashboardStats, CartItem } from '../types';
 
 // Este arquivo simula a comunicação com o seu backend (as Vercel Functions e o Firebase).
 // Em um projeto real, aqui você faria chamadas de rede (usando `fetch` ou `axios`)
@@ -168,3 +168,15 @@ export const getUserDashboardStats = (userId: string): Promise<DashboardStats> =
         }, API_DELAY);
     });
 }
+
+// --- Funções da API para Checkout ---
+export const placeOrder = (userId: string, items: CartItem[], shippingAddress: Address): Promise<{ orderId: string }> => {
+    console.log('Placing order for user:', userId);
+    return new Promise(resolve => {
+        setTimeout(() => {
+            const orderId = `mock-order-${Date.now()}`;
+            console.log(`Mock order created with ID: ${orderId}`);
+            resolve({ orderId });
+        }, API_DELAY);
+    });
+};

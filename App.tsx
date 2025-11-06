@@ -28,6 +28,7 @@ import AddressesPage from './pages/dashboard/AddressesPage';
 import SettingsPage from './pages/dashboard/SettingsPage';
 import WishlistPage from './pages/dashboard/WishlistPage';
 import OrderDetailPage from './pages/dashboard/OrderDetailPage';
+import OrderConfirmationPage from './pages/OrderConfirmationPage';
 
 const App: React.FC = () => {
   return (
@@ -60,6 +61,15 @@ const App: React.FC = () => {
                           <CheckoutPage />
                         </ProtectedRoute>
                       } 
+                    />
+
+                    <Route 
+                      path={`${ROUTES.ORDER_CONFIRMATION}/:orderId`}
+                      element={
+                        <ProtectedRoute>
+                          <OrderConfirmationPage />
+                        </ProtectedRoute>
+                      }
                     />
                     
                     {/* Layout do Dashboard com rotas aninhadas */}

@@ -39,4 +39,5 @@ export const ROUTES = {
   DASHBOARD_ADDRESSES: '/dashboard/addresses',
   DASHBOARD_SETTINGS: '/dashboard/settings',
   DASHBOARD_WISHLIST: '/dashboard/wishlist',
+  ORDER_CONFIRMATION: '/order-confirmation',
 };
