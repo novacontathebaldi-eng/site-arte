@@ -112,3 +112,62 @@ export interface AuthContextType {
     refetchUser: () => Promise<void>;
     updateUserPreferences: (preferences: Partial<UserPreferences>) => Promise<void>;
 }
+
+// --- TIPOS PARA PEDIDOS (ORDERS) ---
+
+export type OrderStatus = 'pending' | 'confirmed' | 'preparing' | 'shipped' | 'in-transit' | 'delivered' | 'cancelled' | 'refunded';
+export type PaymentStatus = 'pending' | 'paid' | 'failed' | 'refunded';
+
+export interface Address {
+    recipientName: string;
+    company?: string | null;
+    addressLine1: string;
+    addressLine2?: string | null;
+    city: string;
+    state?: string | null;
+    postalCode: string;
+    country: string;
+    phone: string;
+}
+
+export interface OrderItem {
+    productId: string;
+    productSnapshot: {
+        title: string;
+        image: string;
+        price: number;
+    };
+    quantity: number;
+    price: number;
+    subtotal: number;
+}
+
+export interface Order {
+    id: string;
+    orderNumber: string;
+    userId: string;
+    status: OrderStatus;
+    items: OrderItem[];
+    pricing: {
+        subtotal: number;
+        shipping: number;
+        discount: number;
+        tax: number;
+        total: number;
+    };
+    shippingAddress: Address;
+    paymentMethod: {
+        type: 'card' | 'paypal' | 'pix';
+        last4?: string | null;
+        brand?: string | null;
+    };
+    paymentStatus: PaymentStatus;
+    statusHistory: {
+        status: OrderStatus;
+        timestamp: string;
+        note?: string | null;
+    }[];
+    createdAt: string;
+    updatedAt: string;
+    estimatedDelivery?: string | null;
+}

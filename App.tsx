@@ -27,6 +27,7 @@ import OrdersPage from './pages/dashboard/OrdersPage';
 import AddressesPage from './pages/dashboard/AddressesPage';
 import SettingsPage from './pages/dashboard/SettingsPage';
 import WishlistPage from './pages/dashboard/WishlistPage';
+import OrderDetailPage from './pages/dashboard/OrderDetailPage';
 
 const App: React.FC = () => {
   return (
@@ -74,6 +75,7 @@ const App: React.FC = () => {
                         <Route index element={<DashboardOverviewPage />} /> 
                         <Route path="profile" element={<ProfilePage />} />
                         <Route path="orders" element={<OrdersPage />} />
+                        <Route path="orders/:orderId" element={<OrderDetailPage />} />
                         <Route path="addresses" element={<AddressesPage />} />
                         <Route path="settings" element={<SettingsPage />} />
                         <Route path="wishlist" element={<WishlistPage />} />

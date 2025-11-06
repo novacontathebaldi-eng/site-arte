@@ -35,6 +35,7 @@ export const ROUTES = {
   DASHBOARD: '/dashboard',
   DASHBOARD_PROFILE: '/dashboard/profile',
   DASHBOARD_ORDERS: '/dashboard/orders',
+  DASHBOARD_ORDER_DETAIL: '/dashboard/orders/:orderId', // Rota dinâmica para detalhes do pedido
   DASHBOARD_ADDRESSES: '/dashboard/addresses',
   DASHBOARD_SETTINGS: '/dashboard/settings',
   DASHBOARD_WISHLIST: '/dashboard/wishlist',
