@@ -2,10 +2,10 @@
 // Ele inicializa o Firebase com as suas chaves de API e exporta os serviços
 // que vamos usar no resto do site (como autenticação e banco de dados).
 
-// FIX: Switched to a modular import to resolve the module resolution issue with Firebase v9+.
-import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+// FIX: Reverted to Firebase v8 compat syntax to resolve the module resolution error. The v9 modular imports were not working in this environment.
+import firebase from "firebase/app";
+import "firebase/auth";
+import "firebase/firestore";
 
 // ATENÇÃO, OTÁVIO:
 // Cole aqui as suas credenciais do Firebase que você encontra no console do seu projeto.
@@ -21,11 +21,12 @@ const firebaseConfig = {
 };
 
 // Inicializa a aplicação Firebase com as configurações acima.
-// FIX: Using the imported initializeApp function directly.
-const app = initializeApp(firebaseConfig);
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
 
 // Exporta os serviços que vamos utilizar:
 // auth: para gerenciar login, cadastro, etc.
 // db: para interagir com o banco de dados Firestore (ler e escrever dados).
-export const auth = getAuth(app);
-export const db = getFirestore(app);
+export const auth = firebase.auth();
+export const db = firebase.firestore();

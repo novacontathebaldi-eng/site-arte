@@ -19,8 +19,8 @@ const NotificationsSettingsTab: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (user?.preferences) {
-      setPreferences(user.preferences);
+    if (user?.profile?.preferences) {
+      setPreferences(user.profile.preferences);
     }
   }, [user]);
 

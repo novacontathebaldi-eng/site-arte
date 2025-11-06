@@ -56,17 +56,15 @@ const RegisterPage: React.FC = () => {
             options: {
                 data: {
                     display_name: fullName,
-                }
+                },
+                 emailRedirectTo: window.location.origin,
             }
         });
         if (error) throw error;
-        if (!data.session) {
-             showToast("Please check your email to verify your account.", 'info');
-             navigate(ROUTES.LOGIN);
-        } else {
-            showToast(t('toast.registerSuccess'), 'success');
-            navigate(ROUTES.DASHBOARD);
-        }
+
+        showToast("Please check your email to verify your account.", 'info');
+        navigate(ROUTES.LOGIN);
+
     } catch (err: any) {
       setError(err.message || t('toast.error'));
       showToast(err.message || t('toast.error'), 'error');
@@ -78,6 +76,9 @@ const RegisterPage: React.FC = () => {
    const handleGoogleLogin = async () => {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
+       options: {
+        redirectTo: window.location.origin,
+      },
     });
      if (error) {
         showToast(t('toast.error'), 'error');

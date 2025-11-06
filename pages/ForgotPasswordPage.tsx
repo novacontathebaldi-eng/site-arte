@@ -19,7 +19,7 @@ const ForgotPasswordPage: React.FC = () => {
     setIsLoading(true);
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: window.location.origin, // O usuário será redirecionado para a home após o reset
+          redirectTo: `${window.location.origin}/`,
       });
       if (error) throw error;
       showToast(t('toast.passwordResetSent'), 'success');

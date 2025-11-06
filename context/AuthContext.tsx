@@ -21,7 +21,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             .eq('id', supabaseUser.id)
             .single();
 
-        if (error && error.code !== 'PGRST116') { // PGRST116 = 0 rows
+        if (error && error.code !== 'PGRST116') { // PGRST116 = 0 rows returned
             console.error('Error fetching profile:', error);
             return { ...supabaseUser, profile: null };
         }
@@ -29,16 +29,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         return { ...supabaseUser, profile: profile as Profile };
     }, []);
 
-    const getSession = useCallback(async () => {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session?.user) {
-            const userData = await fetchUserProfile(session.user);
-            setUser(userData);
-        }
-        setLoading(false);
-    }, [fetchUserProfile]);
-
     useEffect(() => {
+        const getSession = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session?.user) {
+                const userData = await fetchUserProfile(session.user);
+                setUser(userData);
+            }
+            setLoading(false);
+        };
+
         getSession();
 
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
@@ -52,7 +52,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         });
 
         return () => subscription.unsubscribe();
-    }, [fetchUserProfile, getSession]);
+    }, [fetchUserProfile]);
     
     const refetchUser = useCallback(async () => {
         const { data: { user: supabaseUser } } = await supabase.auth.getUser();

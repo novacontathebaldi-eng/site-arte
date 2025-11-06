@@ -50,7 +50,7 @@ export interface Product {
   slug: string;
   featured: boolean;
   views: number;
-  createdAt: string; // Usando string para simplificar, no Firebase seria um Timestamp
+  createdAt: string; // Usando string para simplificar
   updatedAt: string;
   publishedAt?: string | null;
 }

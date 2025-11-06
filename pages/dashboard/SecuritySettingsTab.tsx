@@ -47,7 +47,6 @@ const SecuritySettingsTab: React.FC = () => {
     <div>
       <h2 className="text-xl font-bold text-text-primary mb-4">{t('dashboard.changePassword')}</h2>
       <form onSubmit={handlePasswordChange} className="space-y-4 max-w-lg">
-        {/* O Supabase não exige a senha antiga para atualizar a nova se o usuário já estiver logado. */}
         <Input
           id="newPassword"
           type="password"

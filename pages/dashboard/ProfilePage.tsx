@@ -11,11 +11,12 @@ const ProfilePage: React.FC = () => {
   const { t } = useTranslation();
   const { showToast } = useToast();
 
-  const [displayName, setDisplayName] = useState(user?.profile?.display_name || '');
+  const [displayName, setDisplayName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    setDisplayName(user?.profile?.display_name || '');
+    // Tenta pegar o display_name do perfil, senão do user_metadata, senão vazio
+    setDisplayName(user?.profile?.display_name || user?.user_metadata?.display_name || '');
   }, [user]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -25,15 +26,16 @@ const ProfilePage: React.FC = () => {
     setIsLoading(true);
     try {
       // Atualiza a tabela 'profiles' no Supabase
-      const { error } = await supabase
+      const { error: profileError } = await supabase
         .from('profiles')
         .update({ display_name: displayName, updated_at: new Date().toISOString() })
         .eq('id', user.id);
 
-      if (error) throw error;
+      if (profileError) throw profileError;
       
-      // Atualiza os metadados no Supabase Auth (opcional, mas bom para consistência)
-      await supabase.auth.updateUser({ data: { display_name: displayName } });
+      // Atualiza os metadados no Supabase Auth para consistência
+      const { error: userError } = await supabase.auth.updateUser({ data: { display_name: displayName } });
+      if (userError) throw userError;
 
       await refetchUser();
 
