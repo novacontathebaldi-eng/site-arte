@@ -1,159 +1,62 @@
+
 import React from 'react';
-import { SiteSettings, DaySchedule } from '../types';
+import { Link } from 'react-router-dom';
+import { useTranslation } from '../hooks/useTranslation';
+import { ROUTES } from '../constants';
 
-interface FooterProps {
-    settings: SiteSettings;
-    onOpenChatbot: () => void;
-    onOpenPrivacyPolicy: () => void;
-    onUserAreaClick: () => void;
-}
+// Componente do Ícone do Instagram
+const InstagramIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+  <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 448 512" height="1em" width="1em" {...props}>
+    <path d="M224.1 141c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9 114.9S339 319.5 339 255.9 287.7 141 224.1 141zm0 189.6c-41.1 0-74.7-33.5-74.7-74.7s33.5-74.7 74.7-74.7 74.7 33.5 74.7 74.7-33.6 74.7-74.7 74.7zm146.4-194.3c0 14.9-12 26.8-26.8 26.8-14.9 0-26.8-12-26.8-26.8s12-26.8 26.8-26.8 26.8 12 26.8 26.8zm76.1 27.2c-1.7-35.9-9.9-67.7-36.2-93.9-26.2-26.2-58-34.4-93.9-36.2-37-2.1-147.9-2.1-184.9 0-35.8 1.7-67.6 9.9-93.9 36.1s-34.4 58-36.2 93.9c-2.1 37-2.1 147.9 0 184.9 1.7 35.9 9.9 67.7 36.2 93.9 26.3 26.2 58 34.4 93.9 36.2 37 2.1 147.9 2.1 184.9 0 35.9-1.7 67.7-9.9 93.9-36.2 26.2-26.2 34.4-58 36.2-93.9 2.1-37 2.1-147.8 0-184.8zM398.8 388c-7.8 19.6-22.9 34.7-42.6 42.6-29.5 11.7-99.5 9-132.1 9s-102.7 2.6-132.1-9c-19.6-7.8-34.7-22.9-42.6-42.6-11.7-29.5-9-99.5-9-132.1s-2.6-102.7 9-132.1c7.8-19.6 22.9-34.7 42.6-42.6 29.5-11.7 99.5-9 132.1-9s102.7-2.6 132.1 9c19.6 7.8 34.7 22.9 42.6 42.6 11.7 29.5 9 99.5 9 132.1s2.7 102.7-9 132.1z" />
+  </svg>
+);
 
-function formatOperatingHoursGroups(operatingHours?: DaySchedule[]): { days: string, time: string }[] {
-    if (!operatingHours?.length) return [];
-    
-    const openSchedules = operatingHours.filter(h => h.isOpen);
-    if (openSchedules.length === 0) return [];
-    
-    const schedulesByTime = openSchedules.reduce((acc, schedule) => {
-        const timeKey = `${schedule.openTime}-${schedule.closeTime}`;
-        if (!acc[timeKey]) acc[timeKey] = [];
-        acc[timeKey].push(schedule);
-        return acc;
-    }, {} as Record<string, DaySchedule[]>);
+// Este é o componente do Rodapé (Footer).
+const Footer: React.FC = () => {
+  const { t } = useTranslation();
 
-    const result: { days: string, time: string }[] = [];
+  return (
+    <footer className="bg-surface text-text-secondary border-t border-gray-200">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {/* Coluna 1: Sobre a Artista */}
+          <div>
+            <h3 className="text-lg font-heading font-semibold text-text-primary">Melissa Pelussi</h3>
+            <p className="mt-4 text-sm leading-relaxed">
+              {t('home.artistIntro')}
+            </p>
+          </div>
 
-    for (const timeKey in schedulesByTime) {
-        const schedules = schedulesByTime[timeKey].sort((a, b) => a.dayOfWeek - b.dayOfWeek);
-        if (schedules.length === 0) continue;
+          {/* Coluna 2: Links Rápidos */}
+          <div>
+            <h3 className="text-lg font-heading font-semibold text-text-primary">{t('footer.quickLinks')}</h3>
+            <ul className="mt-4 space-y-2 text-sm">
+              <li><Link to={ROUTES.HOME} className="hover:text-secondary transition-colors">Home</Link></li>
+              <li><Link to={ROUTES.CATALOG} className="hover:text-secondary transition-colors">{t('header.catalog')}</Link></li>
+              {/* Adicione mais links aqui */}
+            </ul>
+          </div>
 
-        let dayString;
-        if (schedules.length === 7) {
-            dayString = 'Tous les jours';
-        } else {
-            const sequences: DaySchedule[][] = [];
-            if (schedules.length > 0) {
-                let currentSequence: DaySchedule[] = [schedules[0]];
-                for (let i = 1; i < schedules.length; i++) {
-                    if (schedules[i].dayOfWeek === schedules[i - 1].dayOfWeek + 1) {
-                        currentSequence.push(schedules[i]);
-                    } else {
-                        sequences.push(currentSequence);
-                        currentSequence = [schedules[i]];
-                    }
-                }
-                sequences.push(currentSequence);
-            }
-            
-            const formattedSequences = sequences.map(seq => {
-                if (seq.length === 1) return seq[0].dayName;
-                if (seq.length === 2) return `${seq[0].dayName} et ${seq[1].dayName}`;
-                return `De ${seq[0].dayName} à ${seq[seq.length - 1].dayName}`;
-            });
-            dayString = formattedSequences.join(' et ');
-        }
-
-        const [openTime, closeTime] = timeKey.split('-');
-        result.push({
-            days: dayString,
-            time: `de ${openTime}h à ${closeTime}h`
-        });
-    }
-    return result;
-}
-
-const formatOperatingHours = (operatingHours?: DaySchedule[]): string[] => {
-    if (!operatingHours?.length) {
-        return ['Horaires non informés.'];
-    }
-    const openSchedules = operatingHours.filter(h => h.isOpen);
-    if (openSchedules.length === 0) {
-        return ['Fermé tous les jours.'];
-    }
-    const groups = formatOperatingHoursGroups(operatingHours);
-    if (groups.length === 0) {
-        return ['Fermé tous les jours.'];
-    }
-    return groups.map(group => `${group.days}: ${group.time}`);
-};
-
-export const Footer: React.FC<FooterProps> = ({ settings, onOpenChatbot, onOpenPrivacyPolicy, onUserAreaClick }) => {
-    const visibleLinks = settings.footerLinks?.filter(link => link.isVisible !== false) ?? [];
-    const socialLinks = visibleLinks.filter(link => link.icon.startsWith('fab'));
-    const otherLinks = visibleLinks.filter(link => !link.icon.startsWith('fab') && link.url !== '#admin');
-    const operatingHoursParts = formatOperatingHours(settings.operatingHours);
-
-    return (
-        <footer id="footer-section" className="bg-brand-primary text-text-on-dark pt-16 pb-8">
-            <div className="container mx-auto px-4">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center md:text-left">
-                    <div className="flex flex-col items-center md:items-start md:col-span-1">
-                        <div className="flex items-center gap-3 text-2xl font-serif font-bold mb-4">
-                           <img src={settings.logoUrl} alt="Logo" className="h-12" />
-                            <span>Andressa Pelussi</span>
-                        </div>
-                        <p className="text-brand-accent mb-4">{settings.heroSlogan}</p>
-                        <div className="flex gap-4">
-                            {socialLinks.map(link => {
-                                let bgColor = 'bg-gray-500';
-                                if (link.icon.includes('instagram')) bgColor = 'bg-pink-600 hover:bg-pink-500';
-
-                                return (
-                                    <a key={link.id} href={link.url} target="_blank" rel="noopener noreferrer" className={`w-10 h-10 ${bgColor} rounded-full flex items-center justify-center text-xl transition-colors`}>
-                                        <i className={link.icon}></i>
-                                    </a>
-                                )
-                            })}
-                        </div>
-                    </div>
-                    <div>
-                        <h4 className="font-bold text-lg mb-4">Contact</h4>
-                        <ul className="space-y-2 text-gray-300">
-                            <li><i className="fas fa-map-marker-alt mr-2 text-brand-secondary"></i>Luxembourg</li>
-                            <li><i className="fas fa-phone mr-2 text-brand-secondary"></i>(+352) 12 345 678</li>
-                            <li><i className="fas fa-envelope mr-2 text-brand-secondary"></i>contact@example.com</li>
-                        </ul>
-                    </div>
-                    <div>
-                        <h4 className="font-bold text-lg mb-4">Horaires d'ouverture</h4>
-                         <ul className="space-y-2 text-gray-300">
-                            {operatingHoursParts.map((part, index) => (
-                                <li key={index}>{part}</li>
-                            ))}
-                        </ul>
-                    </div>
-                     <div>
-                        <h4 className="font-bold text-lg mb-4">Navigation</h4>
-                         <ul className="space-y-2 text-gray-300">
-                            {otherLinks.map(link => (
-                                <li key={link.id}>
-                                    <a href={link.url} className="inline-flex items-center gap-2 hover:text-white transition-colors">
-                                        <span>{link.text}</span>
-                                    </a>
-                                </li>
-                            ))}
-                            <li>
-                                <button onClick={onUserAreaClick} className="inline-flex items-center gap-2 hover:text-white transition-colors">
-                                    <span>Espace Client</span>
-                                </button>
-                            </li>
-                            <li>
-                                <button onClick={onOpenChatbot} className="inline-flex items-center gap-2 hover:text-white transition-colors">
-                                    <span>Aide et Support</span>
-                                </button>
-                            </li>
-                            <li>
-                                <button onClick={onOpenPrivacyPolicy} className="inline-flex items-center gap-2 hover:text-white transition-colors">
-                                    <span>Politique de Confidentialité</span>
-                                </button>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-                <div className="border-t border-brand-olive-600 mt-8 pt-6 text-center text-gray-400 text-sm">
-                    <p>&copy; {new Date().getFullYear()} Andressa Pelussi. Tous droits réservés.</p>
-                </div>
+          {/* Coluna 3: Redes Sociais */}
+          <div>
+            <h3 className="text-lg font-heading font-semibold text-text-primary">{t('footer.socialMedia')}</h3>
+            <div className="mt-4 flex space-x-4">
+              <a href="https://instagram.com/meehpelussi" target="_blank" rel="noopener noreferrer" aria-label="Instagram"
+                 className="text-text-secondary hover:text-secondary transition-colors text-2xl">
+                <InstagramIcon />
+              </a>
+              {/* Adicione mais redes sociais aqui */}
             </div>
-        </footer>
-    );
+          </div>
+        </div>
+
+        {/* Linha de Copyright */}
+        <div className="mt-12 pt-8 border-t border-gray-200 text-center text-xs">
+          <p>{t('footer.copyright')}</p>
+        </div>
+      </div>
+    </footer>
+  );
 };
+
+export default Footer;

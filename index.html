@@ -1,139 +1,51 @@
+
 <!DOCTYPE html>
-<html lang="fr" class="scroll-smooth">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
-    <title>Andressa Pelussi - Galerie d'Art</title>
-    <meta name="description" content="Découvrez les œuvres uniques de l'artiste Andressa Pelussi. Peintures et créations disponibles au Luxembourg.">
-    
-    <!-- PWA & SEO -->
-    <link rel="manifest" href="/manifest.webmanifest">
-    <meta name="theme-color" content="#2D2D2D">
-    <link rel="apple-touch-icon" href="/assets/logo_art.png">
-
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://arte-meeh.web.app/">
-    <meta property="og:title" content="Andressa Pelussi - Galerie d'Art">
-    <meta property="og:description" content="Découvrez les œuvres uniques de l'artiste Andressa Pelussi. Peintures et créations disponibles au Luxembourg.">
-    <meta property="og:image" content="https://arte-meeh.web.app/assets/logo_art.png">
-
-    <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://arte-meeh.web.app/">
-    <meta property="twitter:title" content="Andressa Pelussi - Galerie d'Art">
-    <meta property="twitter:description" content="Découvrez les œuvres uniques de l'artiste Andressa Pelussi. Peintures et créations disponibles au Luxembourg.">
-    <meta property="twitter:image" content="https://arte-meeh.web.app/assets/logo_art.png">
-    
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" href="/assets/logo_art.png">
-
-    <!-- Preload assets -->
-    <link rel="preload" href="/assets/user_area_bg.jpg" as="image">
-
-    <script src="https://cdn.tailwindcss.com"></script>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Melissa Pelussi Art</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <style>
-      body {
-        font-family: 'Inter', sans-serif;
-        overflow-x: hidden;
-      }
-      .font-serif {
-        font-family: 'Playfair Display', serif;
-      }
-      body.modal-open {
-        overflow: hidden;
-      }
-      .line-clamp-2 {
-        overflow: hidden;
-        display: -webkit-box;
-        -webkit-box-orient: vertical;
-        -webkit-line-clamp: 2;
-      }
-      @keyframes fadeInUp {
-        from {
-          opacity: 0;
-          transform: translateY(20px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-      .animate-fade-in-up {
-        animation: fadeInUp 0.5s ease-out forwards;
-      }
-      .scrollbar-hide::-webkit-scrollbar {
-        display: none;
-      }
-      .scrollbar-hide {
-        -ms-overflow-style: none;
-        scrollbar-width: none;
-      }
-    </style>
-    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
         theme: {
           extend: {
-            fontFamily: {
-              sans: ['Inter', 'sans-serif'],
-              serif: ['Playfair Display', 'serif'],
-            },
             colors: {
-              'brand-background': '#F9F9F9',
-              'brand-surface': '#FFFFFF',
-              'brand-primary': '#2D2D2D',
-              'brand-secondary': '#A9926A',
-              'brand-accent': '#C9B38D',
-              'text-primary': '#2D2D2D',
-              'text-secondary': '#6B6B6B',
-              'brand-green-700': '#2D2D2D',
-              'text-on-dark': '#FFFFFF',
-              'brand-gold-600': '#A9926A',
-              'brand-olive-600': '#4A4A4A',
-              'brand-ivory-50': '#F9F9F9',
-              'accent': '#A9926A',
+              'primary': '#2C2C2C',
+              'secondary': '#D4AF37',
+              'background': '#FFFFFF',
+              'surface': '#F8F8F8',
+              'text-primary': '#1A1A1A',
+              'text-secondary': '#4A4A4A',
+              'accent': '#4A7C59',
+            },
+            fontFamily: {
+              'heading': ['Playfair Display', 'serif'],
+              'body': ['Inter', 'sans-serif'],
             }
           }
         }
       }
     </script>
-<script type="importmap">
+  <script type="importmap">
 {
   "imports": {
-    "react": "https://esm.sh/react@18.2.0",
-    "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
-    "firebase/compat/app": "https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js",
-    "firebase/compat/firestore": "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js",
-    "firebase/compat/storage": "https://www.gstatic.com/firebasejs/9.22.1/firebase-storage-compat.js",
-    "firebase/compat/auth": "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js",
-    "firebase/compat/functions": "https://www.gstatic.com/firebasejs/9.22.1/firebase-functions-compat.js",
-    "@dnd-kit/core": "https://esm.sh/@dnd-kit/core@6.1.0",
-    "@dnd-kit/sortable": "https://esm.sh/@dnd-kit/sortable@8.0.0",
-    "@dnd-kit/utilities": "https://esm.sh/@dnd-kit/utilities@3.2.2",
-    "react-cropper": "https://esm.sh/react-cropper@2.3.3",
-    "cropperjs/dist/cropper.css": "https://esm.sh/cropperjs@1.6.2/dist/cropper.css"
+    "react-router-dom": "https://aistudiocdn.com/react-router-dom@^7.9.5",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "firebase/": "https://aistudiocdn.com/firebase@^12.5.0/"
   }
 }
 </script>
-
 <link rel="stylesheet" href="/index.css">
 </head>
-<body class="bg-brand-background text-text-primary antialiased">
+  <body>
     <div id="root"></div>
-    <script>
-      function onGoogleScriptLoad() {
-        window.googleScriptLoaded = true;
-        if (window.onGoogleScriptLoadCallback) {
-          window.onGoogleScriptLoadCallback();
-        }
-      }
-    </script>
-    <script src="https://apis.google.com/js/platform.js?onload=onGoogleScriptLoad" async defer></script>
     <script type="module" src="/index.tsx"></script>
-</body>
+  </body>
 </html>
