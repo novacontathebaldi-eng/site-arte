@@ -2,7 +2,8 @@
 // Ele inicializa o Firebase com as suas chaves de API e exporta os serviços
 // que vamos usar no resto do site (como autenticação e banco de dados).
 
-import { initializeApp } from "firebase/app";
+// FIX: Mudei para a biblioteca de compatibilidade para a inicialização para resolver um possível problema de ambiente/versão com o SDK modular.
+import firebase from "firebase/compat/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
@@ -20,7 +21,10 @@ const firebaseConfig = {
 };
 
 // Inicializa a aplicação Firebase com as configurações acima.
-const app = initializeApp(firebaseConfig);
+// Verificamos se o app já foi inicializado para evitar erros durante o hot-reloading (recarregamento automático em desenvolvimento).
+const app = !firebase.apps.length
+  ? firebase.initializeApp(firebaseConfig)
+  : firebase.app();
 
 // Exporta os serviços que vamos utilizar:
 // auth: para gerenciar login, cadastro, etc.

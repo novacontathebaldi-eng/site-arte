@@ -62,7 +62,12 @@ const RegisterPage: React.FC = () => {
           email: email,
           role: 'customer',
           language: language,
-          createdAt: serverTimestamp()
+          createdAt: serverTimestamp(),
+          preferences: {
+            orderUpdates: true,
+            promotions: false,
+            newArtworks: true,
+          }
       });
 
       showToast(t('toast.registerSuccess'), 'success');

@@ -86,6 +86,13 @@ export interface Toast {
   type: ToastType;
 }
 
+// Define as preferências de notificação do usuário.
+export interface UserPreferences {
+    orderUpdates: boolean;
+    promotions: boolean;
+    newArtworks: boolean;
+}
+
 // Representa os dados do usuário que salvamos no Firestore.
 export interface UserData {
     uid: string;
@@ -95,6 +102,7 @@ export interface UserData {
     role: 'customer' | 'admin';
     language: Language;
     createdAt: any; // Firestore Timestamp
+    preferences: UserPreferences;
 }
 
 // Define o que o Contexto de Autenticação vai fornecer.
@@ -102,4 +110,5 @@ export interface AuthContextType {
     user: UserData | null;
     loading: boolean;
     refetchUser: () => Promise<void>;
+    updateUserPreferences: (preferences: Partial<UserPreferences>) => Promise<void>;
 }
