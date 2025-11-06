@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useTranslation } from '../hooks/useTranslation';
@@ -7,12 +7,14 @@ import { ROUTES } from '../constants';
 import Input from '../components/ui/Input';
 import Button from '../components/ui/Button';
 import { GoogleIcon } from '../components/ui/icons';
+import { useAuth } from '../hooks/useAuth';
 
 const LoginPage: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const { showToast } = useToast();
+  const { user } = useAuth();
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -20,6 +22,12 @@ const LoginPage: React.FC = () => {
   const [error, setError] = useState('');
 
   const from = location.state?.from?.pathname || ROUTES.DASHBOARD;
+
+  useEffect(() => {
+    if (user) {
+      navigate(from, { replace: true });
+    }
+  }, [user, navigate, from]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();

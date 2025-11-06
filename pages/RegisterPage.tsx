@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useTranslation } from '../hooks/useTranslation';
@@ -7,6 +7,7 @@ import { ROUTES } from '../constants';
 import Input from '../components/ui/Input';
 import Button from '../components/ui/Button';
 import { GoogleIcon } from '../components/ui/icons';
+import { useAuth } from '../hooks/useAuth';
 
 const PasswordStrengthMeter: React.FC<{ password: string }> = ({ password }) => {
     const { t } = useTranslation();
@@ -38,12 +39,19 @@ const RegisterPage: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { showToast } = useToast();
+  const { user } = useAuth();
 
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  
+  useEffect(() => {
+    if (user) {
+      navigate(ROUTES.DASHBOARD, { replace: true });
+    }
+  }, [user, navigate]);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
