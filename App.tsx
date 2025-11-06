@@ -1,5 +1,5 @@
 import React from 'react';
-import { HashRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { LanguageProvider } from './context/LanguageContext';
 import { CartProvider } from './context/CartContext';
 import { ToastProvider } from './context/ToastContext';
@@ -36,7 +36,7 @@ const App: React.FC = () => {
       <AuthProvider>
         <ToastProvider>
           <CartProvider>
-            <HashRouter>
+            <BrowserRouter>
               <div className="flex flex-col min-h-screen font-body bg-background text-text-primary">
                 <Toaster />
                 <Header />
@@ -97,7 +97,7 @@ const App: React.FC = () => {
                 </main>
                 <Footer />
               </div>
-            </HashRouter>
+            </BrowserRouter>
           </CartProvider>
         </ToastProvider>
       </AuthProvider>
