@@ -33,4 +33,9 @@ export const ROUTES = {
   REGISTER: '/register',
   FORGOT_PASSWORD: '/forgot-password',
   DASHBOARD: '/dashboard',
+  DASHBOARD_PROFILE: '/dashboard/profile',
+  DASHBOARD_ORDERS: '/dashboard/orders',
+  DASHBOARD_ADDRESSES: '/dashboard/addresses',
+  DASHBOARD_SETTINGS: '/dashboard/settings',
+  DASHBOARD_WISHLIST: '/dashboard/wishlist',
 };

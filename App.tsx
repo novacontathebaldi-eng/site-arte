@@ -19,30 +19,26 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ProtectedRoute from './components/ProtectedRoute';
-import DashboardPage from './pages/DashboardPage';
 import { ROUTES } from './constants';
+import DashboardLayout from './pages/dashboard/DashboardLayout';
+import DashboardOverviewPage from './pages/dashboard/DashboardOverviewPage';
+import ProfilePage from './pages/dashboard/ProfilePage';
+import OrdersPage from './pages/dashboard/OrdersPage';
+import AddressesPage from './pages/dashboard/AddressesPage';
+import SettingsPage from './pages/dashboard/SettingsPage';
+import WishlistPage from './pages/dashboard/WishlistPage';
 
-
-// Este é o componente principal da sua aplicação, o App.tsx.
-// Ele funciona como o centro de controle que organiza tudo.
 const App: React.FC = () => {
   return (
-    // 1. Providers: Envolvemos a aplicação com todos os "provedores de contexto".
-    //    - LanguageProvider: Gerencia o idioma.
-    //    - AuthProvider: NOVO! Gerencia o estado de autenticação do usuário.
-    //    - ToastProvider: Gerencia as notificações.
-    //    - CartProvider: Gerencia o carrinho de compras.
     <LanguageProvider>
       <AuthProvider>
         <ToastProvider>
           <CartProvider>
-            {/* 2. HashRouter: Gerencia a navegação entre as páginas. */}
             <HashRouter>
               <div className="flex flex-col min-h-screen font-body bg-background text-text-primary">
                 <Toaster />
                 <Header />
                 <main className="flex-grow">
-                  {/* 3. Routes: Define qual componente de página deve ser mostrado com base na URL. */}
                   <Routes>
                     {/* Rotas Públicas */}
                     <Route path={ROUTES.HOME} element={<HomePage />} />
@@ -55,7 +51,7 @@ const App: React.FC = () => {
                     <Route path={ROUTES.REGISTER} element={<RegisterPage />} />
                     <Route path={ROUTES.FORGOT_PASSWORD} element={<ForgotPasswordPage />} />
                     
-                    {/* Rotas Protegidas (exigem login) */}
+                    {/* Rotas Protegidas */}
                     <Route 
                       path={ROUTES.CHECKOUT} 
                       element={
@@ -64,14 +60,24 @@ const App: React.FC = () => {
                         </ProtectedRoute>
                       } 
                     />
+                    
+                    {/* Layout do Dashboard com rotas aninhadas */}
                     <Route 
-                      path={ROUTES.DASHBOARD} 
+                      path={ROUTES.DASHBOARD}
                       element={
                         <ProtectedRoute>
-                          <DashboardPage />
+                          <DashboardLayout />
                         </ProtectedRoute>
-                      } 
-                    />
+                      }
+                    >
+                        {/* A rota "index" é a página padrão do dashboard */}
+                        <Route index element={<DashboardOverviewPage />} /> 
+                        <Route path="profile" element={<ProfilePage />} />
+                        <Route path="orders" element={<OrdersPage />} />
+                        <Route path="addresses" element={<AddressesPage />} />
+                        <Route path="settings" element={<SettingsPage />} />
+                        <Route path="wishlist" element={<WishlistPage />} />
+                    </Route>
 
                     {/* Rota para página não encontrada */}
                     <Route path="*" element={<NotFoundPage />} />

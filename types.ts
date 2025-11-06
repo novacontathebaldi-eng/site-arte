@@ -101,4 +101,5 @@ export interface UserData {
 export interface AuthContextType {
     user: UserData | null;
     loading: boolean;
+    refetchUser: () => Promise<void>;
 }
