@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { useTranslation } from '../hooks/useTranslation';
-import LanguageSwitcher from './LanguageSwitcher';
 import { ROUTES } from '../constants';
 import CartIcon from './CartIcon';
 import { useAuth } from '../hooks/useAuth';
@@ -99,7 +98,6 @@ const Header: React.FC = () => {
           </nav>
 
           <div className="flex items-center space-x-4">
-            <LanguageSwitcher />
             <CartIcon />
             <div className="w-px h-6 bg-gray-200"></div>
             

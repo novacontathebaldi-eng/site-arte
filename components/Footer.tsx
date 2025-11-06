@@ -1,8 +1,8 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from '../hooks/useTranslation';
 import { ROUTES } from '../constants';
+import LanguageSwitcher from './LanguageSwitcher';
 
 // Componente do Ícone do Instagram
 const InstagramIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
@@ -50,8 +50,13 @@ const Footer: React.FC = () => {
           </div>
         </div>
 
+        {/* Seção do Seletor de Idiomas */}
+        <div className="mt-12 pt-8 border-t border-gray-200 flex justify-center">
+            <LanguageSwitcher />
+        </div>
+
         {/* Linha de Copyright */}
-        <div className="mt-12 pt-8 border-t border-gray-200 text-center text-xs">
+        <div className="mt-8 text-center text-xs">
           <p>{t('footer.copyright')}</p>
         </div>
       </div>
