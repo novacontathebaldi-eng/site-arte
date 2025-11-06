@@ -3,7 +3,7 @@ import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { useTranslation } from '../../hooks/useTranslation';
 import { ROUTES } from '../../constants';
-import { auth } from '../../lib/firebase';
+import { supabase } from '../../lib/supabase';
 import {
   OverviewIcon,
   PackageIcon,
@@ -21,7 +21,7 @@ const DashboardLayout: React.FC = () => {
   const navigate = useNavigate();
 
   const handleLogout = async () => {
-    await auth.signOut();
+    await supabase.auth.signOut();
     navigate(ROUTES.HOME);
   };
 
@@ -40,6 +40,9 @@ const DashboardLayout: React.FC = () => {
         ? 'bg-secondary text-white'
         : 'text-text-secondary hover:bg-surface hover:text-text-primary'
     }`;
+  
+  const displayName = user?.profile?.display_name || user?.email;
+  const photoURL = user?.profile?.photo_url || user?.user_metadata?.avatar_url;
 
   return (
     <div className="bg-surface min-h-screen">
@@ -50,12 +53,12 @@ const DashboardLayout: React.FC = () => {
             <div className="bg-white p-6 rounded-lg shadow-md">
               <div className="flex items-center gap-4 mb-6 border-b pb-4">
                 <img
-                  src={user?.photoURL || `https://ui-avatars.com/api/?name=${user?.displayName || user?.email}&background=D4AF37&color=2C2C2C&bold=true`}
+                  src={photoURL || `https://ui-avatars.com/api/?name=${displayName}&background=D4AF37&color=2C2C2C&bold=true`}
                   alt="User Avatar"
                   className="w-16 h-16 rounded-full"
                 />
                 <div>
-                  <h2 className="font-bold text-lg text-text-primary truncate">{user?.displayName}</h2>
+                  <h2 className="font-bold text-lg text-text-primary truncate">{displayName}</h2>
                   <p className="text-sm text-text-secondary truncate">{user?.email}</p>
                 </div>
               </div>

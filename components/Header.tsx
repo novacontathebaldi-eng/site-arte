@@ -4,7 +4,7 @@ import { useTranslation } from '../hooks/useTranslation';
 import { ROUTES } from '../constants';
 import CartIcon from './CartIcon';
 import { useAuth } from '../hooks/useAuth';
-import { auth } from '../lib/firebase';
+import { supabase } from '../lib/supabase';
 import { useToast } from '../hooks/useToast';
 import { MenuIcon, UserCircleIcon, XIcon } from './ui/icons';
 
@@ -12,15 +12,19 @@ import { MenuIcon, UserCircleIcon, XIcon } from './ui/icons';
 const UserMenu: React.FC = () => {
     const { t } = useTranslation();
     const { showToast } = useToast();
+    const { user } = useAuth();
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
-    const user = auth.currentUser;
     const navigate = useNavigate();
 
     const handleLogout = async () => {
-        await auth.signOut();
-        showToast(t('toast.logoutSuccess'), 'info');
-        navigate(ROUTES.HOME);
+        const { error } = await supabase.auth.signOut();
+        if (error) {
+            showToast(t('toast.error'), 'error');
+        } else {
+            showToast(t('toast.logoutSuccess'), 'info');
+            navigate(ROUTES.HOME);
+        }
     };
     
     useEffect(() => {
@@ -33,11 +37,14 @@ const UserMenu: React.FC = () => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
+    const displayName = user?.profile?.display_name || user?.email;
+    const photoURL = user?.profile?.photo_url || user?.user_metadata?.avatar_url;
+
     return (
         <div className="relative" ref={dropdownRef}>
             <button onClick={() => setIsOpen(!isOpen)} className="flex items-center">
                 <img 
-                    src={user?.photoURL || `https://ui-avatars.com/api/?name=${user?.displayName || user?.email}&background=D4AF37&color=2C2C2C`} 
+                    src={photoURL || `https://ui-avatars.com/api/?name=${displayName}&background=D4AF37&color=2C2C2C`} 
                     alt="User Avatar"
                     className="w-8 h-8 rounded-full"
                 />
@@ -82,11 +89,14 @@ const Header: React.FC = () => {
   }, []);
 
   const handleLogout = async () => {
-    await auth.signOut();
+    await supabase.auth.signOut();
     showToast(t('toast.logoutSuccess'), 'info');
     setIsMobileAuthOpen(false);
     navigate(ROUTES.HOME);
   };
+  
+  const displayName = user?.profile?.display_name || user?.email;
+  const photoURL = user?.profile?.photo_url || user?.user_metadata?.avatar_url;
 
   const navLinkClasses = ({ isActive }: { isActive: boolean }): string =>
     `relative py-2 text-sm font-medium transition-colors duration-300 ${
@@ -144,7 +154,7 @@ const Header: React.FC = () => {
                     <button onClick={() => setIsMobileAuthOpen(p => !p)}>
                         {user ? (
                              <img 
-                                src={user?.photoURL || `https://ui-avatars.com/api/?name=${user?.displayName || user?.email}&background=D4AF37&color=2C2C2C`} 
+                                src={photoURL || `https://ui-avatars.com/api/?name=${displayName}&background=D4AF37&color=2C2C2C`} 
                                 alt="User Avatar"
                                 className="w-8 h-8 rounded-full"
                             />

@@ -1,6 +1,7 @@
 // Este arquivo define a "forma" dos dados que usamos no site.
 // Pense nisso como um contrato: se um objeto é um "Produto", ele TEM que ter
 // as propriedades definidas aqui (id, sku, category, etc.). Isso ajuda a evitar erros.
+import { User } from '@supabase/supabase-js';
 
 // Idiomas suportados no site.
 export type Language = 'fr' | 'en' | 'de' | 'pt';
@@ -93,17 +94,20 @@ export interface UserPreferences {
     newArtworks: boolean;
 }
 
-// Representa os dados do usuário que salvamos no Firestore.
-export interface UserData {
-    uid: string;
-    email: string | null;
-    displayName: string | null;
-    photoURL?: string | null;
+// Representa os dados do perfil do usuário na tabela 'profiles' do Supabase.
+export interface Profile {
+    id: string; // Corresponde ao user.id do Supabase Auth
+    display_name: string | null;
+    photo_url?: string | null;
     role: 'customer' | 'admin';
     language: Language;
-    createdAt: any; // Firestore Timestamp
+    updated_at: string;
     preferences: UserPreferences;
 }
+
+// Combina o usuário do Supabase Auth com o perfil do banco de dados.
+export type UserData = User & { profile: Profile | null };
+
 
 // Define o que o Contexto de Autenticação vai fornecer.
 export interface AuthContextType {
