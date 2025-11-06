@@ -1,20 +1,25 @@
-
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useTranslation } from '../hooks/useTranslation';
 import { Product } from '../types';
 import { getProductBySlug } from '../services/api';
 import { ProductDetailSkeleton } from '../components/SkeletonLoader';
 import NotFoundPage from './NotFoundPage';
+import { useCart } from '../hooks/useCart';
+import { useToast } from '../hooks/useToast';
 
 // Esta é a Página de Detalhes do Produto. Ela mostra todas as informações de uma única obra.
 const ProductDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>(); // Pega o 'slug' do produto da URL.
   const { language, t } = useTranslation();
+  const { addItem } = useCart();
+  const { showToast } = useToast();
 
   const [product, setProduct] = useState<Product | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [quantity, setQuantity] = useState(1);
+  const [isAdded, setIsAdded] = useState(false);
 
   // Busca os detalhes do produto específico usando o slug.
   useEffect(() => {
@@ -39,6 +44,24 @@ const ProductDetailPage: React.FC = () => {
     fetchProduct();
   }, [slug]);
 
+  const handleAddToCart = () => {
+    if (!product) return;
+    
+    addItem({
+      id: product.id,
+      slug: product.slug,
+      title: product.translations[language].title,
+      image: product.images[0].url,
+      price: product.price.amount,
+      quantity: quantity,
+      stock: product.stock,
+    });
+
+    showToast(t('toast.itemAdded'), 'success');
+    setIsAdded(true);
+    setTimeout(() => setIsAdded(false), 2000); // Reseta o estado do botão após 2 segundos
+  };
+
   // Se estiver carregando, mostra o esqueleto.
   if (isLoading) {
     return <ProductDetailSkeleton />;
@@ -60,6 +83,8 @@ const ProductDetailPage: React.FC = () => {
     sold: { text: t('product.sold'), color: 'bg-red-100 text-red-800' },
     'made-to-order': { text: t('product.madeToOrder'), color: 'bg-yellow-100 text-yellow-800' },
   };
+
+  const isAddToCartDisabled = product.status !== 'available' || isAdded;
 
   return (
     <div className="bg-white">
@@ -98,9 +123,22 @@ const ProductDetailPage: React.FC = () => {
             </ul>
 
             {product.status === 'available' && (
-              <button className="mt-8 w-full bg-primary text-white font-bold py-4 px-8 rounded-lg text-lg hover:bg-opacity-80 transition-colors duration-300">
-                {t('product.addToCart')}
-              </button>
+              <div className="mt-8 flex items-center gap-4">
+                 {product.stock > 1 && (
+                    <div className="flex items-center border rounded-lg">
+                        <button onClick={() => setQuantity(q => Math.max(1, q - 1))} className="px-4 py-3 h-full">-</button>
+                        <input type="number" value={quantity} readOnly className="w-12 text-center border-l border-r" />
+                        <button onClick={() => setQuantity(q => Math.min(product.stock, q + 1))} className="px-4 py-3 h-full">+</button>
+                    </div>
+                )}
+                <button 
+                  onClick={handleAddToCart}
+                  disabled={isAddToCartDisabled}
+                  className={`w-full bg-primary text-white font-bold py-3 px-8 rounded-lg text-lg transition-all duration-300 ${isAddToCartDisabled ? 'bg-gray-400 cursor-not-allowed' : 'hover:bg-opacity-80'}`}
+                >
+                  {isAdded ? t('product.addedToCart') : t('product.addToCart')}
+                </button>
+              </div>
             )}
           </div>
         </div>

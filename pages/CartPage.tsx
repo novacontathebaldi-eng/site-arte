@@ -5,7 +5,7 @@ import { useTranslation } from '../hooks/useTranslation';
 import { useToast } from '../hooks/useToast';
 import { CartItem } from '../types';
 import { ROUTES } from '../constants';
-import { TrashIcon, PlusIcon, MinusIcon } from '../components/ui/icons';
+import { TrashIcon, PlusIcon, MinusIcon, VisaIcon, MastercardIcon, PaypalIcon } from '../components/ui/icons';
 
 // Componente para um único item na lista do carrinho.
 const CartItemRow: React.FC<{ item: CartItem }> = ({ item }) => {
@@ -102,6 +102,14 @@ const CartPage: React.FC = () => {
                     <Link to={ROUTES.CATALOG} className="mt-4 w-full block text-center text-primary font-semibold py-2">
                         {t('cart.continueShopping')}
                     </Link>
+                     <div className="mt-6 border-t pt-4">
+                        <p className="text-sm text-center text-text-secondary mb-2">Pagamentos seguros com:</p>
+                        <div className="flex justify-center items-center space-x-2">
+                            <VisaIcon className="h-10 w-10" />
+                            <MastercardIcon className="h-10 w-10" />
+                            <PaypalIcon className="h-10 w-10" />
+                        </div>
+                    </div>
                 </div>
             </aside>
           </div>
