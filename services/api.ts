@@ -13,10 +13,8 @@ const API_DELAY = 500; // Atraso de 500ms para simular o tempo de resposta da re
  * @returns Uma Promise que resolve com a lista de todos os produtos.
  */
 export const getProducts = (): Promise<Product[]> => {
-  console.log('Fetching all products...');
   return new Promise(resolve => {
     setTimeout(() => {
-      console.log('Fetched all products.');
       resolve(mockProducts);
     }, API_DELAY);
   });
@@ -28,11 +26,9 @@ export const getProducts = (): Promise<Product[]> => {
  * @returns Uma Promise que resolve com o produto encontrado ou undefined se não encontrar.
  */
 export const getProductBySlug = (slug: string): Promise<Product | undefined> => {
-  console.log(`Fetching product with slug: ${slug}`);
   return new Promise(resolve => {
     setTimeout(() => {
       const product = mockProducts.find(p => p.slug === slug);
-      console.log(`Fetched product:`, product);
       resolve(product);
     }, API_DELAY);
   });
@@ -43,11 +39,9 @@ export const getProductBySlug = (slug: string): Promise<Product | undefined> => 
  * @returns Uma Promise que resolve com uma lista de produtos em destaque.
  */
 export const getFeaturedProducts = (): Promise<Product[]> => {
-    console.log('Fetching featured products...');
     return new Promise(resolve => {
         setTimeout(() => {
             const featured = mockProducts.filter(p => p.featured);
-            console.log('Fetched featured products.');
             resolve(featured);
         }, API_DELAY);
     });
@@ -59,12 +53,10 @@ export const getFeaturedProducts = (): Promise<Product[]> => {
  * @returns Uma Promise que resolve com a lista de pedidos do usuário.
  */
 export const getOrdersByUserId = (userId: string): Promise<Order[]> => {
-    console.log(`Fetching orders for user: ${userId}`);
     return new Promise(resolve => {
         setTimeout(() => {
-            // Em um app real, o `userId` seria usado para filtrar.
-            // Como temos apenas um usuário mock, retornamos todos os pedidos mock.
-            resolve(mockOrders);
+            // Para simular um novo usuário, retornamos um array vazio.
+            resolve([]);
         }, API_DELAY);
     });
 };
@@ -76,9 +68,10 @@ export const getOrdersByUserId = (userId: string): Promise<Order[]> => {
  * @returns Uma Promise que resolve com o pedido encontrado ou undefined.
  */
 export const getOrderById = (orderId: string): Promise<Order | undefined> => {
-    console.log(`Fetching order with id: ${orderId}`);
     return new Promise(resolve => {
         setTimeout(() => {
+            // Isso ainda pode retornar um pedido mock se o ID corresponder.
+            // Para um novo usuário, ele não terá IDs de pedido para consultar.
             const order = mockOrders.find(o => o.id === orderId);
             resolve(order);
         }, API_DELAY);
@@ -88,26 +81,23 @@ export const getOrderById = (orderId: string): Promise<Order | undefined> => {
 // --- Funções da API para Endereços ---
 
 export const getAddresses = (userId: string): Promise<AddressWithId[]> => {
-  console.log(`Fetching addresses for user: ${userId}`);
-  return new Promise(resolve => setTimeout(() => resolve([...mockAddresses]), API_DELAY));
+  return new Promise(resolve => setTimeout(() => resolve([]), API_DELAY));
 };
 
 export const addAddress = (userId: string, address: Address): Promise<AddressWithId> => {
-  console.log(`Adding address for user: ${userId}`);
   return new Promise(resolve => {
     setTimeout(() => {
       if (address.isDefault) {
         mockAddresses.forEach(a => a.isDefault = false);
       }
       const newAddress: AddressWithId = { ...address, id: `addr-${Date.now()}` };
-      mockAddresses.push(newAddress);
+      // Em uma aplicação real, isso seria salvo no DB. Aqui, apenas retornamos.
       resolve(newAddress);
     }, API_DELAY);
   });
 };
 
 export const updateAddress = (userId: string, addressId: string, address: Address): Promise<AddressWithId> => {
-  console.log(`Updating address ${addressId} for user: ${userId}`);
   return new Promise(resolve => {
     setTimeout(() => {
        if (address.isDefault) {
@@ -121,7 +111,6 @@ export const updateAddress = (userId: string, addressId: string, address: Addres
 };
 
 export const deleteAddress = (userId: string, addressId: string): Promise<void> => {
-    console.log(`Deleting address ${addressId} for user: ${userId}`);
     return new Promise(resolve => {
         setTimeout(() => {
             const index = mockAddresses.findIndex(a => a.id === addressId);
@@ -136,33 +125,26 @@ export const deleteAddress = (userId: string, addressId: string): Promise<void> 
 // --- Funções da API para Wishlist ---
 
 export const getWishlist = (userId: string): Promise<Wishlist> => {
-    console.log(`Fetching wishlist for user: ${userId}`);
-    return new Promise(resolve => setTimeout(() => resolve({ ...mockWishlist }), API_DELAY));
+    return new Promise(resolve => setTimeout(() => resolve({ userId, items: [] }), API_DELAY));
 };
 
 export const updateWishlist = (userId: string, wishlist: Wishlist): Promise<Wishlist> => {
-    console.log(`Updating wishlist for user: ${userId}`);
     return new Promise(resolve => {
         setTimeout(() => {
-            // FIX: Cannot assign to 'mockWishlist' because it is an import.
-            // Mutate the object instead of reassigning it.
-            mockWishlist.items = wishlist.items;
-            mockWishlist.userId = wishlist.userId;
-            resolve({ ...mockWishlist });
+            // Simula a atualização e retorna a nova wishlist.
+            resolve({ ...wishlist });
         }, API_DELAY);
     });
 }
 
 // --- Funções da API para Dashboard ---
 export const getUserDashboardStats = (userId: string): Promise<DashboardStats> => {
-    console.log(`Fetching stats for user: ${userId}`);
     return new Promise(resolve => {
         setTimeout(() => {
-            const totalSpent = mockOrders.reduce((sum, order) => sum + order.pricing.total, 0);
             const stats: DashboardStats = {
-                totalOrders: mockOrders.length,
-                totalSpent: totalSpent,
-                wishlistCount: mockWishlist.items.length
+                totalOrders: 0,
+                totalSpent: 0,
+                wishlistCount: 0
             };
             resolve(stats);
         }, API_DELAY);
@@ -171,11 +153,9 @@ export const getUserDashboardStats = (userId: string): Promise<DashboardStats> =
 
 // --- Funções da API para Checkout ---
 export const placeOrder = (userId: string, items: CartItem[], shippingAddress: Address): Promise<{ orderId: string }> => {
-    console.log('Placing order for user:', userId);
     return new Promise(resolve => {
         setTimeout(() => {
             const orderId = `mock-order-${Date.now()}`;
-            console.log(`Mock order created with ID: ${orderId}`);
             resolve({ orderId });
         }, API_DELAY);
     });

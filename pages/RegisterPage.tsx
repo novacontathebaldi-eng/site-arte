@@ -62,8 +62,10 @@ const RegisterPage: React.FC = () => {
         });
         if (error) throw error;
 
-        showToast("Please check your email to verify your account.", 'info');
-        navigate(ROUTES.LOGIN);
+        // Supabase automatically signs in the user after signUp.
+        // The onAuthStateChange listener in AuthContext will handle the session.
+        showToast(t('toast.registerSuccess'), 'info');
+        navigate(ROUTES.DASHBOARD);
 
     } catch (err: any) {
       setError(err.message || t('toast.error'));
