@@ -128,7 +128,13 @@ export interface Address {
     postalCode: string;
     country: string;
     phone: string;
+    isDefault: boolean;
 }
+
+export interface AddressWithId extends Address {
+    id: string;
+}
+
 
 export interface OrderItem {
     productId: string;
@@ -170,4 +176,23 @@ export interface Order {
     createdAt: string;
     updatedAt: string;
     estimatedDelivery?: string | null;
+}
+
+// --- TIPOS PARA WISHLIST ---
+
+export interface WishlistItem {
+    productId: string;
+    addedAt: string;
+}
+
+export interface Wishlist {
+    userId: string;
+    items: WishlistItem[];
+}
+
+// --- TIPOS PARA DASHBOARD ---
+export interface DashboardStats {
+    totalOrders: number;
+    totalSpent: number;
+    wishlistCount: number;
 }
