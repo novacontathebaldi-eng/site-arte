@@ -100,6 +100,7 @@ export const translations = {
       wishlistRemoved: 'Retiré de la liste de souhaits.',
       error: 'Une erreur est survenue.',
       passwordMismatch: 'Les nouveaux mots de passe ne correspondent pas.',
+      confirmationSent: 'E-mail de confirmation renvoyé !',
     },
     about: {
       title: 'À propos de l\'Artiste',
@@ -295,6 +296,9 @@ export const translations = {
       activeOrders: 'Commandes actives',
       wishlistItems: 'Articles souhaités',
       recentOrders: 'Commandes Récentes',
+      confirmEmailBannerTitle: 'Confirmez votre adresse e-mail',
+      confirmEmailBannerText: 'Veuillez vérifier votre boîte de réception et cliquer sur le lien de confirmation pour sécuriser entièrement votre compte.',
+      resendConfirmation: 'Renvoyer l\'e-mail',
     },
     orderStatus: {
         pending: 'En attente',
@@ -409,6 +413,7 @@ export const translations = {
       wishlistRemoved: 'Removed from wishlist.',
       error: 'An error occurred.',
       passwordMismatch: 'The new passwords do not match.',
+      confirmationSent: 'Confirmation email resent!',
     },
     about: {
       title: 'About the Artist',
@@ -604,6 +609,9 @@ export const translations = {
       activeOrders: 'Active Orders',
       wishlistItems: 'Wishlist Items',
       recentOrders: 'Recent Orders',
+      confirmEmailBannerTitle: 'Confirm Your Email Address',
+      confirmEmailBannerText: 'Please check your inbox and click the confirmation link to fully secure your account.',
+      resendConfirmation: 'Resend Email',
     },
     orderStatus: {
         pending: 'Pending',
@@ -718,6 +726,7 @@ export const translations = {
       wishlistRemoved: 'Von der Wunschliste entfernt.',
       error: 'Ein Fehler ist aufgetreten.',
       passwordMismatch: 'Die neuen Passwörter stimmen nicht überein.',
+      confirmationSent: 'Bestätigungs-E-Mail erneut gesendet!',
     },
      about: {
       title: 'Über die Künstlerin',
@@ -913,6 +922,9 @@ export const translations = {
       activeOrders: 'Aktive Bestellungen',
       wishlistItems: 'Wunschlistenartikel',
       recentOrders: 'Letzte Bestellungen',
+      confirmEmailBannerTitle: 'Bestätigen Sie Ihre E-Mail-Adresse',
+      confirmEmailBannerText: 'Bitte überprüfen Sie Ihren Posteingang und klicken Sie auf den Bestätigungslink, um Ihr Konto vollständig zu sichern.',
+      resendConfirmation: 'E-Mail erneut senden',
     },
     orderStatus: {
         pending: 'Ausstehend',
@@ -1027,6 +1039,7 @@ export const translations = {
       wishlistRemoved: 'Removido da lista de desejos.',
       error: 'Ocorreu um erro.',
       passwordMismatch: 'As novas senhas não correspondem.',
+      confirmationSent: 'E-mail de confirmação reenviado!',
     },
     about: {
       title: 'Sobre a Artista',
@@ -1222,6 +1235,9 @@ export const translations = {
       activeOrders: 'Pedidos Ativos',
       wishlistItems: 'Itens na Lista',
       recentOrders: 'Pedidos Recentes',
+      confirmEmailBannerTitle: 'Confirme o seu Endereço de E-mail',
+      confirmEmailBannerText: 'Por favor, verifique sua caixa de entrada e clique no link de confirmação para proteger totalmente sua conta.',
+      resendConfirmation: 'Reenviar E-mail',
     },
      orderStatus: {
         pending: 'Pendente',

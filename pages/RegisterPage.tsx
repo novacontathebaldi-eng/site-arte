@@ -58,7 +58,7 @@ const RegisterPage: React.FC = () => {
     setIsLoading(true);
     setError('');
     try {
-        const { error } = await supabase.auth.signUp({
+        const { error: signUpError } = await supabase.auth.signUp({
             email,
             password,
             options: {
@@ -67,10 +67,20 @@ const RegisterPage: React.FC = () => {
                 }
             }
         });
-        if (error) throw error;
+        if (signUpError) throw signUpError;
         
-        // Com a confirmação de e-mail desativada no Supabase, o signUp já loga o usuário.
-        // O onAuthStateChange listener fará o resto.
+        // Agora, faça login do usuário para criar uma sessão imediatamente
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+
+        if (signInError) {
+          // Mesmo que o login falhe (caso raro), o usuário foi criado.
+          // O usuário pode então fazer login manualmente.
+          console.error("Sign in after sign up failed:", signInError);
+        }
+
         showToast(t('toast.registerSuccess'), 'info');
         navigate(ROUTES.DASHBOARD);
 
