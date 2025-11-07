@@ -34,7 +34,6 @@ const LoginPage: React.FC = () => {
     setIsLoading(true);
     setError('');
     try {
-      // FIX: In Supabase v2, `signInWithPassword` is used instead of `signIn`.
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
       showToast(t('toast.loginSuccess'), 'success');
@@ -48,7 +47,6 @@ const LoginPage: React.FC = () => {
   };
   
   const handleGoogleLogin = async () => {
-    // FIX: In Supabase v2, `signInWithOAuth` is used for OAuth instead of `signIn`.
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {

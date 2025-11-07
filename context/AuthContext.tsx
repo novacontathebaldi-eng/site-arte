@@ -30,7 +30,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     useEffect(() => {
         setLoading(true);
-        // FIX: In Supabase v2, onAuthStateChange returns an object with a `data` property containing the subscription.
         const { data: authListener } = supabase.auth.onAuthStateChange(async (_event, session) => {
             if (session?.user) {
                 const userData = await fetchUserProfile(session.user as User);
@@ -41,12 +40,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             setLoading(false);
         });
 
-        // FIX: In Supabase v2, unsubscribe is called on the subscription object.
         return () => authListener?.subscription.unsubscribe();
     }, [fetchUserProfile]);
     
     const refetchUser = useCallback(async () => {
-        // FIX: In Supabase v2, `getUser` is async and returns the user in a data object.
         const { data: { user: supabaseUser } } = await supabase.auth.getUser();
         if (supabaseUser) {
             setLoading(true);

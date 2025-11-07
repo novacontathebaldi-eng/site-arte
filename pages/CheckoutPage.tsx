@@ -16,7 +16,7 @@ const CheckoutPage: React.FC = () => {
         {t('checkout.title')}
       </h1>
       <div className="max-w-3xl mx-auto text-center text-text-secondary bg-white p-8 rounded-lg shadow-md">
-        {/* FIX: Property 'displayName' does not exist on type 'UserData'. Use 'user.profile.display_name' instead. */}
+        {/* FIX: Correctly access the user's display name from the profile object. */}
         <h2 className="text-2xl font-semibold text-primary mb-4">Olá, {user?.profile?.display_name || user?.email}!</h2>
         <p className="mb-6">
             Esta é a área de finalização de compra. A implementação do formulário de endereço e do pagamento seguro com Stripe será o próximo passo.
