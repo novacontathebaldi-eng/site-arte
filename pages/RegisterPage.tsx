@@ -58,41 +58,32 @@ const RegisterPage: React.FC = () => {
     setIsLoading(true);
     setError('');
     try {
-        const { error: signUpError } = await supabase.auth.signUp({
+        const { error } = await supabase.auth.signUp({
             email,
             password,
             options: {
                 data: {
                     display_name: fullName,
-                },
-                 emailRedirectTo: window.location.origin,
+                }
             }
         });
-        if (signUpError) throw signUpError;
-
-        // Efetua o login do usuário manualmente para criar a sessão
-        // FIX: In Supabase v2, `signInWithPassword` is used instead of `signIn`.
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-            email,
-            password,
-        });
-        if (signInError) throw signInError;
-
+        if (error) throw error;
+        
+        // Com a confirmação de e-mail desativada no Supabase, o signUp já loga o usuário.
+        // O onAuthStateChange listener fará o resto.
         showToast(t('toast.registerSuccess'), 'info');
-        // O listener onAuthStateChange irá capturar a sessão e o useEffect
-        // fará o redirecionamento. Navegamos aqui como um fallback.
         navigate(ROUTES.DASHBOARD);
 
     } catch (err: any) {
       setError(err.message || t('toast.error'));
-      showToast(err.message || t('toast.error'), 'error');
+      // O erro 'Email rate limit exceeded' será exibido aqui
+      showToast(err.error_description || err.message || t('toast.error'), 'error');
     } finally {
       setIsLoading(false);
     }
   };
 
    const handleGoogleLogin = async () => {
-    // FIX: In Supabase v2, `signInWithOAuth` is used for OAuth instead of `signIn`.
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
