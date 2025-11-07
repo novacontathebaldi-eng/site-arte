@@ -4,9 +4,10 @@ import { useTranslation } from '../hooks/useTranslation';
 import { ROUTES } from '../constants';
 import CartIcon from './CartIcon';
 import { useAuth } from '../hooks/useAuth';
-import { supabase } from '../lib/supabase';
 import { useToast } from '../hooks/useToast';
 import { MenuIcon, UserCircleIcon, XIcon } from './ui/icons';
+import { auth } from '../lib/firebase';
+import { signOut } from 'firebase/auth';
 
 // Menu do Usuário para Desktop
 const UserMenu: React.FC = () => {
@@ -18,12 +19,12 @@ const UserMenu: React.FC = () => {
     const navigate = useNavigate();
 
     const handleLogout = async () => {
-        const { error } = await supabase.auth.signOut();
-        if (error) {
-            showToast(t('toast.error'), 'error');
-        } else {
+        try {
+            await signOut(auth);
             showToast(t('toast.logoutSuccess'), 'info');
             navigate(ROUTES.HOME);
+        } catch (error) {
+            showToast(t('toast.error'), 'error');
         }
     };
     
@@ -89,7 +90,7 @@ const Header: React.FC = () => {
   }, []);
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    await signOut(auth);
     showToast(t('toast.logoutSuccess'), 'info');
     setIsMobileAuthOpen(false);
     navigate(ROUTES.HOME);

@@ -3,7 +3,6 @@ import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { useTranslation } from '../../hooks/useTranslation';
 import { ROUTES } from '../../constants';
-import { supabase } from '../../lib/supabase';
 import { useToast } from '../../hooks/useToast';
 import {
   OverviewIcon,
@@ -15,6 +14,8 @@ import {
   LogoutIcon,
   XIcon,
 } from '../../components/ui/icons';
+import { auth } from '../../lib/firebase';
+import { signOut, sendEmailVerification } from 'firebase/auth';
 
 // Este componente é o layout principal para toda a área do cliente.
 const DashboardLayout: React.FC = () => {
@@ -26,18 +27,15 @@ const DashboardLayout: React.FC = () => {
   const [isConfirmationBannerVisible, setIsConfirmationBannerVisible] = useState(true);
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    await signOut(auth);
     navigate(ROUTES.HOME);
   };
   
   const handleResendConfirmation = async () => {
-    if (!user?.email) return;
+    const firebaseUser = auth.currentUser;
+    if (!firebaseUser) return;
     try {
-        const { error } = await supabase.auth.resend({
-            type: 'signup',
-            email: user.email,
-        });
-        if (error) throw error;
+        await sendEmailVerification(firebaseUser);
         showToast(t('toast.confirmationSent'), 'success');
     } catch (error: any) {
         showToast(error.message || t('toast.error'), 'error');

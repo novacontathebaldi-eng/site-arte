@@ -5,6 +5,8 @@ import { supabase } from '../../lib/supabase';
 import { useToast } from '../../hooks/useToast';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
+import { auth } from '../../lib/firebase';
+import { updateProfile } from 'firebase/auth';
 
 const ProfilePage: React.FC = () => {
   const { user, refetchUser } = useAuth();
@@ -21,7 +23,7 @@ const ProfilePage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
+    if (!user || !auth.currentUser) return;
     
     setIsLoading(true);
     try {
@@ -33,9 +35,8 @@ const ProfilePage: React.FC = () => {
 
       if (profileError) throw profileError;
       
-      // Atualiza os metadados no Supabase Auth para consistência
-      const { error: userError } = await supabase.auth.updateUser({ data: { display_name: displayName } });
-      if (userError) throw userError;
+      // Atualiza o perfil no Firebase Auth para consistência
+      await updateProfile(auth.currentUser, { displayName });
 
       await refetchUser();
 

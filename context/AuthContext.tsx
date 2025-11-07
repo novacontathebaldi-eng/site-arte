@@ -1,6 +1,8 @@
 import React, { createContext, useCallback, useEffect, useState } from 'react';
-import { AuthChangeEvent, Session, User as SupabaseUser } from '@supabase/supabase-js';
+import { User as FirebaseUser, onAuthStateChanged } from 'firebase/auth';
+import { auth } from '../lib/firebase';
 import { supabase } from '../lib/supabase';
+import { syncUserToSupabase } from '../lib/syncUserToSupabase';
 import { AuthContextType, UserData, Profile, UserPreferences } from '../types';
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -9,58 +11,63 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchUserProfile = useCallback(async (supabaseUser: SupabaseUser): Promise<UserData> => {
+  const fetchAppUser = useCallback(async (firebaseUser: FirebaseUser): Promise<UserData | null> => {
     const { data: profile, error } = await supabase
       .from('profiles')
       .select('*')
-      .eq('id', supabaseUser.id)
+      .eq('id', firebaseUser.uid)
       .single();
-    
-    if (error && error.code !== 'PGRST116') { // PGRST116 means no rows found, which is ok for new users
-      console.warn('Could not fetch user profile.', error.message);
-      return { ...supabaseUser, profile: null };
+
+    if (error && error.code !== 'PGRST116') {
+      console.error('Error fetching Supabase profile:', error);
+      return null;
     }
 
-    return { ...supabaseUser, profile: profile as Profile };
+    const adaptedUser = {
+      id: firebaseUser.uid,
+      email: firebaseUser.email || undefined,
+      user_metadata: {
+        display_name: firebaseUser.displayName,
+        avatar_url: firebaseUser.photoURL,
+      },
+      created_at: firebaseUser.metadata.creationTime || new Date().toISOString(),
+      email_confirmed_at: firebaseUser.emailVerified ? new Date().toISOString() : undefined,
+    };
+    
+    return { ...adaptedUser, profile: profile as Profile } as UserData;
   }, []);
-  
-  const refetchUser = useCallback(async () => {
-      const { data: { user: supabaseUser } } = await supabase.auth.getUser();
-      if (supabaseUser) {
-        const userData = await fetchUserProfile(supabaseUser);
-        setUser(userData);
-      } else {
-        setUser(null);
-      }
-  }, [fetchUserProfile]);
 
+  const refetchUser = useCallback(async () => {
+    const firebaseUser = auth.currentUser;
+    if (firebaseUser) {
+        setLoading(true);
+        await firebaseUser.reload(); // Get latest user data from Firebase
+        const appUser = await fetchAppUser(firebaseUser);
+        setUser(appUser);
+        setLoading(false);
+    }
+  }, [fetchAppUser]);
 
   useEffect(() => {
-    setLoading(true);
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      if (session?.user) {
-        const userData = await fetchUserProfile(session.user);
-        setUser(userData);
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      setLoading(true);
+      if (firebaseUser) {
+        try {
+            await syncUserToSupabase(firebaseUser);
+            const appUser = await fetchAppUser(firebaseUser);
+            setUser(appUser);
+        } catch (e) {
+            console.error("Auth context setup failed:", e);
+            setUser(null);
+        }
+      } else {
+        setUser(null);
       }
       setLoading(false);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event: AuthChangeEvent, session: Session | null) => {
-        if (session?.user) {
-          const userData = await fetchUserProfile(session.user);
-          setUser(userData);
-        } else {
-          setUser(null);
-        }
-        setLoading(false);
-      }
-    );
-
-    return () => {
-      subscription?.unsubscribe();
-    };
-  }, [fetchUserProfile]);
+    return () => unsubscribe();
+  }, [fetchAppUser]);
 
   const updateUserPreferences = useCallback(async (preferences: Partial<UserPreferences>) => {
     if (!user) throw new Error("User not authenticated.");
