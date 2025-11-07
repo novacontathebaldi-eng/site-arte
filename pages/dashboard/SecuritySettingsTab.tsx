@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
+import { EmailAuthProvider, reauthenticateWithCredential, updatePassword } from 'firebase/auth';
 import { useTranslation } from '../../hooks/useTranslation';
 import { useToast } from '../../hooks/useToast';
-import { supabase } from '../../lib/supabase';
+import { auth } from '../../lib/firebase';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
 
 const SecuritySettingsTab: React.FC = () => {
   const { t } = useTranslation();
   const { showToast } = useToast();
+  const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -22,22 +24,25 @@ const SecuritySettingsTab: React.FC = () => {
       return;
     }
     
-     if (newPassword.length < 8) {
-      showToast("Password should be at least 8 characters.", 'error');
+    const user = auth.currentUser;
+    if (!user || !user.email) {
+      showToast(t('toast.error'), 'error');
       setIsLoading(false);
       return;
     }
 
     try {
-      const { error } = await supabase.auth.updateUser({ password: newPassword });
-      if (error) throw error;
+      const credential = EmailAuthProvider.credential(user.email, currentPassword);
+      await reauthenticateWithCredential(user, credential);
+      await updatePassword(user, newPassword);
       
       showToast(t('toast.passwordUpdated'), 'success');
+      setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
-    } catch (error: any) {
+    } catch (error) {
       console.error("Password change error:", error);
-      showToast(error.message || t('toast.error'), 'error');
+      showToast(t('toast.error'), 'error');
     } finally {
       setIsLoading(false);
     }
@@ -47,6 +52,14 @@ const SecuritySettingsTab: React.FC = () => {
     <div>
       <h2 className="text-xl font-bold text-text-primary mb-4">{t('dashboard.changePassword')}</h2>
       <form onSubmit={handlePasswordChange} className="space-y-4 max-w-lg">
+        <Input
+          id="currentPassword"
+          type="password"
+          label={t('dashboard.currentPassword')}
+          value={currentPassword}
+          onChange={(e) => setCurrentPassword(e.target.value)}
+          required
+        />
         <Input
           id="newPassword"
           type="password"

@@ -1,10 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { useTranslation } from '../../hooks/useTranslation';
 import { ROUTES } from '../../constants';
-import { supabase } from '../../lib/supabase';
-import { useToast } from '../../hooks/useToast';
+import { auth } from '../../lib/firebase';
 import {
   OverviewIcon,
   PackageIcon,
@@ -13,7 +12,6 @@ import {
   SettingsIcon,
   HeartIcon,
   LogoutIcon,
-  XIcon,
 } from '../../components/ui/icons';
 
 // Este componente é o layout principal para toda a área do cliente.
@@ -21,27 +19,10 @@ const DashboardLayout: React.FC = () => {
   const { user } = useAuth();
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { showToast } = useToast();
-
-  const [isConfirmationBannerVisible, setIsConfirmationBannerVisible] = useState(true);
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    await auth.signOut();
     navigate(ROUTES.HOME);
-  };
-  
-  const handleResendConfirmation = async () => {
-    if (!user?.email) return;
-    try {
-        const { error } = await supabase.auth.resend({
-            type: 'signup',
-            email: user.email,
-        });
-        if (error) throw error;
-        showToast(t('toast.confirmationSent'), 'success');
-    } catch (error: any) {
-        showToast(error.message || t('toast.error'), 'error');
-    }
   };
 
   const navItems = [
@@ -59,46 +40,22 @@ const DashboardLayout: React.FC = () => {
         ? 'bg-secondary text-white'
         : 'text-text-secondary hover:bg-surface hover:text-text-primary'
     }`;
-  
-  const displayName = user?.profile?.display_name || user?.email;
-  const photoURL = user?.profile?.photo_url || user?.user_metadata?.avatar_url;
-  const isEmailConfirmed = !!user?.email_confirmed_at;
 
   return (
     <div className="bg-surface min-h-screen">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Banner de Confirmação de E-mail */}
-        {!isEmailConfirmed && isConfirmationBannerVisible && (
-          <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-md shadow-md mb-6" role="alert">
-            <div className="flex">
-              <div className="py-1">
-                <svg className="fill-current h-6 w-6 text-yellow-500 mr-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M2.93 17.07A10 10 0 1 1 17.07 2.93 10 10 0 0 1 2.93 17.07zM9 5v6h2V5H9zm0 8v2h2v-2H9z"/></svg>
-              </div>
-              <div className="flex-grow">
-                <p className="font-bold">{t('dashboard.confirmEmailBannerTitle')}</p>
-                <p className="text-sm">{t('dashboard.confirmEmailBannerText')}</p>
-                <button onClick={handleResendConfirmation} className="mt-2 text-sm font-semibold text-yellow-800 hover:underline">
-                    {t('dashboard.resendConfirmation')}
-                </button>
-              </div>
-              <button onClick={() => setIsConfirmationBannerVisible(false)} className="ml-auto flex-shrink-0 p-1.5">
-                  <XIcon className="w-5 h-5"/>
-              </button>
-            </div>
-          </div>
-        )}
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Menu Lateral (Sidebar) */}
           <aside className="lg:w-1/4 xl:w-1/5 flex-shrink-0">
             <div className="bg-white p-6 rounded-lg shadow-md">
               <div className="flex items-center gap-4 mb-6 border-b pb-4">
                 <img
-                  src={photoURL || `https://ui-avatars.com/api/?name=${displayName}&background=D4AF37&color=2C2C2C&bold=true`}
+                  src={user?.photoURL || `https://ui-avatars.com/api/?name=${user?.displayName || user?.email}&background=D4AF37&color=2C2C2C&bold=true`}
                   alt="User Avatar"
                   className="w-16 h-16 rounded-full"
                 />
                 <div>
-                  <h2 className="font-bold text-lg text-text-primary truncate">{displayName}</h2>
+                  <h2 className="font-bold text-lg text-text-primary truncate">{user?.displayName}</h2>
                   <p className="text-sm text-text-secondary truncate">{user?.email}</p>
                 </div>
               </div>

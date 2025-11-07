@@ -1,13 +1,14 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { supabase } from '../lib/supabase';
+import { createUserWithEmailAndPassword, updateProfile, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { auth, db } from '../lib/firebase';
 import { useTranslation } from '../hooks/useTranslation';
 import { useToast } from '../hooks/useToast';
 import { ROUTES } from '../constants';
 import Input from '../components/ui/Input';
 import Button from '../components/ui/Button';
 import { GoogleIcon } from '../components/ui/icons';
-import { useAuth } from '../hooks/useAuth';
 
 const PasswordStrengthMeter: React.FC<{ password: string }> = ({ password }) => {
     const { t } = useTranslation();
@@ -36,71 +37,57 @@ const PasswordStrengthMeter: React.FC<{ password: string }> = ({ password }) => 
 
 
 const RegisterPage: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const navigate = useNavigate();
   const { showToast } = useToast();
-  const { user } = useAuth();
 
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  
-  useEffect(() => {
-    if (user) {
-      navigate(ROUTES.DASHBOARD, { replace: true });
-    }
-  }, [user, navigate]);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
     try {
-        const { error: signUpError } = await supabase.auth.signUp({
-            email,
-            password,
-            options: {
-                data: {
-                    display_name: fullName,
-                }
-            }
-        });
-        if (signUpError) throw signUpError;
-        
-        // Agora, faça login do usuário para criar uma sessão imediatamente
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      await updateProfile(userCredential.user, { displayName: fullName });
+      
+      // Cria o documento do usuário no Firestore
+      await setDoc(doc(db, 'users', userCredential.user.uid), {
+          uid: userCredential.user.uid,
+          displayName: fullName,
+          email: email,
+          role: 'customer',
+          language: language,
+          createdAt: serverTimestamp(),
+          preferences: {
+            orderUpdates: true,
+            promotions: false,
+            newArtworks: true,
+          }
+      });
 
-        if (signInError) {
-          // Mesmo que o login falhe (caso raro), o usuário foi criado.
-          // O usuário pode então fazer login manualmente.
-          console.error("Sign in after sign up failed:", signInError);
-        }
-
-        showToast(t('toast.registerSuccess'), 'info');
-        navigate(ROUTES.DASHBOARD);
-
+      showToast(t('toast.registerSuccess'), 'success');
+      navigate(ROUTES.DASHBOARD);
     } catch (err: any) {
-      setError(err.message || t('toast.error'));
-      // O erro 'Email rate limit exceeded' será exibido aqui
-      showToast(err.error_description || err.message || t('toast.error'), 'error');
+      // Aqui você pode adicionar tratamentos para erros específicos do Firebase
+      setError(t('toast.error'));
+      showToast(t('toast.error'), 'error');
     } finally {
       setIsLoading(false);
     }
   };
 
    const handleGoogleLogin = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: window.location.origin,
-      }
-    });
-     if (error) {
+    const provider = new GoogleAuthProvider();
+    try {
+        await signInWithPopup(auth, provider);
+        showToast(t('toast.loginSuccess'), 'success');
+        navigate(ROUTES.DASHBOARD);
+    } catch (err) {
         showToast(t('toast.error'), 'error');
     }
   };

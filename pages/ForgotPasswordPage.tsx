@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { supabase } from '../lib/supabase';
+import { sendPasswordResetEmail } from 'firebase/auth';
+import { auth } from '../lib/firebase';
 import { useTranslation } from '../hooks/useTranslation';
 import { useToast } from '../hooks/useToast';
 import { ROUTES } from '../constants';
@@ -18,13 +19,10 @@ const ForgotPasswordPage: React.FC = () => {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: `${window.location.origin}/`,
-      });
-      if (error) throw error;
+      await sendPasswordResetEmail(auth, email);
       showToast(t('toast.passwordResetSent'), 'success');
     } catch (err: any) {
-      showToast(err.message || t('toast.error'), 'error');
+      showToast(t('toast.error'), 'error');
     } finally {
       setIsLoading(false);
     }

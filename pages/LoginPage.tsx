@@ -1,59 +1,52 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { supabase } from '../lib/supabase';
+import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { auth } from '../lib/firebase';
 import { useTranslation } from '../hooks/useTranslation';
 import { useToast } from '../hooks/useToast';
 import { ROUTES } from '../constants';
 import Input from '../components/ui/Input';
 import Button from '../components/ui/Button';
 import { GoogleIcon } from '../components/ui/icons';
-import { useAuth } from '../hooks/useAuth';
 
 const LoginPage: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const { showToast } = useToast();
-  const { user } = useAuth();
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
+  // O `from` nos diz para qual página o usuário deve ir após o login.
+  // Se ele tentou ir para /checkout, o `from` será /checkout. Senão, vai para o dashboard.
   const from = location.state?.from?.pathname || ROUTES.DASHBOARD;
-
-  useEffect(() => {
-    if (user) {
-      navigate(from, { replace: true });
-    }
-  }, [user, navigate, from]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
     try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) throw error;
+      await signInWithEmailAndPassword(auth, email, password);
       showToast(t('toast.loginSuccess'), 'success');
       navigate(from, { replace: true });
     } catch (err: any) {
-      setError(t('toast.error'));
-      showToast(err.message || t('toast.error'), 'error');
+      setError(t('toast.error')); // Mensagem genérica por segurança
+      showToast(t('toast.error'), 'error');
     } finally {
       setIsLoading(false);
     }
   };
   
   const handleGoogleLogin = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: window.location.origin,
-      }
-    });
-    if (error) {
+    const provider = new GoogleAuthProvider();
+    try {
+        await signInWithPopup(auth, provider);
+        showToast(t('toast.loginSuccess'), 'success');
+        navigate(from, { replace: true });
+    } catch (err) {
         showToast(t('toast.error'), 'error');
     }
   };
