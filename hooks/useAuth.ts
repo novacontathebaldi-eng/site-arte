@@ -1,6 +1,5 @@
 import { useContext } from 'react';
-import { AuthContext } from '../context/AuthContext';
-import { AuthContextType } from '../types';
+import { AuthContext, AuthContextType } from '../context/AuthContext';
 
 // Hook customizado para acessar facilmente os dados de autenticação.
 export const useAuth = (): AuthContextType => {

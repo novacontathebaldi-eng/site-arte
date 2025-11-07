@@ -79,12 +79,16 @@ const CatalogPage: React.FC = () => {
     );
 
     const currentRefs = sectionRefs.current;
-    Object.values(currentRefs).forEach((ref) => {
+    // FIX: Explicitly type `ref` as HTMLElement | null to prevent TypeScript from inferring it as `unknown`.
+    // This resolves the error when calling observer.observe.
+    Object.values(currentRefs).forEach((ref: HTMLElement | null) => {
       if (ref) observer.observe(ref);
     });
 
     return () => {
-      Object.values(currentRefs).forEach((ref) => {
+      // FIX: Explicitly type `ref` as HTMLElement | null to prevent TypeScript from inferring it as `unknown`.
+      // This resolves the error when calling observer.unobserve.
+      Object.values(currentRefs).forEach((ref: HTMLElement | null) => {
         if (ref) observer.unobserve(ref);
       });
     };
