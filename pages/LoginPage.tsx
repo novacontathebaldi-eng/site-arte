@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
-import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+// FIX: Switched to Firebase v8 compat API to resolve module export errors.
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/auth';
 import { auth } from '../lib/firebase';
 import { syncUserToSupabase } from '../lib/syncUserToSupabase';
 import Button from '../components/ui/Button';
@@ -26,8 +28,9 @@ const LoginPage: React.FC = () => {
         setLoading(true);
 
         try {
-            const userCredential = await signInWithEmailAndPassword(auth, email, password);
-            await syncUserToSupabase(userCredential.user);
+            // FIX: Switched to Firebase v8 compat API `auth.signInWithEmailAndPassword()` to resolve module export errors.
+            const userCredential = await auth.signInWithEmailAndPassword(email, password);
+            await syncUserToSupabase(userCredential.user!);
             showToast(t('toast.loginSuccess'), 'success');
             navigate(from, { replace: true });
         } catch (error: any) {
@@ -38,10 +41,12 @@ const LoginPage: React.FC = () => {
     };
 
     const handleGoogleLogin = async () => {
-        const provider = new GoogleAuthProvider();
+        // FIX: Switched to Firebase v8 compat API `firebase.auth.GoogleAuthProvider()` to resolve module export errors.
+        const provider = new firebase.auth.GoogleAuthProvider();
         try {
-            const userCredential = await signInWithPopup(auth, provider);
-            await syncUserToSupabase(userCredential.user);
+            // FIX: Switched to Firebase v8 compat API `auth.signInWithPopup()` to resolve module export errors.
+            const userCredential = await auth.signInWithPopup(provider);
+            await syncUserToSupabase(userCredential.user!);
             showToast(t('toast.loginSuccess'), 'success');
             navigate(from, { replace: true });
         } catch (error: any) {

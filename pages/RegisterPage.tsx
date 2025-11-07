@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
-import { createUserWithEmailAndPassword, updateProfile, sendEmailVerification } from 'firebase/auth';
+// FIX: Removed modular imports from 'firebase/auth' which caused an error.
+// The v8 compatibility API is used instead.
 import { auth } from '../lib/firebase';
 import { syncUserToSupabase } from '../lib/syncUserToSupabase';
 import Button from '../components/ui/Button';
@@ -26,14 +27,17 @@ const RegisterPage: React.FC = () => {
         setLoading(true);
 
         try {
-            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            // FIX: Switched to Firebase v8 compat API `auth.createUserWithEmailAndPassword()` to resolve module export errors.
+            const userCredential = await auth.createUserWithEmailAndPassword(email, password);
             
-            await updateProfile(userCredential.user, {
+            // FIX: Switched to Firebase v8 compat API `user.updateProfile()` to resolve module export errors.
+            await userCredential.user!.updateProfile({
                 displayName: fullName
             });
 
             try {
-                await sendEmailVerification(userCredential.user);
+                // FIX: Switched to Firebase v8 compat API `user.sendEmailVerification()` to resolve module export errors.
+                await userCredential.user!.sendEmailVerification();
                 console.log('Verification email sent');
             } catch (emailError) {
                 console.error('Error sending verification email:', emailError);
@@ -43,7 +47,7 @@ const RegisterPage: React.FC = () => {
             // The user object from the credential might not be updated immediately after updateProfile
             // It's safer to construct the object for syncing manually
             const userToSync = { 
-                ...userCredential.user, 
+                ...userCredential.user!,
                 displayName: fullName 
             };
             await syncUserToSupabase(userToSync);

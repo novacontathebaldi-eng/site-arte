@@ -6,7 +6,8 @@ import { useToast } from '../../hooks/useToast';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
 import { auth } from '../../lib/firebase';
-import { updateProfile } from 'firebase/auth';
+// FIX: Removed modular import 'updateProfile' from 'firebase/auth' which caused an error.
+// The v8 compatibility API is used instead.
 
 const ProfilePage: React.FC = () => {
   const { user, refetchUser } = useAuth();
@@ -35,8 +36,9 @@ const ProfilePage: React.FC = () => {
 
       if (profileError) throw profileError;
       
+      // FIX: Switched to Firebase v8 compat API `auth.currentUser.updateProfile()` to resolve module export errors.
       // Atualiza o perfil no Firebase Auth para consistência
-      await updateProfile(auth.currentUser, { displayName });
+      await auth.currentUser.updateProfile({ displayName });
 
       await refetchUser();
 

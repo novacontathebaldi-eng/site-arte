@@ -1,24 +1,29 @@
 import { supabase } from './supabase';
-import { User } from 'firebase/auth';
+// FIX: Changed to Firebase v8 compat User type to resolve module export errors.
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/auth';
 
-export async function syncUserToSupabase(firebaseUser: User) {
-    const { uid, email, displayName, photoURL, emailVerified } = firebaseUser;
+export async function syncUserToSupabase(firebaseUser: firebase.User) {
+    const { uid, email, displayName, photoURL, emailVerified, phoneNumber } = firebaseUser;
 
-    const { error } = await supabase
+    const { data, error } = await supabase
         .from('profiles')
         .upsert({
             id: uid,
-            email: email || '',
-            display_name: displayName || '',
-            photo_url: photoURL || '',
-            // Supabase schema might expect email_verified, but the Firebase user object has emailVerified
-            // Let's assume the column is `email_verified` for now. The user didn't provide schema.
+            email: email,
             email_verified: emailVerified,
+            display_name: displayName || email?.split('@')[0] || 'User',
+            photo_url: photoURL,
+            phone: phoneNumber,
             updated_at: new Date().toISOString()
-        }, { onConflict: 'id' });
+        }, { onConflict: 'id' })
+        .select();
 
     if (error) {
         console.error('Error syncing user to Supabase:', error);
         throw error;
     }
+    
+    console.log('Profile synced successfully:', data);
+    return data?.[0] || null;
 }

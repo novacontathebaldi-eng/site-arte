@@ -1,5 +1,7 @@
 import React, { createContext, useCallback, useEffect, useState } from 'react';
-import { User as FirebaseUser, onAuthStateChanged } from 'firebase/auth';
+// FIX: Switched to Firebase v8 compat API to resolve module export errors.
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/auth';
 import { auth } from '../lib/firebase';
 import { supabase } from '../lib/supabase';
 import { syncUserToSupabase } from '../lib/syncUserToSupabase';
@@ -11,7 +13,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchAppUser = useCallback(async (firebaseUser: FirebaseUser): Promise<UserData | null> => {
+  const fetchAppUser = useCallback(async (firebaseUser: firebase.User): Promise<UserData | null> => {
     const { data: profile, error } = await supabase
       .from('profiles')
       .select('*')
@@ -49,9 +51,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [fetchAppUser]);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+    // FIX: Switched to Firebase v8 compat API `auth.onAuthStateChanged()` to resolve module export errors.
+    const unsubscribe = auth.onAuthStateChanged(async (firebaseUser) => {
       setLoading(true);
       if (firebaseUser) {
+        // ⚠️ Aviso opcional: email não verificado
+        // Mas o usuário PODE fazer login mesmo assim
+        if (!firebaseUser.emailVerified) {
+          console.warn('⚠️ Email não verificado. Considere verificar seu email.');
+        }
         try {
             await syncUserToSupabase(firebaseUser);
             const appUser = await fetchAppUser(firebaseUser);

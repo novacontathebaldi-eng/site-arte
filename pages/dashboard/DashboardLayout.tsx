@@ -15,7 +15,8 @@ import {
   XIcon,
 } from '../../components/ui/icons';
 import { auth } from '../../lib/firebase';
-import { signOut, sendEmailVerification } from 'firebase/auth';
+// FIX: Removed modular imports for 'signOut' and 'sendEmailVerification' from 'firebase/auth' which caused an error.
+// The v8 compatibility API is used instead.
 
 // Este componente é o layout principal para toda a área do cliente.
 const DashboardLayout: React.FC = () => {
@@ -27,7 +28,8 @@ const DashboardLayout: React.FC = () => {
   const [isConfirmationBannerVisible, setIsConfirmationBannerVisible] = useState(true);
 
   const handleLogout = async () => {
-    await signOut(auth);
+    // FIX: Switched to Firebase v8 compat API `auth.signOut()` to resolve module export errors.
+    await auth.signOut();
     navigate(ROUTES.HOME);
   };
   
@@ -35,7 +37,8 @@ const DashboardLayout: React.FC = () => {
     const firebaseUser = auth.currentUser;
     if (!firebaseUser) return;
     try {
-        await sendEmailVerification(firebaseUser);
+        // FIX: Switched to Firebase v8 compat API `firebaseUser.sendEmailVerification()` to resolve module export errors.
+        await firebaseUser.sendEmailVerification();
         showToast(t('toast.confirmationSent'), 'success');
     } catch (error: any) {
         showToast(error.message || t('toast.error'), 'error');

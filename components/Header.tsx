@@ -7,7 +7,8 @@ import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../hooks/useToast';
 import { MenuIcon, UserCircleIcon, XIcon } from './ui/icons';
 import { auth } from '../lib/firebase';
-import { signOut } from 'firebase/auth';
+// FIX: Removed modular import 'signOut' from 'firebase/auth' which caused an error.
+// The v8 compatibility API is used instead.
 
 // Menu do Usuário para Desktop
 const UserMenu: React.FC = () => {
@@ -20,7 +21,8 @@ const UserMenu: React.FC = () => {
 
     const handleLogout = async () => {
         try {
-            await signOut(auth);
+            // FIX: Switched to Firebase v8 compat API `auth.signOut()` to resolve module export errors.
+            await auth.signOut();
             showToast(t('toast.logoutSuccess'), 'info');
             navigate(ROUTES.HOME);
         } catch (error) {
@@ -90,7 +92,8 @@ const Header: React.FC = () => {
   }, []);
 
   const handleLogout = async () => {
-    await signOut(auth);
+    // FIX: Switched to Firebase v8 compat API `auth.signOut()` to resolve module export errors.
+    await auth.signOut();
     showToast(t('toast.logoutSuccess'), 'info');
     setIsMobileAuthOpen(false);
     navigate(ROUTES.HOME);

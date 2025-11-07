@@ -1,8 +1,9 @@
-// FIX: Added a triple-slash directive to include Vite's client types, which resolves the TypeScript error for `import.meta.env`.
+// FIX: Adds the Vite client types reference to resolve errors with `import.meta.env`.
 /// <reference types="vite/client" />
 
-import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
+// FIX: Changed to Firebase v8 compat imports to resolve module export errors.
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/auth';
 
 // As credenciais agora são lidas de forma segura a partir das variáveis de ambiente
 const firebaseConfig = {
@@ -19,5 +20,6 @@ if (!firebaseConfig.apiKey) {
   throw new Error("VITE_FIREBASE_API_KEY is not defined in the environment variables.");
 }
 
-const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
+// FIX: Changed to Firebase v8 compat initialization.
+const app = firebase.initializeApp(firebaseConfig);
+export const auth = firebase.auth();

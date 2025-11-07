@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { sendPasswordResetEmail } from 'firebase/auth';
+// FIX: Removed modular import 'sendPasswordResetEmail' from 'firebase/auth' which caused an error.
+// The v8 compatibility API is used instead.
 import { auth } from '../lib/firebase';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
@@ -19,7 +20,8 @@ const ForgotPasswordPage: React.FC = () => {
         setLoading(true);
 
         try {
-            await sendPasswordResetEmail(auth, email);
+            // FIX: Switched to Firebase v8 compat API `auth.sendPasswordResetEmail()` to resolve module export errors.
+            await auth.sendPasswordResetEmail(email);
             showToast(t('toast.passwordResetSent'), 'success');
         } catch (error: any) {
             showToast(error.message, 'error');

@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { useTranslation } from '../../hooks/useTranslation';
 import { useToast } from '../../hooks/useToast';
 import { auth } from '../../lib/firebase';
-import { updatePassword } from 'firebase/auth';
+// FIX: Removed modular import 'updatePassword' from 'firebase/auth' which caused an error.
+// The v8 compatibility API is used instead.
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
 
@@ -37,7 +38,8 @@ const SecuritySettingsTab: React.FC = () => {
     }
 
     try {
-      await updatePassword(user, newPassword);
+      // FIX: Switched to Firebase v8 compat API `user.updatePassword()` to resolve module export errors.
+      await user.updatePassword(newPassword);
       
       showToast(t('toast.passwordUpdated'), 'success');
       setNewPassword('');
