@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useTranslation } from '../hooks/useTranslation';
@@ -7,6 +7,7 @@ import { ROUTES } from '../constants';
 import Input from '../components/ui/Input';
 import Button from '../components/ui/Button';
 import { GoogleIcon } from '../components/ui/icons';
+import { useAuth } from '../hooks/useAuth';
 
 const PasswordStrengthMeter: React.FC<{ password: string }> = ({ password }) => {
     const { t } = useTranslation();
@@ -38,38 +39,55 @@ const RegisterPage: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { showToast } = useToast();
+  const { user } = useAuth();
 
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  
+  useEffect(() => {
+    if (user) {
+      navigate(ROUTES.DASHBOARD, { replace: true });
+    }
+  }, [user, navigate]);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
     try {
-        const { data, error } = await supabase.auth.signUp({
+        const { error: signUpError } = await supabase.auth.signUp({
             email,
             password,
             options: {
                 data: {
                     display_name: fullName,
-                },
-                 emailRedirectTo: window.location.origin,
+                }
             }
         });
-        if (error) throw error;
+        if (signUpError) throw signUpError;
+        
+        // Agora, faça login do usuário para criar uma sessão imediatamente
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
 
-        // Supabase automatically signs in the user after signUp.
-        // The onAuthStateChange listener in AuthContext will handle the session.
+        if (signInError) {
+          // Mesmo que o login falhe (caso raro), o usuário foi criado.
+          // O usuário pode então fazer login manualmente.
+          console.error("Sign in after sign up failed:", signInError);
+        }
+
         showToast(t('toast.registerSuccess'), 'info');
         navigate(ROUTES.DASHBOARD);
 
     } catch (err: any) {
       setError(err.message || t('toast.error'));
-      showToast(err.message || t('toast.error'), 'error');
+      // O erro 'Email rate limit exceeded' será exibido aqui
+      showToast(err.error_description || err.message || t('toast.error'), 'error');
     } finally {
       setIsLoading(false);
     }
@@ -78,9 +96,9 @@ const RegisterPage: React.FC = () => {
    const handleGoogleLogin = async () => {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-       options: {
+      options: {
         redirectTo: window.location.origin,
-      },
+      }
     });
      if (error) {
         showToast(t('toast.error'), 'error');

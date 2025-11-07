@@ -40,4 +40,11 @@ export const ROUTES = {
   DASHBOARD_SETTINGS: '/dashboard/settings',
   DASHBOARD_WISHLIST: '/dashboard/wishlist',
   ORDER_CONFIRMATION: '/order-confirmation',
+
+  // Admin Routes
+  ADMIN_DASHBOARD: '/admin',
+  ADMIN_PRODUCTS: '/admin/products',
+  ADMIN_PRODUCTS_NEW: '/admin/products/new',
+  ADMIN_PRODUCTS_EDIT: '/admin/products/edit/:productId',
+  ADMIN_ORDERS: '/admin/orders',
 };

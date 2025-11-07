@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from './useAuth';
 import { useToast } from './useToast';
@@ -16,7 +17,6 @@ export const useWishlist = () => {
         if (user) {
             try {
                 setLoading(true);
-                // FIX: Property 'uid' does not exist on type 'UserData'. Use 'user.id' instead.
                 const userWishlist = await apiGetWishlist(user.id);
                 setWishlist(userWishlist);
             } catch (error) {
@@ -38,7 +38,6 @@ export const useWishlist = () => {
         if (user) {
             try {
                 setWishlist(updatedWishlist); // Optimistic update
-                // FIX: Property 'uid' does not exist on type 'UserData'. Use 'user.id' instead.
                 await apiUpdateWishlist(user.id, updatedWishlist);
             } catch (error) {
                 console.error("Failed to update wishlist:", error);

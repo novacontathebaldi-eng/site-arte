@@ -1,7 +1,6 @@
 import React, { createContext, useState, useEffect, ReactNode, useCallback } from 'react';
-import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
-import { UserData, AuthContextType, Profile, UserPreferences } from '../types';
+import { UserData, AuthContextType, Profile, UserPreferences, User } from '../types';
 
 export const AuthContext = createContext<AuthContextType>({
     user: null,
@@ -30,20 +29,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }, []);
 
     useEffect(() => {
-        const getSession = async () => {
-            const { data: { session } } = await supabase.auth.getSession();
+        setLoading(true);
+        const { data: authListener } = supabase.auth.onAuthStateChange(async (_event, session) => {
             if (session?.user) {
-                const userData = await fetchUserProfile(session.user);
-                setUser(userData);
-            }
-            setLoading(false);
-        };
-
-        getSession();
-
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-            if (session?.user) {
-                const userData = await fetchUserProfile(session.user);
+                const userData = await fetchUserProfile(session.user as User);
                 setUser(userData);
             } else {
                 setUser(null);
@@ -51,14 +40,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             setLoading(false);
         });
 
-        return () => subscription.unsubscribe();
+        return () => authListener?.subscription.unsubscribe();
     }, [fetchUserProfile]);
     
     const refetchUser = useCallback(async () => {
         const { data: { user: supabaseUser } } = await supabase.auth.getUser();
         if (supabaseUser) {
             setLoading(true);
-            const userData = await fetchUserProfile(supabaseUser);
+            const userData = await fetchUserProfile(supabaseUser as User);
             setUser(userData);
             setLoading(false);
         }

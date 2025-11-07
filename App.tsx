@@ -29,6 +29,12 @@ import SettingsPage from './pages/dashboard/SettingsPage';
 import WishlistPage from './pages/dashboard/WishlistPage';
 import OrderDetailPage from './pages/dashboard/OrderDetailPage';
 import OrderConfirmationPage from './pages/OrderConfirmationPage';
+import AdminRoute from './components/AdminRoute';
+import AdminLayout from './pages/admin/AdminLayout';
+import AdminDashboardPage from './pages/admin/AdminDashboardPage';
+import ProductManagementPage from './pages/admin/ProductManagementPage';
+import OrderManagementPage from './pages/admin/OrderManagementPage';
+import ProductEditPage from './pages/admin/ProductEditPage';
 
 const App: React.FC = () => {
   return (
@@ -39,63 +45,70 @@ const App: React.FC = () => {
             <HashRouter>
               <div className="flex flex-col min-h-screen font-body bg-background text-text-primary">
                 <Toaster />
-                <Header />
-                <main className="flex-grow">
-                  <Routes>
-                    {/* Rotas Públicas */}
-                    <Route path={ROUTES.HOME} element={<HomePage />} />
-                    <Route path={ROUTES.CATALOG} element={<CatalogPage />} />
-                    <Route path={`${ROUTES.PRODUCT}/:slug`} element={<ProductDetailPage />} />
-                    <Route path={ROUTES.CART} element={<CartPage />} />
-                    <Route path={ROUTES.ABOUT} element={<AboutPage />} />
-                    <Route path={ROUTES.CONTACT} element={<ContactPage />} />
-                    <Route path={ROUTES.LOGIN} element={<LoginPage />} />
-                    <Route path={ROUTES.REGISTER} element={<RegisterPage />} />
-                    <Route path={ROUTES.FORGOT_PASSWORD} element={<ForgotPasswordPage />} />
-                    
-                    {/* Rotas Protegidas */}
-                    <Route 
-                      path={ROUTES.CHECKOUT} 
-                      element={
-                        <ProtectedRoute>
-                          <CheckoutPage />
-                        </ProtectedRoute>
-                      } 
-                    />
+                <Routes>
+                  {/* Rotas do Painel de Administração (renderizadas sem Header/Footer) */}
+                  <Route
+                    path="/admin/*"
+                    element={
+                      <AdminRoute>
+                        <Routes>
+                           <Route element={<AdminLayout />}>
+                              <Route index element={<AdminDashboardPage />} />
+                              <Route path="products" element={<ProductManagementPage />} />
+                              <Route path="products/new" element={<ProductEditPage />} />
+                              <Route path="products/edit/:productId" element={<ProductEditPage />} />
+                              <Route path="orders" element={<OrderManagementPage />} />
+                           </Route>
+                        </Routes>
+                      </AdminRoute>
+                    }
+                  />
 
-                    <Route 
-                      path={`${ROUTES.ORDER_CONFIRMATION}/:orderId`}
-                      element={
-                        <ProtectedRoute>
-                          <OrderConfirmationPage />
-                        </ProtectedRoute>
-                      }
-                    />
-                    
-                    {/* Layout do Dashboard com rotas aninhadas */}
-                    <Route 
-                      path={ROUTES.DASHBOARD}
-                      element={
-                        <ProtectedRoute>
-                          <DashboardLayout />
-                        </ProtectedRoute>
-                      }
-                    >
-                        {/* A rota "index" é a página padrão do dashboard */}
-                        <Route index element={<DashboardOverviewPage />} /> 
-                        <Route path="profile" element={<ProfilePage />} />
-                        <Route path="orders" element={<OrdersPage />} />
-                        <Route path="orders/:orderId" element={<OrderDetailPage />} />
-                        <Route path="addresses" element={<AddressesPage />} />
-                        <Route path="settings" element={<SettingsPage />} />
-                        <Route path="wishlist" element={<WishlistPage />} />
-                    </Route>
-
-                    {/* Rota para página não encontrada */}
-                    <Route path="*" element={<NotFoundPage />} />
-                  </Routes>
-                </main>
-                <Footer />
+                  {/* Rotas Públicas e do Cliente (com Header/Footer) */}
+                  <Route 
+                    path="/*"
+                    element={
+                      <>
+                        <Header />
+                        <main className="flex-grow">
+                           <Routes>
+                              <Route path={ROUTES.HOME} element={<HomePage />} />
+                              <Route path={ROUTES.CATALOG} element={<CatalogPage />} />
+                              <Route path={`${ROUTES.PRODUCT}/:slug`} element={<ProductDetailPage />} />
+                              <Route path={ROUTES.CART} element={<CartPage />} />
+                              <Route path={ROUTES.ABOUT} element={<AboutPage />} />
+                              <Route path={ROUTES.CONTACT} element={<ContactPage />} />
+                              <Route path={ROUTES.LOGIN} element={<LoginPage />} />
+                              <Route path={ROUTES.REGISTER} element={<RegisterPage />} />
+                              <Route path={ROUTES.FORGOT_PASSWORD} element={<ForgotPasswordPage />} />
+                              
+                              <Route 
+                                path={ROUTES.CHECKOUT} 
+                                element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} 
+                              />
+                              <Route 
+                                path={`${ROUTES.ORDER_CONFIRMATION}/:orderId`}
+                                element={<ProtectedRoute><OrderConfirmationPage /></ProtectedRoute>}
+                              />
+                              
+                              <Route path={ROUTES.DASHBOARD} element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
+                                  <Route index element={<DashboardOverviewPage />} /> 
+                                  <Route path="profile" element={<ProfilePage />} />
+                                  <Route path="orders" element={<OrdersPage />} />
+                                  <Route path="orders/:orderId" element={<OrderDetailPage />} />
+                                  <Route path="addresses" element={<AddressesPage />} />
+                                  <Route path="settings" element={<SettingsPage />} />
+                                  <Route path="wishlist" element={<WishlistPage />} />
+                              </Route>
+                              
+                              <Route path="*" element={<NotFoundPage />} />
+                           </Routes>
+                        </main>
+                        <Footer />
+                      </>
+                    }
+                  />
+                </Routes>
               </div>
             </HashRouter>
           </CartProvider>

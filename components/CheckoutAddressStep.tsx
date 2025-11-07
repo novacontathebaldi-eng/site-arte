@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from '../hooks/useTranslation';
 import { useAuth } from '../hooks/useAuth';
@@ -20,7 +21,6 @@ const CheckoutAddressStep: React.FC<CheckoutAddressStepProps> = ({ onAddressSele
   useEffect(() => {
     const fetchAddresses = async () => {
       if (user) {
-        // FIX: Property 'uid' does not exist on type 'UserData'. Use 'user.id' instead.
         const userAddresses = await getAddresses(user.id);
         setAddresses(userAddresses);
         const defaultAddress = userAddresses.find(a => a.isDefault);
@@ -36,7 +36,6 @@ const CheckoutAddressStep: React.FC<CheckoutAddressStepProps> = ({ onAddressSele
 
   const handleSaveNewAddress = async (addressData: Address) => {
     if (!user) return;
-    // FIX: Property 'uid' does not exist on type 'UserData'. Use 'user.id' instead.
     const newAddress = await addAddress(user.id, addressData);
     setAddresses(prev => [...prev, newAddress]);
     setSelectedAddressId(newAddress.id);

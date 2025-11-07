@@ -38,8 +38,8 @@ const ProductDetailPage: React.FC = () => {
         } else {
           setError(true);
         }
-      } catch (err) {
-        console.error("Failed to fetch product:", err);
+      } catch (err: any) {
+        console.error("Failed to fetch product:", err.message);
         setError(true);
       } finally {
         setIsLoading(false);

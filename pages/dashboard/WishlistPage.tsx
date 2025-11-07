@@ -23,8 +23,8 @@ const WishlistPage: React.FC = () => {
         const wishlistProductIds = new Set(wishlist.items.map(item => item.productId));
         const filteredProducts = allProducts.filter(p => wishlistProductIds.has(p.id));
         setWishlistProducts(filteredProducts);
-      } catch (error) {
-        console.error("Failed to fetch wishlist products:", error);
+      } catch (error: any) {
+        console.error("Failed to fetch wishlist products:", error.message);
       } finally {
         setIsLoading(false);
       }

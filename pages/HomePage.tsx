@@ -21,8 +21,8 @@ const HomePage: React.FC = () => {
         setIsLoading(true);
         const products = await getFeaturedProducts();
         setFeaturedProducts(products);
-      } catch (error) {
-        console.error("Failed to fetch featured products:", error);
+      } catch (error: any) {
+        console.error("Failed to fetch featured products:", error.message);
       } finally {
         setIsLoading(false);
       }

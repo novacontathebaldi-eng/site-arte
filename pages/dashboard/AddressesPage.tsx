@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from '../../hooks/useTranslation';
 import { useAuth } from '../../hooks/useAuth';
@@ -22,7 +23,6 @@ const AddressesPage: React.FC = () => {
     if (user) {
       try {
         setIsLoading(true);
-        // FIX: Property 'uid' does not exist on type 'UserData'. Use 'user.id' instead.
         const userAddresses = await getAddresses(user.id);
         setAddresses(userAddresses);
       } catch (error) {
@@ -52,11 +52,9 @@ const AddressesPage: React.FC = () => {
     if (!user) return;
     try {
       if (addressToEdit) {
-        // FIX: Property 'uid' does not exist on type 'UserData'. Use 'user.id' instead.
         await updateAddress(user.id, addressToEdit.id, addressData);
         showToast(t('toast.addressUpdated'), 'success');
       } else {
-        // FIX: Property 'uid' does not exist on type 'UserData'. Use 'user.id' instead.
         await addAddress(user.id, addressData);
         showToast(t('toast.addressAdded'), 'success');
       }
@@ -70,7 +68,6 @@ const AddressesPage: React.FC = () => {
   const handleDeleteAddress = async (addressId: string) => {
     if (!user || !window.confirm(t('dashboard.confirmDelete'))) return;
     try {
-      // FIX: Property 'uid' does not exist on type 'UserData'. Use 'user.id' instead.
       await deleteAddress(user.id, addressId);
       showToast(t('toast.addressDeleted'), 'info');
       fetchAddresses();
