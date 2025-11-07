@@ -10,11 +10,11 @@
     "postinstall": "patch-package"
   },
   "dependencies": {
-    "react-router-dom": "^7.9.5",
+    "@supabase/supabase-js": "^2.80.0",
+    "firebase": "^12.5.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "@supabase/supabase-js": "^2.80.0",
-    "firebase": "^12.5.0"
+    "react-router-dom": "^7.9.5"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
