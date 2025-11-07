@@ -9,7 +9,6 @@ import { XIcon } from '../components/ui/icons';
 import { useDebounce } from '../hooks/useDebounce';
 
 const CatalogPage: React.FC = () => {
-  // FIX: Destructure language from useTranslation to get the current language.
   const { t, language } = useTranslation();
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -48,7 +47,6 @@ const CatalogPage: React.FC = () => {
     // Filter by search query
     if (debouncedQuery) {
       result = result.filter(p =>
-        // FIX: Use 'language' from useTranslation hook instead of t.language
         p.translations[language].title
           .toLowerCase()
           .includes(debouncedQuery.toLowerCase())
@@ -80,7 +78,6 @@ const CatalogPage: React.FC = () => {
     }
 
     return result;
-    // FIX: Use 'language' in the dependency array instead of t.language
   }, [products, debouncedQuery, filters, sortOrder, language]);
 
   const categories = ['all', 'paintings', 'jewelry', 'digital', 'prints'];

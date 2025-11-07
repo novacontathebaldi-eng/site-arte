@@ -33,6 +33,7 @@ const ProfilePage: React.FC = () => {
 
       if (profileError) throw profileError;
       
+      // FIX: In Supabase v2, `updateUser` is used instead of `update`.
       // Atualiza os metadados no Supabase Auth para consistência
       const { error: userError } = await supabase.auth.updateUser({ data: { display_name: displayName } });
       if (userError) throw userError;

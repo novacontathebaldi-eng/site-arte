@@ -18,6 +18,7 @@ const ForgotPasswordPage: React.FC = () => {
     e.preventDefault();
     setIsLoading(true);
     try {
+      // FIX: In Supabase v1, `resetPasswordForEmail` is located under `auth.api`. In v2, it's directly under `auth`.
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
           redirectTo: `${window.location.origin}/`,
       });

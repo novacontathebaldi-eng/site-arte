@@ -29,6 +29,7 @@ const SecuritySettingsTab: React.FC = () => {
     }
 
     try {
+      // FIX: In Supabase v2, `updateUser` is used instead of `update`.
       const { error } = await supabase.auth.updateUser({ password: newPassword });
       if (error) throw error;
       

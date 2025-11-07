@@ -1,7 +1,19 @@
 // Este arquivo define a "forma" dos dados que usamos no site.
 // Pense nisso como um contrato: se um objeto é um "Produto", ele TEM que ter
 // as propriedades definidas aqui (id, sku, category, etc.). Isso ajuda a evitar erros.
-import { User } from '@supabase/supabase-js';
+// FIX: The `User` type is not exported in some versions of `@supabase/supabase-js`. 
+// Defining a custom User interface based on application-wide usage.
+export interface User {
+  id: string;
+  email?: string;
+  user_metadata: {
+    [key: string]: any;
+    display_name?: string;
+    avatar_url?: string;
+  };
+  created_at: string;
+  email_confirmed_at?: string;
+}
 
 // Idiomas suportados no site.
 export type Language = 'fr' | 'en' | 'de' | 'pt';
@@ -99,6 +111,7 @@ export interface Profile {
     id: string; // Corresponde ao user.id do Supabase Auth
     display_name: string | null;
     photo_url?: string | null;
+    phone?: string | null;
     role: 'customer' | 'admin';
     language: Language;
     updated_at: string;

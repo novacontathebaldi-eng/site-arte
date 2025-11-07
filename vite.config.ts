@@ -2,12 +2,10 @@
 import path from 'path';
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
-// FIX: __dirname is not available in ES modules. Import fileURLToPath to derive it.
 import { fileURLToPath } from 'url';
 
 export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, '.', '');
-    // FIX: Define __dirname for an ES module environment.
     const __dirname = path.dirname(fileURLToPath(import.meta.url));
     return {
       server: {
