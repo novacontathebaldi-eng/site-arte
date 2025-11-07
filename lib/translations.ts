@@ -148,7 +148,11 @@ export const translations = {
         commission: 'Demande de commande personnalisée',
         shipping: 'Question sur la livraison',
         general: 'Demande générale',
-      }
+      },
+      formSuccess: 'Message envoyé avec succès !',
+      attachFileLabel: 'Joindre un fichier (facultatif)',
+      chooseFileButton: 'Choisir un fichier',
+      fileUploadHint: 'Taille max : 10 Mo. Formats autorisés : jpg, png, gif.',
     },
     checkout: {
         title: 'Paiement',
@@ -453,7 +457,11 @@ export const translations = {
         commission: 'Commission inquiry',
         shipping: 'Shipping question',
         general: 'General inquiry',
-      }
+      },
+      formSuccess: 'Message sent successfully!',
+      attachFileLabel: 'Attach a file (optional)',
+      chooseFileButton: 'Choose File',
+      fileUploadHint: 'Max file size: 10MB. Allowed types: jpg, png, gif.',
     },
     checkout: {
         title: 'Checkout',
@@ -758,7 +766,11 @@ export const translations = {
         commission: 'Anfrage für Auftragsarbeit',
         shipping: 'Frage zum Versand',
         general: 'Allgemeine Anfrage',
-      }
+      },
+      formSuccess: 'Nachricht erfolgreich gesendet!',
+      attachFileLabel: 'Datei anhängen (optional)',
+      chooseFileButton: 'Datei auswählen',
+      fileUploadHint: 'Max. Dateigröße: 10MB. Erlaubte Typen: jpg, png, gif.',
     },
     checkout: {
         title: 'Kasse',
@@ -1063,7 +1075,11 @@ export const translations = {
         commission: 'Pedido de encomenda',
         shipping: 'Dúvida sobre o envio',
         general: 'Dúvida geral',
-      }
+      },
+      formSuccess: 'Mensagem enviada com sucesso!',
+      attachFileLabel: 'Anexar arquivo (opcional)',
+      chooseFileButton: 'Escolher arquivo',
+      fileUploadHint: 'Tamanho máx.: 10MB. Tipos permitidos: jpg, png, gif.',
     },
     checkout: {
         title: 'Finalizar Compra',
