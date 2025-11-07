@@ -58,7 +58,7 @@ const RegisterPage: React.FC = () => {
     setIsLoading(true);
     setError('');
     try {
-        const { data, error } = await supabase.auth.signUp({
+        const { error: signUpError } = await supabase.auth.signUp({
             email,
             password,
             options: {
@@ -68,11 +68,18 @@ const RegisterPage: React.FC = () => {
                  emailRedirectTo: window.location.origin,
             }
         });
-        if (error) throw error;
+        if (signUpError) throw signUpError;
 
-        // Supabase automatically signs in the user after signUp.
-        // The onAuthStateChange listener in AuthContext will handle the session.
+        // Efetua o login do usuário manualmente para criar a sessão
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+        });
+        if (signInError) throw signInError;
+
         showToast(t('toast.registerSuccess'), 'info');
+        // O listener onAuthStateChange irá capturar a sessão e o useEffect
+        // fará o redirecionamento. Navegamos aqui como um fallback.
         navigate(ROUTES.DASHBOARD);
 
     } catch (err: any) {

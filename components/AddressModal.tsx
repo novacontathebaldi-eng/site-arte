@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, ChangeEvent } from 'react';
 import { useTranslation } from '../hooks/useTranslation';
 import { Address, AddressWithId } from '../types';
@@ -58,7 +59,6 @@ const AddressModal: React.FC<AddressModalProps> = ({ isOpen, onClose, onSave, ad
         </h2>
         <form onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* FIX: Add id prop to all Input components */}
                 <Input id="recipientName" name="recipientName" label={t('dashboard.recipientName')} value={address.recipientName} onChange={handleChange} required />
                 <Input id="company" name="company" label={t('dashboard.company')} value={address.company || ''} onChange={handleChange} />
                 <Input id="addressLine1" name="addressLine1" label={t('dashboard.addressLine1')} value={address.addressLine1} onChange={handleChange} required className="md:col-span-2" />

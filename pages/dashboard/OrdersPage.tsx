@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from '../../hooks/useTranslation';
@@ -29,7 +30,6 @@ const OrdersPage: React.FC = () => {
             if (user) {
                 try {
                     setIsLoading(true);
-                    // FIX: Property 'uid' does not exist on type 'UserData'. Use 'user.id' instead.
                     const userOrders = await getOrdersByUserId(user.id);
                     setOrders(userOrders);
                 } catch (error) {

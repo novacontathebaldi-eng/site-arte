@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from '../../hooks/useTranslation';
 import { useAuth } from '../../hooks/useAuth';
@@ -36,7 +37,6 @@ const DashboardOverviewPage: React.FC = () => {
             if (user) {
                 try {
                     setIsLoading(true);
-                    // FIX: Property 'uid' does not exist on type 'UserData'. Use 'user.id' instead.
                     const [userStats, allOrders] = await Promise.all([
                         getUserDashboardStats(user.id),
                         getOrdersByUserId(user.id)
@@ -64,7 +64,6 @@ const DashboardOverviewPage: React.FC = () => {
     return (
         <div className="space-y-8">
             <h1 className="text-3xl font-bold text-primary">
-                {/* FIX: Property 'displayName' does not exist on type 'UserData'. Use 'user.profile.display_name' instead. */}
                 {t('dashboard.overviewTitle')} {user?.profile?.display_name || user?.email}!
             </h1>
 

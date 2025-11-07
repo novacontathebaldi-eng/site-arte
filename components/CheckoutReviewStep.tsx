@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from '../hooks/useTranslation';
@@ -31,7 +32,6 @@ const CheckoutReviewStep: React.FC<CheckoutReviewStepProps> = ({ selectedAddress
       if (!user) return;
       setIsPlacingOrder(true);
       try {
-          // FIX: Property 'uid' does not exist on type 'UserData'. Use 'user.id' instead.
           const { orderId } = await placeOrder(user.id, state.items, selectedAddress);
           clearCart();
           navigate(`${ROUTES.ORDER_CONFIRMATION}/${orderId}`);
