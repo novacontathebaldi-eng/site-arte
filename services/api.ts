@@ -1,5 +1,4 @@
-import { mockOrders, mockAddresses, mockWishlist } from '../lib/mockData';
-import { Product, Order, Address, AddressWithId, Wishlist, DashboardStats, CartItem, Language } from '../types';
+import { Order, Address, AddressWithId, Wishlist, DashboardStats, CartItem, Language, Product } from '../types';
 import { supabase } from '../lib/supabase';
 
 const API_DELAY = 500; // Atraso mantido para simular a latência da rede em algumas operações.
@@ -12,7 +11,7 @@ export const getProducts = async (): Promise<Product[]> => {
   const { data, error } = await supabase
     .from('products')
     .select('*')
-    .order('created_at', { ascending: false });
+    .order('createdAt', { ascending: false });
 
   if (error) {
     console.error("Error fetching products from Supabase:", error.message);
@@ -56,7 +55,7 @@ export const getFeaturedProducts = async (): Promise<Product[]> => {
         .from('products')
         .select('*')
         .eq('featured', true)
-        .order('created_at', { ascending: false });
+        .order('createdAt', { ascending: false });
 
     if (error) {
         console.error("Error fetching featured products:", error.message);
@@ -158,7 +157,8 @@ export const getOrdersByUserId = (userId: string): Promise<Order[]> => {
 };
 
 export const getOrderById = (orderId: string): Promise<Order | undefined> => {
-    return new Promise(resolve => resolve(mockOrders.find(o => o.id === orderId)));
+    // Temporariamente mockado
+    return new Promise(resolve => resolve(undefined));
 };
 
 export const getAddresses = (userId: string): Promise<AddressWithId[]> => {

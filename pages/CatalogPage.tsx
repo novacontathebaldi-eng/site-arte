@@ -159,9 +159,6 @@ const CatalogPage: React.FC = () => {
               <section
                 key={category}
                 id={category}
-                // FIX: Changed ref callback from an expression to a block statement.
-                // An assignment expression returns the assigned value, which is not allowed for a ref callback.
-                // Wrapping the assignment in curly braces ensures the function returns undefined.
                 ref={(el) => { if (el) sectionRefs.current[category] = el; }}
                 aria-labelledby={`${category}-heading`}
               >
