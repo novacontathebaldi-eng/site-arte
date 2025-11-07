@@ -1,6 +1,7 @@
 // Este arquivo define a "forma" dos dados que usamos no site.
 // Pense nisso como um contrato: se um objeto é um "Produto", ele TEM que ter
 // as propriedades definidas aqui (id, sku, category, etc.). Isso ajuda a evitar erros.
+import { User } from '@supabase/supabase-js';
 
 // Idiomas suportados no site.
 export type Language = 'fr' | 'en' | 'de' | 'pt';
@@ -49,15 +50,15 @@ export interface Product {
   slug: string;
   featured: boolean;
   views: number;
-  createdAt: string; // Usando string para simplificar, no Firebase seria um Timestamp
+  createdAt: string; // Usando string para simplificar
   updatedAt: string;
   publishedAt?: string | null;
 }
 
 // Tipos para os filtros do catálogo.
 export interface Filters {
+  query: string;
   category: string;
-  priceRange: [number, number];
   availability: string;
 }
 
@@ -93,17 +94,20 @@ export interface UserPreferences {
     newArtworks: boolean;
 }
 
-// Representa os dados do usuário que salvamos no Firestore.
-export interface UserData {
-    uid: string;
-    email: string | null;
-    displayName: string | null;
-    photoURL?: string | null;
+// Representa os dados do perfil do usuário na tabela 'profiles' do Supabase.
+export interface Profile {
+    id: string; // Corresponde ao user.id do Supabase Auth
+    display_name: string | null;
+    photo_url?: string | null;
     role: 'customer' | 'admin';
     language: Language;
-    createdAt: any; // Firestore Timestamp
+    updated_at: string;
     preferences: UserPreferences;
 }
+
+// Combina o usuário do Supabase Auth com o perfil do banco de dados.
+export type UserData = User & { profile: Profile | null };
+
 
 // Define o que o Contexto de Autenticação vai fornecer.
 export interface AuthContextType {
@@ -112,3 +116,90 @@ export interface AuthContextType {
     refetchUser: () => Promise<void>;
     updateUserPreferences: (preferences: Partial<UserPreferences>) => Promise<void>;
 }
+
+// --- TIPOS PARA PEDIDOS (ORDERS) ---
+
+export type OrderStatus = 'pending' | 'confirmed' | 'preparing' | 'shipped' | 'in-transit' | 'delivered' | 'cancelled' | 'refunded';
+export type PaymentStatus = 'pending' | 'paid' | 'failed' | 'refunded';
+
+export interface Address {
+    recipientName: string;
+    company?: string | null;
+    addressLine1: string;
+    addressLine2?: string | null;
+    city: string;
+    state?: string | null;
+    postalCode: string;
+    country: string;
+    phone: string;
+    isDefault: boolean;
+}
+
+export interface AddressWithId extends Address {
+    id: string;
+}
+
+
+export interface OrderItem {
+    productId: string;
+    productSnapshot: {
+        title: string;
+        image: string;
+        price: number;
+    };
+    quantity: number;
+    price: number;
+    subtotal: number;
+}
+
+export interface Order {
+    id: string;
+    orderNumber: string;
+    userId: string;
+    status: OrderStatus;
+    items: OrderItem[];
+    pricing: {
+        subtotal: number;
+        shipping: number;
+        discount: number;
+        tax: number;
+        total: number;
+    };
+    shippingAddress: Address;
+    paymentMethod: {
+        type: 'card' | 'paypal' | 'pix';
+        last4?: string | null;
+        brand?: string | null;
+    };
+    paymentStatus: PaymentStatus;
+    statusHistory: {
+        status: OrderStatus;
+        timestamp: string;
+        note?: string | null;
+    }[];
+    createdAt: string;
+    updatedAt: string;
+    estimatedDelivery?: string | null;
+}
+
+// --- TIPOS PARA WISHLIST ---
+
+export interface WishlistItem {
+    productId: string;
+    addedAt: string;
+}
+
+export interface Wishlist {
+    userId: string;
+    items: WishlistItem[];
+}
+
+// --- TIPOS PARA DASHBOARD ---
+export interface DashboardStats {
+    totalOrders: number;
+    totalSpent: number;
+    wishlistCount: number;
+}
+
+// --- TIPOS PARA CHECKOUT ---
+export type CheckoutStep = 'address' | 'payment' | 'review';

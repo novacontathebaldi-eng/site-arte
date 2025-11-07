@@ -7,6 +7,8 @@ import { ProductDetailSkeleton } from '../components/SkeletonLoader';
 import NotFoundPage from './NotFoundPage';
 import { useCart } from '../hooks/useCart';
 import { useToast } from '../hooks/useToast';
+import { useWishlist } from '../hooks/useWishlist';
+import { HeartIcon, HeartSolidIcon } from '../components/ui/icons';
 
 // Esta é a Página de Detalhes do Produto. Ela mostra todas as informações de uma única obra.
 const ProductDetailPage: React.FC = () => {
@@ -14,6 +16,8 @@ const ProductDetailPage: React.FC = () => {
   const { language, t } = useTranslation();
   const { addItem } = useCart();
   const { showToast } = useToast();
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+
 
   const [product, setProduct] = useState<Product | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -62,6 +66,15 @@ const ProductDetailPage: React.FC = () => {
     setTimeout(() => setIsAdded(false), 2000); // Reseta o estado do botão após 2 segundos
   };
 
+  const handleWishlistToggle = () => {
+    if (!product) return;
+    if (isInWishlist(product.id)) {
+        removeFromWishlist(product.id);
+    } else {
+        addToWishlist(product.id);
+    }
+  };
+
   // Se estiver carregando, mostra o esqueleto.
   if (isLoading) {
     return <ProductDetailSkeleton />;
@@ -85,6 +98,7 @@ const ProductDetailPage: React.FC = () => {
   };
 
   const isAddToCartDisabled = product.status !== 'available' || isAdded;
+  const isProductInWishlist = isInWishlist(product.id);
 
   return (
     <div className="bg-white">
@@ -122,24 +136,37 @@ const ProductDetailPage: React.FC = () => {
               <li><strong>{t('product.dimensions')}:</strong> {product.dimensions.height} x {product.dimensions.width} {product.dimensions.depth ? `x ${product.dimensions.depth}` : ''} cm</li>
             </ul>
 
-            {product.status === 'available' && (
-              <div className="mt-8 flex items-center gap-4">
-                 {product.stock > 1 && (
-                    <div className="flex items-center border rounded-lg">
-                        <button onClick={() => setQuantity(q => Math.max(1, q - 1))} className="px-4 py-3 h-full">-</button>
-                        <input type="number" value={quantity} readOnly className="w-12 text-center border-l border-r" />
-                        <button onClick={() => setQuantity(q => Math.min(product.stock, q + 1))} className="px-4 py-3 h-full">+</button>
-                    </div>
+            <div className="mt-8 flex items-center gap-4">
+                {product.status === 'available' && (
+                  <>
+                    {product.stock > 1 && (
+                        <div className="flex items-center border rounded-lg">
+                            <button onClick={() => setQuantity(q => Math.max(1, q - 1))} className="px-4 py-3 h-full">-</button>
+                            <input type="number" value={quantity} readOnly className="w-12 text-center border-l border-r" />
+                            <button onClick={() => setQuantity(q => Math.min(product.stock, q + 1))} className="px-4 py-3 h-full">+</button>
+                        </div>
+                    )}
+                    <button 
+                      onClick={handleAddToCart}
+                      disabled={isAddToCartDisabled}
+                      className={`w-full bg-primary text-white font-bold py-3 px-8 rounded-lg text-lg transition-all duration-300 ${isAddToCartDisabled ? 'bg-gray-400 cursor-not-allowed' : 'hover:bg-opacity-80'}`}
+                    >
+                      {isAdded ? t('product.addedToCart') : t('product.addToCart')}
+                    </button>
+                  </>
                 )}
                 <button 
-                  onClick={handleAddToCart}
-                  disabled={isAddToCartDisabled}
-                  className={`w-full bg-primary text-white font-bold py-3 px-8 rounded-lg text-lg transition-all duration-300 ${isAddToCartDisabled ? 'bg-gray-400 cursor-not-allowed' : 'hover:bg-opacity-80'}`}
+                  onClick={handleWishlistToggle}
+                  className="p-3 border rounded-lg hover:bg-surface transition-colors"
+                  aria-label={isProductInWishlist ? t('product.removeFromWishlist') : t('product.addToWishlist')}
                 >
-                  {isAdded ? t('product.addedToCart') : t('product.addToCart')}
+                    {isProductInWishlist ? (
+                        <HeartSolidIcon className="w-6 h-6 text-red-500"/>
+                    ) : (
+                        <HeartIcon className="w-6 h-6 text-text-secondary"/>
+                    )}
                 </button>
-              </div>
-            )}
+            </div>
           </div>
         </div>
       </div>

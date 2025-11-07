@@ -1,22 +1,27 @@
-
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useTranslation } from '../hooks/useTranslation';
-import { Product } from '../types';
+import { Product, Filters } from '../types';
 import { getProducts } from '../services/api';
 import ProductCard from '../components/ProductCard';
 import { ProductGridSkeleton } from '../components/SkeletonLoader';
+import { XIcon } from '../components/ui/icons';
+import { useDebounce } from '../hooks/useDebounce';
 
-// Esta é a página do Catálogo, onde todas as obras de arte são listadas.
 const CatalogPage: React.FC = () => {
-  const { t } = useTranslation();
+  // FIX: Destructure language from useTranslation to get the current language.
+  const { t, language } = useTranslation();
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  
-  // Estados para os filtros e ordenação
-  const [categoryFilter, setCategoryFilter] = useState<string>('all');
+
+  const [filters, setFilters] = useState<Filters>({
+    query: '',
+    category: 'all',
+    availability: 'all',
+  });
+  const debouncedQuery = useDebounce(filters.query, 300);
+
   const [sortOrder, setSortOrder] = useState<string>('newest');
 
-  // Busca todos os produtos quando a página carrega.
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -32,18 +37,34 @@ const CatalogPage: React.FC = () => {
     fetchProducts();
   }, []);
 
-  // useMemo é usado aqui para otimização. O código dentro dele só será
-  // executado novamente se `products`, `categoryFilter` ou `sortOrder` mudarem.
-  // Ele filtra e ordena a lista de produtos sem precisar buscar os dados novamente.
+  const handleFilterChange = (filterName: keyof Filters, value: string) => {
+    setFilters(prev => ({ ...prev, [filterName]: value }));
+  };
+
   const filteredAndSortedProducts = useMemo(() => {
     let result = [...products];
 
-    // 1. Filtragem por categoria
-    if (categoryFilter !== 'all') {
-      result = result.filter(p => p.category === categoryFilter);
+    // Filter by search query
+    if (debouncedQuery) {
+      result = result.filter(p =>
+        // FIX: Use 'language' from useTranslation hook instead of t.language
+        p.translations[language].title
+          .toLowerCase()
+          .includes(debouncedQuery.toLowerCase())
+      );
     }
 
-    // 2. Ordenação
+    // Filter by category
+    if (filters.category !== 'all') {
+      result = result.filter(p => p.category === filters.category);
+    }
+    
+    // Filter by availability
+    if (filters.availability !== 'all') {
+        result = result.filter(p => p.status === filters.availability);
+    }
+
+    // Sorting
     switch (sortOrder) {
       case 'priceLowHigh':
         result.sort((a, b) => a.price.amount - b.price.amount);
@@ -58,48 +79,76 @@ const CatalogPage: React.FC = () => {
     }
 
     return result;
-  }, [products, categoryFilter, sortOrder]);
-  
+    // FIX: Use 'language' in the dependency array instead of t.language
+  }, [products, debouncedQuery, filters, sortOrder, language]);
+
   const categories = ['all', 'paintings', 'jewelry', 'digital', 'prints'];
+  const availabilities = ['all', 'available', 'sold', 'madeToOrder'];
 
   return (
     <div className="bg-white">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <h1 className="text-4xl md:text-5xl font-heading font-bold text-center mb-4">{t('catalog.title')}</h1>
-        <p className="text-center text-text-secondary mb-12">{filteredAndSortedProducts.length} {t('catalog.resultsFound')}</p>
-
-        <div className="flex flex-col md:flex-row gap-8">
-          {/* Barra lateral de filtros */}
-          <aside className="w-full md:w-1/4 lg:w-1/5">
-            <h2 className="text-xl font-bold mb-4">{t('catalog.filters')}</h2>
-            <div>
-              <h3 className="font-semibold mb-2">{t('catalog.category')}</h3>
-              <ul className="space-y-1">
-                {categories.map(cat => (
-                  <li key={cat}>
-                    <button 
-                      onClick={() => setCategoryFilter(cat)}
-                      className={`w-full text-left p-2 rounded-md transition-colors ${categoryFilter === cat ? 'bg-secondary text-white' : 'hover:bg-surface'}`}
-                    >
-                      {t(`catalog.${cat}`)}
-                    </button>
-                  </li>
-                ))}
-              </ul>
+        <h1 className="text-4xl md:text-5xl font-heading font-bold text-center mb-12">{t('catalog.title')}</h1>
+        
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Filters Sidebar */}
+          <aside className="w-full lg:w-1/4 xl:w-1/5">
+            <div className="space-y-6">
+               <input
+                type="text"
+                placeholder={t('catalog.searchPlaceholder')}
+                value={filters.query}
+                onChange={(e) => handleFilterChange('query', e.target.value)}
+                className="w-full p-2 border rounded-md"
+              />
+              <div>
+                <h3 className="font-semibold mb-2">{t('catalog.category')}</h3>
+                <ul className="space-y-1">
+                  {categories.map(cat => (
+                    <li key={cat}>
+                      <button 
+                        onClick={() => handleFilterChange('category', cat)}
+                        className={`w-full text-left p-2 rounded-md transition-colors ${filters.category === cat ? 'bg-secondary text-white' : 'hover:bg-surface'}`}
+                      >
+                        {t(`catalog.${cat}`)}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+               <div>
+                  <h3 className="font-semibold mb-2">{t('catalog.availability')}</h3>
+                   {availabilities.map(avail => (
+                       <label key={avail} className="flex items-center space-x-2">
+                           <input type="radio" name="availability" value={avail} checked={filters.availability === avail} onChange={(e) => handleFilterChange('availability', e.target.value)} />
+                           <span>{t(avail === 'all' ? 'catalog.all' : `product.${avail}`)}</span>
+                       </label>
+                   ))}
+              </div>
             </div>
           </aside>
           
-          {/* Conteúdo principal: grade de produtos */}
-          <main className="w-full md:w-3/4 lg:w-4/5">
-            <div className="flex justify-end mb-4">
-              <div className="flex items-center space-x-2">
+          {/* Main Content */}
+          <main className="w-full lg:w-3/4 xl:w-4/5">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
+               <div className="flex-grow flex items-center gap-2 flex-wrap mb-4 sm:mb-0">
+                    <span className="font-semibold text-sm">{filteredAndSortedProducts.length} {t('catalog.resultsFound')}</span>
+                    {filters.category !== 'all' && (
+                        <span className="bg-gray-200 text-xs font-semibold px-2 py-1 rounded-full flex items-center gap-1">
+                            {t(`catalog.${filters.category}`)}
+                            <button onClick={() => handleFilterChange('category', 'all')}><XIcon className="w-3 h-3"/></button>
+                        </span>
+                    )}
+                    {filters.availability !== 'all' && (
+                         <span className="bg-gray-200 text-xs font-semibold px-2 py-1 rounded-full flex items-center gap-1">
+                            {t(`product.${filters.availability}`)}
+                            <button onClick={() => handleFilterChange('availability', 'all')}><XIcon className="w-3 h-3"/></button>
+                        </span>
+                    )}
+               </div>
+              <div className="flex items-center space-x-2 flex-shrink-0">
                 <label htmlFor="sort" className="text-sm">{t('catalog.sortBy')}:</label>
-                <select 
-                  id="sort"
-                  value={sortOrder}
-                  onChange={(e) => setSortOrder(e.target.value)}
-                  className="p-2 border rounded-md"
-                >
+                <select id="sort" value={sortOrder} onChange={(e) => setSortOrder(e.target.value)} className="p-2 border rounded-md">
                   <option value="newest">{t('catalog.newest')}</option>
                   <option value="priceLowHigh">{t('catalog.priceLowHigh')}</option>
                   <option value="priceHighLow">{t('catalog.priceHighLow')}</option>
@@ -120,6 +169,7 @@ const CatalogPage: React.FC = () => {
                 <p className="text-lg text-text-secondary">{t('catalog.noResults')}</p>
               </div>
             )}
+            {/* Pagination will be added here */}
           </main>
         </div>
       </div>

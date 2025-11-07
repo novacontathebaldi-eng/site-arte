@@ -1,8 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { createUserWithEmailAndPassword, updateProfile, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
-import { auth, db } from '../lib/firebase';
+import { supabase } from '../lib/supabase';
 import { useTranslation } from '../hooks/useTranslation';
 import { useToast } from '../hooks/useToast';
 import { ROUTES } from '../constants';
@@ -37,7 +35,7 @@ const PasswordStrengthMeter: React.FC<{ password: string }> = ({ password }) => 
 
 
 const RegisterPage: React.FC = () => {
-  const { t, language } = useTranslation();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { showToast } = useToast();
 
@@ -52,42 +50,39 @@ const RegisterPage: React.FC = () => {
     setIsLoading(true);
     setError('');
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      await updateProfile(userCredential.user, { displayName: fullName });
-      
-      // Cria o documento do usuário no Firestore
-      await setDoc(doc(db, 'users', userCredential.user.uid), {
-          uid: userCredential.user.uid,
-          displayName: fullName,
-          email: email,
-          role: 'customer',
-          language: language,
-          createdAt: serverTimestamp(),
-          preferences: {
-            orderUpdates: true,
-            promotions: false,
-            newArtworks: true,
-          }
-      });
+        const { data, error } = await supabase.auth.signUp({
+            email,
+            password,
+            options: {
+                data: {
+                    display_name: fullName,
+                },
+                 emailRedirectTo: window.location.origin,
+            }
+        });
+        if (error) throw error;
 
-      showToast(t('toast.registerSuccess'), 'success');
-      navigate(ROUTES.DASHBOARD);
+        // Supabase automatically signs in the user after signUp.
+        // The onAuthStateChange listener in AuthContext will handle the session.
+        showToast(t('toast.registerSuccess'), 'info');
+        navigate(ROUTES.DASHBOARD);
+
     } catch (err: any) {
-      // Aqui você pode adicionar tratamentos para erros específicos do Firebase
-      setError(t('toast.error'));
-      showToast(t('toast.error'), 'error');
+      setError(err.message || t('toast.error'));
+      showToast(err.message || t('toast.error'), 'error');
     } finally {
       setIsLoading(false);
     }
   };
 
    const handleGoogleLogin = async () => {
-    const provider = new GoogleAuthProvider();
-    try {
-        await signInWithPopup(auth, provider);
-        showToast(t('toast.loginSuccess'), 'success');
-        navigate(ROUTES.DASHBOARD);
-    } catch (err) {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+       options: {
+        redirectTo: window.location.origin,
+      },
+    });
+     if (error) {
         showToast(t('toast.error'), 'error');
     }
   };

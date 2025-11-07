@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { doc, updateDoc } from 'firebase/firestore';
-import { updateProfile } from 'firebase/auth';
 import { useAuth } from '../../hooks/useAuth';
 import { useTranslation } from '../../hooks/useTranslation';
-import { db, auth } from '../../lib/firebase';
+import { supabase } from '../../lib/supabase';
 import { useToast } from '../../hooks/useToast';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
@@ -13,40 +11,44 @@ const ProfilePage: React.FC = () => {
   const { t } = useTranslation();
   const { showToast } = useToast();
 
-  const [displayName, setDisplayName] = useState(user?.displayName || '');
+  const [displayName, setDisplayName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    // Atualiza o formulário se os dados do usuário mudarem no contexto
-    setDisplayName(user?.displayName || '');
+    // Tenta pegar o display_name do perfil, senão do user_metadata, senão vazio
+    setDisplayName(user?.profile?.display_name || user?.user_metadata?.display_name || '');
   }, [user]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user || !auth.currentUser) return;
+    if (!user) return;
     
     setIsLoading(true);
     try {
-      // Atualiza o perfil no Firebase Auth
-      await updateProfile(auth.currentUser, { displayName });
+      // Atualiza a tabela 'profiles' no Supabase
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({ display_name: displayName, updated_at: new Date().toISOString() })
+        .eq('id', user.id);
+
+      if (profileError) throw profileError;
       
-      // Atualiza o documento no Firestore
-      const userRef = doc(db, 'users', user.uid);
-      await updateDoc(userRef, { displayName });
-      
-      // Força a recarga dos dados do usuário no contexto
+      // Atualiza os metadados no Supabase Auth para consistência
+      const { error: userError } = await supabase.auth.updateUser({ data: { display_name: displayName } });
+      if (userError) throw userError;
+
       await refetchUser();
 
       showToast(t('toast.profileUpdated'), 'success');
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating profile: ", error);
-      showToast(t('toast.error'), 'error');
+      showToast(error.message || t('toast.error'), 'error');
     } finally {
       setIsLoading(false);
     }
   };
-
-  const creationDate = user?.createdAt?.toDate ? new Date(user.createdAt.toDate()).toLocaleDateString() : 'N/A';
+  
+  const creationDate = user?.created_at ? new Date(user.created_at).toLocaleDateString() : 'N/A';
 
   return (
     <div className="bg-white p-8 rounded-lg shadow-md">
@@ -75,7 +77,7 @@ const ProfilePage: React.FC = () => {
         <div className="border-t pt-6">
             <h2 className="text-lg font-semibold mb-4">{t('dashboard.accountInfo')}</h2>
             <p className="text-sm text-text-secondary">{t('dashboard.memberSince')}: {creationDate}</p>
-            <p className="text-sm text-text-secondary">{t('dashboard.emailVerified')}: {auth.currentUser?.emailVerified ? t('dashboard.yes') : t('dashboard.no')}</p>
+            <p className="text-sm text-text-secondary">{t('dashboard.emailVerified')}: {user?.email_confirmed_at ? t('dashboard.yes') : t('dashboard.no')}</p>
         </div>
 
         <div className="flex justify-end">

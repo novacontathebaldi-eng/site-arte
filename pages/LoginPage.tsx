@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
-import { auth } from '../lib/firebase';
+import { supabase } from '../lib/supabase';
 import { useTranslation } from '../hooks/useTranslation';
 import { useToast } from '../hooks/useToast';
 import { ROUTES } from '../constants';
@@ -20,8 +19,6 @@ const LoginPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // O `from` nos diz para qual página o usuário deve ir após o login.
-  // Se ele tentou ir para /checkout, o `from` será /checkout. Senão, vai para o dashboard.
   const from = location.state?.from?.pathname || ROUTES.DASHBOARD;
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -29,24 +26,26 @@ const LoginPage: React.FC = () => {
     setIsLoading(true);
     setError('');
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
       showToast(t('toast.loginSuccess'), 'success');
       navigate(from, { replace: true });
     } catch (err: any) {
-      setError(t('toast.error')); // Mensagem genérica por segurança
-      showToast(t('toast.error'), 'error');
+      setError(t('toast.error'));
+      showToast(err.message || t('toast.error'), 'error');
     } finally {
       setIsLoading(false);
     }
   };
   
   const handleGoogleLogin = async () => {
-    const provider = new GoogleAuthProvider();
-    try {
-        await signInWithPopup(auth, provider);
-        showToast(t('toast.loginSuccess'), 'success');
-        navigate(from, { replace: true });
-    } catch (err) {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: window.location.origin,
+      },
+    });
+    if (error) {
         showToast(t('toast.error'), 'error');
     }
   };
