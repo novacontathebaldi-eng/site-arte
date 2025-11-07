@@ -3,6 +3,7 @@ import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { useTranslation } from '../../hooks/useTranslation';
 import { ROUTES } from '../../constants';
+import { supabase } from '../../lib/supabase';
 import { useToast } from '../../hooks/useToast';
 import {
   OverviewIcon,
@@ -14,9 +15,6 @@ import {
   LogoutIcon,
   XIcon,
 } from '../../components/ui/icons';
-import { auth } from '../../lib/firebase';
-// FIX: Removed modular imports for 'signOut' and 'sendEmailVerification' from 'firebase/auth' which caused an error.
-// The v8 compatibility API is used instead.
 
 // Este componente é o layout principal para toda a área do cliente.
 const DashboardLayout: React.FC = () => {
@@ -28,17 +26,18 @@ const DashboardLayout: React.FC = () => {
   const [isConfirmationBannerVisible, setIsConfirmationBannerVisible] = useState(true);
 
   const handleLogout = async () => {
-    // FIX: Switched to Firebase v8 compat API `auth.signOut()` to resolve module export errors.
-    await auth.signOut();
+    await supabase.auth.signOut();
     navigate(ROUTES.HOME);
   };
   
   const handleResendConfirmation = async () => {
-    const firebaseUser = auth.currentUser;
-    if (!firebaseUser) return;
+    if (!user?.email) return;
     try {
-        // FIX: Switched to Firebase v8 compat API `firebaseUser.sendEmailVerification()` to resolve module export errors.
-        await firebaseUser.sendEmailVerification();
+        const { error } = await supabase.auth.resend({
+            type: 'signup',
+            email: user.email,
+        });
+        if (error) throw error;
         showToast(t('toast.confirmationSent'), 'success');
     } catch (error: any) {
         showToast(error.message || t('toast.error'), 'error');

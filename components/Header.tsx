@@ -4,11 +4,9 @@ import { useTranslation } from '../hooks/useTranslation';
 import { ROUTES } from '../constants';
 import CartIcon from './CartIcon';
 import { useAuth } from '../hooks/useAuth';
+import { supabase } from '../lib/supabase';
 import { useToast } from '../hooks/useToast';
 import { MenuIcon, UserCircleIcon, XIcon } from './ui/icons';
-import { auth } from '../lib/firebase';
-// FIX: Removed modular import 'signOut' from 'firebase/auth' which caused an error.
-// The v8 compatibility API is used instead.
 
 // Menu do Usuário para Desktop
 const UserMenu: React.FC = () => {
@@ -20,13 +18,12 @@ const UserMenu: React.FC = () => {
     const navigate = useNavigate();
 
     const handleLogout = async () => {
-        try {
-            // FIX: Switched to Firebase v8 compat API `auth.signOut()` to resolve module export errors.
-            await auth.signOut();
+        const { error } = await supabase.auth.signOut();
+        if (error) {
+            showToast(t('toast.error'), 'error');
+        } else {
             showToast(t('toast.logoutSuccess'), 'info');
             navigate(ROUTES.HOME);
-        } catch (error) {
-            showToast(t('toast.error'), 'error');
         }
     };
     
@@ -92,8 +89,7 @@ const Header: React.FC = () => {
   }, []);
 
   const handleLogout = async () => {
-    // FIX: Switched to Firebase v8 compat API `auth.signOut()` to resolve module export errors.
-    await auth.signOut();
+    await supabase.auth.signOut();
     showToast(t('toast.logoutSuccess'), 'info');
     setIsMobileAuthOpen(false);
     navigate(ROUTES.HOME);

@@ -5,9 +5,6 @@ import { supabase } from '../../lib/supabase';
 import { useToast } from '../../hooks/useToast';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
-import { auth } from '../../lib/firebase';
-// FIX: Removed modular import 'updateProfile' from 'firebase/auth' which caused an error.
-// The v8 compatibility API is used instead.
 
 const ProfilePage: React.FC = () => {
   const { user, refetchUser } = useAuth();
@@ -24,7 +21,7 @@ const ProfilePage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user || !auth.currentUser) return;
+    if (!user) return;
     
     setIsLoading(true);
     try {
@@ -36,9 +33,9 @@ const ProfilePage: React.FC = () => {
 
       if (profileError) throw profileError;
       
-      // FIX: Switched to Firebase v8 compat API `auth.currentUser.updateProfile()` to resolve module export errors.
-      // Atualiza o perfil no Firebase Auth para consistência
-      await auth.currentUser.updateProfile({ displayName });
+      // Atualiza os metadados no Supabase Auth para consistência
+      const { error: userError } = await supabase.auth.updateUser({ data: { display_name: displayName } });
+      if (userError) throw userError;
 
       await refetchUser();
 

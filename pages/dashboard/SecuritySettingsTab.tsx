@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from '../../hooks/useTranslation';
 import { useToast } from '../../hooks/useToast';
-import { auth } from '../../lib/firebase';
-// FIX: Removed modular import 'updatePassword' from 'firebase/auth' which caused an error.
-// The v8 compatibility API is used instead.
+import { supabase } from '../../lib/supabase';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
 
@@ -18,13 +16,6 @@ const SecuritySettingsTab: React.FC = () => {
     e.preventDefault();
     setIsLoading(true);
     
-    const user = auth.currentUser;
-    if (!user) {
-        showToast(t('toast.error'), 'error');
-        setIsLoading(false);
-        return;
-    }
-
     if (newPassword !== confirmPassword) {
       showToast(t('toast.passwordMismatch'), 'error');
       setIsLoading(false);
@@ -38,8 +29,8 @@ const SecuritySettingsTab: React.FC = () => {
     }
 
     try {
-      // FIX: Switched to Firebase v8 compat API `user.updatePassword()` to resolve module export errors.
-      await user.updatePassword(newPassword);
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) throw error;
       
       showToast(t('toast.passwordUpdated'), 'success');
       setNewPassword('');

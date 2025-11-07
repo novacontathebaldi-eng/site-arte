@@ -1,102 +1,79 @@
-import React, { createContext, useCallback, useEffect, useState } from 'react';
-// FIX: Switched to Firebase v8 compat API to resolve module export errors.
-import firebase from 'firebase/compat/app';
-import 'firebase/compat/auth';
-import { auth } from '../lib/firebase';
+import React, { createContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
-import { syncUserToSupabase } from '../lib/syncUserToSupabase';
-import { AuthContextType, UserData, Profile, UserPreferences } from '../types';
+import { UserData, AuthContextType, Profile, UserPreferences, User } from '../types';
 
-export const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export const AuthContext = createContext<AuthContextType>({
+    user: null,
+    loading: true,
+    refetchUser: async () => {},
+    updateUserPreferences: async () => {},
+});
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<UserData | null>(null);
-  const [loading, setLoading] = useState(true);
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+    const [user, setUser] = useState<UserData | null>(null);
+    const [loading, setLoading] = useState(true);
 
-  const fetchAppUser = useCallback(async (firebaseUser: firebase.User): Promise<UserData | null> => {
-    const { data: profile, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', firebaseUser.uid)
-      .single();
+    const fetchUserProfile = useCallback(async (supabaseUser: User): Promise<UserData | null> => {
+        const { data: profile, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', supabaseUser.id)
+            .single();
 
-    if (error && error.code !== 'PGRST116') {
-      console.error('Error fetching Supabase profile:', error);
-      return null;
-    }
+        if (error && error.code !== 'PGRST116') { // PGRST116 = 0 rows returned
+            console.error('Error fetching profile:', error);
+            return { ...supabaseUser, profile: null };
+        }
+        
+        return { ...supabaseUser, profile: profile as Profile };
+    }, []);
 
-    const adaptedUser = {
-      id: firebaseUser.uid,
-      email: firebaseUser.email || undefined,
-      user_metadata: {
-        display_name: firebaseUser.displayName,
-        avatar_url: firebaseUser.photoURL,
-      },
-      created_at: firebaseUser.metadata.creationTime || new Date().toISOString(),
-      email_confirmed_at: firebaseUser.emailVerified ? new Date().toISOString() : undefined,
-    };
-    
-    return { ...adaptedUser, profile: profile as Profile } as UserData;
-  }, []);
-
-  const refetchUser = useCallback(async () => {
-    const firebaseUser = auth.currentUser;
-    if (firebaseUser) {
+    useEffect(() => {
         setLoading(true);
-        await firebaseUser.reload(); // Get latest user data from Firebase
-        const appUser = await fetchAppUser(firebaseUser);
-        setUser(appUser);
-        setLoading(false);
-    }
-  }, [fetchAppUser]);
+        const { data: authListener } = supabase.auth.onAuthStateChange(async (_event, session) => {
+            if (session?.user) {
+                const userData = await fetchUserProfile(session.user as User);
+                setUser(userData);
+            } else {
+                setUser(null);
+            }
+            setLoading(false);
+        });
 
-  useEffect(() => {
-    // FIX: Switched to Firebase v8 compat API `auth.onAuthStateChanged()` to resolve module export errors.
-    const unsubscribe = auth.onAuthStateChanged(async (firebaseUser) => {
-      setLoading(true);
-      if (firebaseUser) {
-        // ⚠️ Aviso opcional: email não verificado
-        // Mas o usuário PODE fazer login mesmo assim
-        if (!firebaseUser.emailVerified) {
-          console.warn('⚠️ Email não verificado. Considere verificar seu email.');
-        }
-        try {
-            await syncUserToSupabase(firebaseUser);
-            const appUser = await fetchAppUser(firebaseUser);
-            setUser(appUser);
-        } catch (e) {
-            console.error("Auth context setup failed:", e);
-            setUser(null);
-        }
-      } else {
-        setUser(null);
-      }
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, [fetchAppUser]);
-
-  const updateUserPreferences = useCallback(async (preferences: Partial<UserPreferences>) => {
-    if (!user) throw new Error("User not authenticated.");
+        return () => authListener?.subscription.unsubscribe();
+    }, [fetchUserProfile]);
     
-    const currentPreferences = user.profile?.preferences || { orderUpdates: true, promotions: false, newArtworks: true };
-    const updatedPreferences = { ...currentPreferences, ...preferences };
+    const refetchUser = useCallback(async () => {
+        const { data: { user: supabaseUser } } = await supabase.auth.getUser();
+        if (supabaseUser) {
+            setLoading(true);
+            const userData = await fetchUserProfile(supabaseUser as User);
+            setUser(userData);
+            setLoading(false);
+        }
+    }, [fetchUserProfile]);
 
-    const { error } = await supabase
-      .from('profiles')
-      .update({ preferences: updatedPreferences, updated_at: new Date().toISOString() })
-      .eq('id', user.id);
-      
-    if (error) throw error;
-    await refetchUser();
-  }, [user, refetchUser]);
-  
-  const value: AuthContextType = { user, loading, refetchUser, updateUserPreferences };
+    const updateUserPreferences = async (preferences: Partial<UserPreferences>) => {
+        if (user?.profile) {
+            const updatedPreferences = { ...user.profile.preferences, ...preferences };
+            const { error } = await supabase
+                .from('profiles')
+                .update({ preferences: updatedPreferences, updated_at: new Date().toISOString() })
+                .eq('id', user.id);
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+            if (error) {
+                console.error("Error updating preferences:", error);
+                throw error;
+            }
+            await refetchUser();
+        }
+    };
+
+    const value = { user, loading, refetchUser, updateUserPreferences };
+
+    return (
+        <AuthContext.Provider value={value}>
+            {children}
+        </AuthContext.Provider>
+    );
 };

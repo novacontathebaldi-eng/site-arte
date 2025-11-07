@@ -78,14 +78,12 @@ const ProductEditPage: React.FC = () => {
 
     const handleImageDrop = (e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault();
-        // FIX: Explicitly type `files` to prevent Array.from from returning `unknown[]`, which caused an error when accessing `f.type`.
-        const files: File[] = Array.from(e.dataTransfer.files);
+        const files = Array.from(e.dataTransfer.files);
         setNewImages(prev => [...prev, ...files.filter(f => f.type.startsWith('image/'))]);
     };
 
     const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-        // FIX: Explicitly type `files` to prevent Array.from from returning `unknown[]`, which caused an error when accessing `f.type`.
-        const files: File[] = Array.from(e.target.files || []);
+        const files = Array.from(e.target.files || []);
         setNewImages(prev => [...prev, ...files.filter(f => f.type.startsWith('image/'))]);
     };
     
