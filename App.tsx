@@ -29,6 +29,11 @@ import SettingsPage from './pages/dashboard/SettingsPage';
 import WishlistPage from './pages/dashboard/WishlistPage';
 import OrderDetailPage from './pages/dashboard/OrderDetailPage';
 import OrderConfirmationPage from './pages/OrderConfirmationPage';
+import AdminRoute from './components/AdminRoute';
+import AdminLayout from './pages/admin/AdminLayout';
+import AdminDashboardPage from './pages/admin/AdminDashboardPage';
+import ProductManagementPage from './pages/admin/ProductManagementPage';
+import OrderManagementPage from './pages/admin/OrderManagementPage';
 
 const App: React.FC = () => {
   return (
@@ -90,6 +95,21 @@ const App: React.FC = () => {
                         <Route path="settings" element={<SettingsPage />} />
                         <Route path="wishlist" element={<WishlistPage />} />
                     </Route>
+
+                    {/* Rotas do Painel de Administração */}
+                    <Route
+                      path="/admin"
+                      element={
+                        <AdminRoute>
+                          <AdminLayout />
+                        </AdminRoute>
+                      }
+                    >
+                      <Route index element={<AdminDashboardPage />} />
+                      <Route path="products" element={<ProductManagementPage />} />
+                      <Route path="orders" element={<OrderManagementPage />} />
+                    </Route>
+
 
                     {/* Rota para página não encontrada */}
                     <Route path="*" element={<NotFoundPage />} />

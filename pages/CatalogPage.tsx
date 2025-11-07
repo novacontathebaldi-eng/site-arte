@@ -1,175 +1,181 @@
-
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from '../hooks/useTranslation';
-import { Product, Filters } from '../types';
+import { Product } from '../types';
 import { getProducts } from '../services/api';
 import ProductCard from '../components/ProductCard';
 import { ProductGridSkeleton } from '../components/SkeletonLoader';
-import { XIcon } from '../components/ui/icons';
+import { SearchIcon } from '../components/ui/icons';
 import { useDebounce } from '../hooks/useDebounce';
+import CategoryNav from '../components/CategoryNav';
 
 const CatalogPage: React.FC = () => {
   const { t, language } = useTranslation();
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  
+  const [searchQuery, setSearchQuery] = useState('');
+  const debouncedQuery = useDebounce(searchQuery, 300);
+  
+  const [activeCategory, setActiveCategory] = useState('paintings');
+  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
 
-  const [filters, setFilters] = useState<Filters>({
-    query: '',
-    category: 'all',
-    availability: 'all',
-  });
-  const debouncedQuery = useDebounce(filters.query, 300);
-
-  const [sortOrder, setSortOrder] = useState<string>('newest');
+  const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
 
   useEffect(() => {
     const fetchProducts = async () => {
-      try {
-        setIsLoading(true);
-        const allProducts = await getProducts();
-        setProducts(allProducts);
-      } catch (error) {
-        console.error("Failed to fetch products:", error);
-      } finally {
-        setIsLoading(false);
-      }
+      setIsLoading(true);
+      const allProducts = await getProducts();
+      setProducts(allProducts);
+      setIsLoading(false);
     };
     fetchProducts();
   }, []);
 
-  const handleFilterChange = (filterName: keyof Filters, value: string) => {
-    setFilters(prev => ({ ...prev, [filterName]: value }));
-  };
+  const categories = useMemo(() => ['paintings', 'jewelry', 'digital', 'prints'], []);
+  
+  const categoryLabels = useMemo(() => categories.map(cat => ({
+    id: cat,
+    label: t(`catalog.${cat}`)
+  })), [categories, t]);
 
-  const filteredAndSortedProducts = useMemo(() => {
-    let result = [...products];
-
-    // Filter by search query
+  const productsByCategory = useMemo(() => {
+    let filteredProducts = products;
     if (debouncedQuery) {
-      result = result.filter(p =>
+      filteredProducts = products.filter(p =>
         p.translations[language].title
           .toLowerCase()
           .includes(debouncedQuery.toLowerCase())
       );
     }
 
-    // Filter by category
-    if (filters.category !== 'all') {
-      result = result.filter(p => p.category === filters.category);
-    }
-    
-    // Filter by availability
-    if (filters.availability !== 'all') {
-        result = result.filter(p => p.status === filters.availability);
-    }
+    return categories.reduce((acc, category) => {
+      acc[category] = filteredProducts.filter(p => p.category === category);
+      return acc;
+    }, {} as Record<string, Product[]>);
+  }, [products, categories, debouncedQuery, language]);
 
-    // Sorting
-    switch (sortOrder) {
-      case 'priceLowHigh':
-        result.sort((a, b) => a.price.amount - b.price.amount);
-        break;
-      case 'priceHighLow':
-        result.sort((a, b) => b.price.amount - a.price.amount);
-        break;
-      case 'newest':
-      default:
-        result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-        break;
+  useEffect(() => {
+    if (debouncedQuery) return; 
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const intersectingEntries = entries.filter(e => e.isIntersecting);
+        if (intersectingEntries.length > 0) {
+            const bestEntry = intersectingEntries.reduce((prev, current) => 
+                (prev.intersectionRatio > current.intersectionRatio) ? prev : current
+            );
+            setActiveCategory(bestEntry.target.id);
+        }
+      },
+      {
+        rootMargin: '-25% 0px -75% 0px',
+        threshold: 0,
+      }
+    );
+
+    const currentRefs = sectionRefs.current;
+    Object.values(currentRefs).forEach((ref) => {
+      if (ref) observer.observe(ref);
+    });
+
+    return () => {
+      Object.values(currentRefs).forEach((ref) => {
+        if (ref) observer.unobserve(ref);
+      });
+    };
+  }, [debouncedQuery, productsByCategory]);
+
+  const handleCategoryClick = (categoryId: string) => {
+    const headerHeight = 80; // from Header.tsx h-20
+    const stickyNavHeight = 58; // approx height of the new nav
+    const element = sectionRefs.current[categoryId];
+    if (element) {
+        const elementPosition = element.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - headerHeight - stickyNavHeight;
+        
+        window.scrollTo({
+            top: offsetPosition,
+            behavior: "smooth"
+        });
     }
-
-    return result;
-  }, [products, debouncedQuery, filters, sortOrder, language]);
-
-  const categories = ['all', 'paintings', 'jewelry', 'digital', 'prints'];
-  const availabilities = ['all', 'available', 'sold', 'madeToOrder'];
+  };
+  
+  const sectionsToRender = categories.filter(category => productsByCategory[category]?.length > 0);
 
   return (
     <div className="bg-white">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <h1 className="text-4xl md:text-5xl font-heading font-bold text-center mb-12">{t('catalog.title')}</h1>
-        
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Filters Sidebar */}
-          <aside className="w-full lg:w-1/4 xl:w-1/5">
-            <div className="space-y-6">
-               <input
-                type="text"
-                placeholder={t('catalog.searchPlaceholder')}
-                value={filters.query}
-                onChange={(e) => handleFilterChange('query', e.target.value)}
-                className="w-full p-2 border rounded-md"
-              />
-              <div>
-                <h3 className="font-semibold mb-2">{t('catalog.category')}</h3>
-                <ul className="space-y-1">
-                  {categories.map(cat => (
-                    <li key={cat}>
-                      <button 
-                        onClick={() => handleFilterChange('category', cat)}
-                        className={`w-full text-left p-2 rounded-md transition-colors ${filters.category === cat ? 'bg-secondary text-white' : 'hover:bg-surface'}`}
-                      >
-                        {t(`catalog.${cat}`)}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-               <div>
-                  <h3 className="font-semibold mb-2">{t('catalog.availability')}</h3>
-                   {availabilities.map(avail => (
-                       <label key={avail} className="flex items-center space-x-2">
-                           <input type="radio" name="availability" value={avail} checked={filters.availability === avail} onChange={(e) => handleFilterChange('availability', e.target.value)} />
-                           <span>{t(avail === 'all' ? 'catalog.all' : `product.${avail}`)}</span>
-                       </label>
-                   ))}
-              </div>
+      {isMobileSearchOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden" aria-modal="true">
+            <div className="absolute inset-0 bg-black/50" onClick={() => setIsMobileSearchOpen(false)}></div>
+            <div className="relative bg-white p-4 shadow-lg">
+                <div className="relative">
+                    <input
+                        type="search"
+                        placeholder={t('catalog.searchPlaceholder')}
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full p-2 pl-10 border rounded-md"
+                        autoFocus
+                    />
+                    <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                </div>
             </div>
-          </aside>
-          
-          {/* Main Content */}
-          <main className="w-full lg:w-3/4 xl:w-4/5">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
-               <div className="flex-grow flex items-center gap-2 flex-wrap mb-4 sm:mb-0">
-                    <span className="font-semibold text-sm">{filteredAndSortedProducts.length} {t('catalog.resultsFound')}</span>
-                    {filters.category !== 'all' && (
-                        <span className="bg-gray-200 text-xs font-semibold px-2 py-1 rounded-full flex items-center gap-1">
-                            {t(`catalog.${filters.category}`)}
-                            <button onClick={() => handleFilterChange('category', 'all')}><XIcon className="w-3 h-3"/></button>
-                        </span>
-                    )}
-                    {filters.availability !== 'all' && (
-                         <span className="bg-gray-200 text-xs font-semibold px-2 py-1 rounded-full flex items-center gap-1">
-                            {t(`product.${filters.availability}`)}
-                            <button onClick={() => handleFilterChange('availability', 'all')}><XIcon className="w-3 h-3"/></button>
-                        </span>
-                    )}
-               </div>
-              <div className="flex items-center space-x-2 flex-shrink-0">
-                <label htmlFor="sort" className="text-sm">{t('catalog.sortBy')}:</label>
-                <select id="sort" value={sortOrder} onChange={(e) => setSortOrder(e.target.value)} className="p-2 border rounded-md">
-                  <option value="newest">{t('catalog.newest')}</option>
-                  <option value="priceLowHigh">{t('catalog.priceLowHigh')}</option>
-                  <option value="priceHighLow">{t('catalog.priceHighLow')}</option>
-                </select>
-              </div>
-            </div>
-
-            {isLoading ? (
-              <ProductGridSkeleton count={9} />
-            ) : filteredAndSortedProducts.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8">
-                {filteredAndSortedProducts.map(product => (
-                  <ProductCard key={product.id} product={product} />
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-20">
-                <p className="text-lg text-text-secondary">{t('catalog.noResults')}</p>
-              </div>
-            )}
-            {/* Pagination will be added here */}
-          </main>
         </div>
+      )}
+
+      <CategoryNav 
+        categories={categoryLabels}
+        activeCategory={activeCategory}
+        onCategoryClick={handleCategoryClick}
+        onSearchClick={() => setIsMobileSearchOpen(true)}
+      />
+
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <h1 className="text-4xl md:text-5xl font-heading font-bold text-center mb-12">
+          {t('catalog.title')}
+        </h1>
+
+        <div className="hidden lg:block relative max-w-lg mx-auto mb-12">
+            <input
+                type="search"
+                placeholder={t('catalog.searchPlaceholder')}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full p-3 pl-12 border rounded-full shadow-sm focus:ring-secondary focus:border-secondary"
+            />
+            <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-400" />
+        </div>
+
+        {isLoading ? (
+            <ProductGridSkeleton count={12} />
+        ) : (
+          <div className="space-y-16">
+            {sectionsToRender.length > 0 ? sectionsToRender.map(category => (
+              <section
+                key={category}
+                id={category}
+                // FIX: Changed ref callback from an expression to a block statement.
+                // An assignment expression returns the assigned value, which is not allowed for a ref callback.
+                // Wrapping the assignment in curly braces ensures the function returns undefined.
+                ref={(el) => { if (el) sectionRefs.current[category] = el; }}
+                aria-labelledby={`${category}-heading`}
+              >
+                <h2 id={`${category}-heading`} className="text-3xl font-bold font-heading mb-6 border-b-2 border-secondary pb-2">
+                  {t(`catalog.${category}`)}
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8">
+                  {productsByCategory[category].map(product => (
+                    <ProductCard key={product.id} product={product} />
+                  ))}
+                </div>
+              </section>
+            )) : (
+                <div className="text-center py-20">
+                    <p className="text-lg text-text-secondary">{t('catalog.noResults')}</p>
+                </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
