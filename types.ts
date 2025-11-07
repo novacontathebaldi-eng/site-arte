@@ -1,8 +1,7 @@
+
 // Este arquivo define a "forma" dos dados que usamos no site.
 // Pense nisso como um contrato: se um objeto é um "Produto", ele TEM que ter
 // as propriedades definidas aqui (id, sku, category, etc.). Isso ajuda a evitar erros.
-// FIX: The `User` type is not exported in some versions of `@supabase/supabase-js`. 
-// Defining a custom User interface based on application-wide usage.
 export interface User {
   id: string;
   email?: string;
