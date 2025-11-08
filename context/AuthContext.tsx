@@ -1,7 +1,8 @@
 import React, { createContext, useReducer, useEffect, ReactNode, useCallback } from 'react';
 import { auth, googleProvider } from '../lib/firebase';
 import { supabase } from '../lib/supabase';
-// FIX: Using Firebase v9 compatibility layer ('firebase/compat/app' and 'firebase/compat/auth') to resolve errors with Firebase v8 namespaced syntax.
+// Usa a sintaxe do Firebase v8 para corresponder à dependência instalada
+// FIX: Switched to Firebase v9 compat imports to provide v8 syntax and types.
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import { UserData, UserPreferences } from '../types';
@@ -92,7 +93,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const login = async (email: string, password: string, rememberMe = true) => {
     dispatch({ type: 'LOADING' });
     try {
-      // FIX: Correctly reference Persistence enum from the firebase object.
+      // Define a persistência da sessão de acordo com a sintaxe da v8
       const persistence = rememberMe ? firebase.auth.Auth.Persistence.LOCAL : firebase.auth.Auth.Persistence.SESSION;
       await auth.setPersistence(persistence);
       await auth.signInWithEmailAndPassword(email, password);

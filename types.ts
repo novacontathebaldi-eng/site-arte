@@ -1,4 +1,5 @@
-// FIX: Using Firebase v9 compatibility layer ('firebase/compat/app' and 'firebase/compat/auth') to resolve errors with Firebase v8 namespaced syntax. This makes types like 'firebase.User' available.
+// Usa a sintaxe do Firebase v8 para corresponder à dependência instalada
+// FIX: Switched to Firebase v9 compat imports to provide v8 syntax and types.
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 

@@ -1,10 +1,9 @@
-// Utiliza a sintaxe do Firebase v8 (namespaced)
-// FIX: Using Firebase v9 compatibility layer ('firebase/compat/app' and 'firebase/compat/auth') to resolve errors with Firebase v8 namespaced syntax.
+// Usa a sintaxe do Firebase v8 para corresponder à dependência instalada
+// FIX: Switched to Firebase v9 compat imports to provide v8 syntax and types.
 import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
 
-// FIX: Switched from import.meta.env to process.env to resolve TypeScript errors regarding 'ImportMeta'.
-// These environment variables are now defined in vite.config.ts for global replacement.
+// As variáveis de ambiente são definidas em vite.config.ts para substituição global.
 const firebaseConfig = {
   apiKey: process.env.VITE_FIREBASE_API_KEY,
   authDomain: process.env.VITE_FIREBASE_AUTH_DOMAIN,
