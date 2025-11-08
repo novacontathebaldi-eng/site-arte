@@ -1,11 +1,18 @@
-// Usa a sintaxe do Firebase v8 para corresponder à dependência instalada
-// FIX: Switched to Firebase v9 compat imports to provide v8 syntax and types.
-import firebase from 'firebase/compat/app';
-import 'firebase/compat/auth';
 
 // Este arquivo define a "forma" dos dados que usamos no site.
 // Pense nisso como um contrato: se um objeto é um "Produto", ele TEM que ter
 // as propriedades definidas aqui (id, sku, category, etc.). Isso ajuda a evitar erros.
+export interface User {
+  id: string;
+  email?: string;
+  user_metadata: {
+    [key: string]: any;
+    display_name?: string;
+    avatar_url?: string;
+  };
+  created_at: string;
+  email_confirmed_at?: string;
+}
 
 // Idiomas suportados no site.
 export type Language = 'fr' | 'en' | 'de' | 'pt';
@@ -102,7 +109,6 @@ export interface UserPreferences {
 export interface Profile {
     id: string; // Corresponde ao user.id do Supabase Auth
     display_name: string | null;
-    email?: string | null;
     photo_url?: string | null;
     phone?: string | null;
     role: 'customer' | 'admin';
@@ -111,8 +117,8 @@ export interface Profile {
     preferences: UserPreferences;
 }
 
-// Combina o usuário do Firebase Auth com o perfil do banco de dados Supabase.
-export type UserData = firebase.User & { profile: Profile | null };
+// Combina o usuário do Supabase Auth com o perfil do banco de dados.
+export type UserData = User & { profile: Profile | null };
 
 
 // Define o que o Contexto de Autenticação vai fornecer.

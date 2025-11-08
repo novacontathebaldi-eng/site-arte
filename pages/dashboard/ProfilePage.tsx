@@ -16,8 +16,7 @@ const ProfilePage: React.FC = () => {
 
   useEffect(() => {
     // Tenta pegar o display_name do perfil, senão do user_metadata, senão vazio
-    // FIX: Property 'user_metadata' does not exist on type 'UserData'. Fallback to 'displayName' from Firebase User.
-    setDisplayName(user?.profile?.display_name || user?.displayName || '');
+    setDisplayName(user?.profile?.display_name || user?.user_metadata?.display_name || '');
   }, [user]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -30,8 +29,7 @@ const ProfilePage: React.FC = () => {
       const { error: profileError } = await supabase
         .from('profiles')
         .update({ display_name: displayName, updated_at: new Date().toISOString() })
-        // FIX: Property 'id' does not exist on type 'UserData'. Use 'uid' instead.
-        .eq('id', user.uid);
+        .eq('id', user.id);
 
       if (profileError) throw profileError;
       
@@ -50,8 +48,7 @@ const ProfilePage: React.FC = () => {
     }
   };
   
-  // FIX: Property 'created_at' does not exist on type 'UserData'. Use 'metadata.creationTime' from Firebase User.
-  const creationDate = user?.metadata.creationTime ? new Date(user.metadata.creationTime).toLocaleDateString() : 'N/A';
+  const creationDate = user?.created_at ? new Date(user.created_at).toLocaleDateString() : 'N/A';
 
   return (
     <div className="bg-white p-8 rounded-lg shadow-md">
@@ -60,33 +57,27 @@ const ProfilePage: React.FC = () => {
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
           <h2 className="text-lg font-semibold mb-4">{t('dashboard.profileTitle')}</h2>
-          {/* FIX: Removed 'label' prop from Input components and added explicit <label> elements. */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label htmlFor="displayName" className="block text-sm font-medium text-gray-700 mb-1">{t('auth.fullName')}</label>
-              <Input 
-                id="displayName" 
-                value={displayName}
-                onChange={(e) => setDisplayName(e.target.value)}
-                required
-              />
-            </div>
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">{t('auth.email')}</label>
-              <Input 
-                id="email" 
-                value={user?.email || ''}
-                disabled 
-              />
-            </div>
+            <Input 
+              id="displayName" 
+              label={t('auth.fullName')} 
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
+              required
+            />
+            <Input 
+              id="email" 
+              label={t('auth.email')} 
+              value={user?.email || ''}
+              disabled 
+            />
           </div>
         </div>
         
         <div className="border-t pt-6">
             <h2 className="text-lg font-semibold mb-4">{t('dashboard.accountInfo')}</h2>
             <p className="text-sm text-text-secondary">{t('dashboard.memberSince')}: {creationDate}</p>
-            {/* FIX: Property 'email_confirmed_at' does not exist on type 'UserData'. Use 'emailVerified' from Firebase User. */}
-            <p className="text-sm text-text-secondary">{t('dashboard.emailVerified')}: {user?.emailVerified ? t('dashboard.yes') : t('dashboard.no')}</p>
+            <p className="text-sm text-text-secondary">{t('dashboard.emailVerified')}: {user?.email_confirmed_at ? t('dashboard.yes') : t('dashboard.no')}</p>
         </div>
 
         <div className="flex justify-end">

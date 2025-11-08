@@ -23,8 +23,7 @@ const AddressesPage: React.FC = () => {
     if (user) {
       try {
         setIsLoading(true);
-        // FIX: Property 'id' does not exist on type 'UserData'. Use 'uid' instead.
-        const userAddresses = await getAddresses(user.uid);
+        const userAddresses = await getAddresses(user.id);
         setAddresses(userAddresses);
       } catch (error) {
         console.error("Failed to fetch addresses:", error);
@@ -53,12 +52,10 @@ const AddressesPage: React.FC = () => {
     if (!user) return;
     try {
       if (addressToEdit) {
-        // FIX: Property 'id' does not exist on type 'UserData'. Use 'uid' instead.
-        await updateAddress(user.uid, addressToEdit.id, addressData);
+        await updateAddress(user.id, addressToEdit.id, addressData);
         showToast(t('toast.addressUpdated'), 'success');
       } else {
-        // FIX: Property 'id' does not exist on type 'UserData'. Use 'uid' instead.
-        await addAddress(user.uid, addressData);
+        await addAddress(user.id, addressData);
         showToast(t('toast.addressAdded'), 'success');
       }
       fetchAddresses();
@@ -71,8 +68,7 @@ const AddressesPage: React.FC = () => {
   const handleDeleteAddress = async (addressId: string) => {
     if (!user || !window.confirm(t('dashboard.confirmDelete'))) return;
     try {
-      // FIX: Property 'id' does not exist on type 'UserData'. Use 'uid' instead.
-      await deleteAddress(user.uid, addressId);
+      await deleteAddress(user.id, addressId);
       showToast(t('toast.addressDeleted'), 'info');
       fetchAddresses();
     } catch (error) {

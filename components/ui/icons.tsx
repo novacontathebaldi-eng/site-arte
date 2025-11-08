@@ -33,15 +33,6 @@ export const GoogleIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
     </svg>
 );
 
-export const EyeIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
-    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" {...props}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-);
-
-export const EyeOffIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
-    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" {...props}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7 .946-3.11 3.278-5.766 6.206-6.954M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c1.47 0 2.87.333 4.133.934m4.23 4.23a9.948 9.948 0 01-1.34 1.832M1.5 1.5l21 21"></path></svg>
-);
-
-
 // Ícones para o Dashboard
 export const OverviewIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" {...props}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h7"></path></svg>
@@ -81,10 +72,6 @@ export const ShieldCheckIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) 
 
 export const CheckCircleIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" {...props}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-);
-
-export const MailIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
-    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" {...props}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
 );
 
 export const EditIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
@@ -173,4 +160,15 @@ export const PaypalIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
     <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="48" height="48" viewBox="0 0 48 48" {...props}>
         <path fill="#1565C0" d="M45,35c0,2.209-1.791,4-4,4H7c-2.209,0-4-1.791-4-4V13c0-2.209,1.791-4,4-4h34c2.209,0,4,1.791,4,4V35z"></path><path fill="#FFF" d="M22.003,16.518c-1.392-0.126-2.24-0.021-2.24-0.021c-1.127,0-2.022,0.852-2.115,1.936 c-0.003,0.011-0.036,0.223-0.036,0.223c-0.21,1.25,0.589,2.373,1.78,2.613c0.01,0.002,0.02,0.004,0.03,0.006 c1.189,0.24,2.775,0.02,3.38-0.379c0.003-0.002,0.006-0.004,0.008-0.006c0.593-0.395,0.853-1.09,0.732-1.723 C23.364,18.291,22.84,16.581,22.003,16.518z M22.76,24.321c-0.816,2.289-2.61,3.43-4.814,3.43c-0.638,0-1.238-0.113-1.787-0.32 c-0.001,0-0.002-0.001-0.003-0.001c-1.119-0.421-1.849-1.467-1.9-2.656l-1.077-6.529c-0.028-0.171-0.043-0.344-0.043-0.519 c0-0.825,0.67-1.495,1.495-1.495h0.001c0.825,0,1.524,0.627,1.589,1.446c0,0.001,0,0.002,0,0.003l0.323,1.958 c0.042,0.251,0.27,0.428,0.525,0.428h0.739c1.688,0,3.058,1.37,3.058,3.058C23.001,23.496,22.923,23.931,22.76,24.321z M28.73,18.067c-0.53-0.92-1.423-1.528-2.47-1.554c-0.902-0.022-1.734,0.448-2.213,1.233c-0.494,0.809-0.59,1.834-0.273,2.753 c0.32,0.916,1.021,1.597,1.896,1.895c0.003,0.001,0.006,0.002,0.009,0.003c0.88,0.297,1.828,0.146,2.613-0.402 c0.84-0.59,1.339-1.523,1.339-2.553C29.623,19.227,29.289,18.521,28.73,18.067z M35.568,16.483 c-1.392-0.126-2.24-0.021-2.24-0.021c-1.127,0-2.022,0.852-2.115,1.936c-0.003,0.011-0.036,0.223-0.036,0.223 c-0.21,1.25,0.589,2.373,1.78,2.613c0.01,0.002,0.02,0.004,0.03,0.006c1.189,0.24,2.775,0.02,3.38-0.379 c0.003-0.002,0.006-0.004,0.008-0.006c0.593-0.395,0.853-1.09,0.732-1.723C36.929,18.256,36.405,16.546,35.568,16.483z M36.325,24.286c-0.816,2.289-2.61,3.43-4.814,3.43c-0.638,0-1.238-0.113-1.787-0.32c-0.001,0-0.002-0.001-0.003-0.001 c-1.119-0.421-1.849-1.467-1.9-2.656l-1.077-6.529c-0.028-0.171-0.043-0.344-0.043-0.519c0-0.825,0.67-1.495,1.495-1.495h0.001 c0.825,0,1.524,0.627,1.589,1.446c0,0.001,0,0.002,0,0.003l0.323,1.958c0.042,0.251,0.27,0.428,0.525,0.428h0.739 c1.688,0,3.058,1.37,3.058,3.058C36.566,23.461,36.488,23.896,36.325,24.286z"></path>
     </svg>
+);
+
+// Ícones para o Admin
+export const ChartBarIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" {...props}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+);
+export const BoxIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" {...props}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 16v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2m12-12v-2a2 2 0 00-2-2H6a2 2 0 00-2 2v2m12 0l-4-4-4 4m8 0l-4 4-4-4"></path></svg>
+);
+export const UsersIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" {...props}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm6-11a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
 );

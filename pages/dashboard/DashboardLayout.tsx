@@ -61,10 +61,8 @@ const DashboardLayout: React.FC = () => {
     }`;
   
   const displayName = user?.profile?.display_name || user?.email;
-  // FIX: Property 'user_metadata' does not exist on type 'UserData'. Fallback to 'photoURL' from Firebase User.
-  const photoURL = user?.profile?.photo_url || user?.photoURL;
-  // FIX: Property 'email_confirmed_at' does not exist on type 'UserData'. Use 'emailVerified' from Firebase User.
-  const isEmailConfirmed = !!user?.emailVerified;
+  const photoURL = user?.profile?.photo_url || user?.user_metadata?.avatar_url;
+  const isEmailConfirmed = !!user?.email_confirmed_at;
 
   return (
     <div className="bg-surface min-h-screen">

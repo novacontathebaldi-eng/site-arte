@@ -1,9 +1,9 @@
 import React from 'react';
 import { HashRouter, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { AuthProvider } from './context/AuthContext';
 import { LanguageProvider } from './context/LanguageContext';
 import { ToastProvider } from './context/ToastContext';
+import { AuthProvider } from './context/AuthContext';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import HomePage from './pages/HomePage';
@@ -15,13 +15,11 @@ import ContactPage from './pages/ContactPage';
 import CheckoutPage from './pages/CheckoutPage';
 import NotFoundPage from './pages/NotFoundPage';
 import Toaster from './components/ui/Toaster';
-import ProtectedRoute from './components/ProtectedRoute';
-import { ROUTES } from './constants';
-
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
-
+import ProtectedRoute from './components/ProtectedRoute';
+import { ROUTES } from './constants';
 import DashboardLayout from './pages/dashboard/DashboardLayout';
 import DashboardOverviewPage from './pages/dashboard/DashboardOverviewPage';
 import ProfilePage from './pages/dashboard/ProfilePage';
@@ -50,24 +48,19 @@ const App: React.FC = () => {
               <div className="flex flex-col min-h-screen font-body bg-background text-text-primary">
                 <Toaster />
                 <Routes>
-                  {/* Rotas de Autenticação (sem Header/Footer) */}
-                  <Route path={ROUTES.LOGIN} element={<LoginPage />} />
-                  <Route path={ROUTES.REGISTER} element={<RegisterPage />} />
-                  <Route path={ROUTES.FORGOT_PASSWORD} element={<ForgotPasswordPage />} />
-
-                  {/* Rotas do Painel de Administração (sem Header/Footer) */}
+                  {/* Rotas do Painel de Administração (renderizadas sem Header/Footer) */}
                   <Route
                     path="/admin/*"
                     element={
                       <AdminRoute>
                         <Routes>
-                          <Route element={<AdminLayout />}>
+                           <Route element={<AdminLayout />}>
                               <Route index element={<AdminDashboardPage />} />
                               <Route path="products" element={<ProductManagementPage />} />
                               <Route path="products/new" element={<ProductEditPage />} />
                               <Route path="products/edit/:productId" element={<ProductEditPage />} />
                               <Route path="orders" element={<OrderManagementPage />} />
-                          </Route>
+                           </Route>
                         </Routes>
                       </AdminRoute>
                     }
@@ -80,13 +73,16 @@ const App: React.FC = () => {
                       <>
                         <Header />
                         <main className="flex-grow">
-                          <Routes>
+                           <Routes>
                               <Route path={ROUTES.HOME} element={<HomePage />} />
                               <Route path={ROUTES.CATALOG} element={<CatalogPage />} />
                               <Route path={`${ROUTES.PRODUCT}/:slug`} element={<ProductDetailPage />} />
                               <Route path={ROUTES.CART} element={<CartPage />} />
                               <Route path={ROUTES.ABOUT} element={<AboutPage />} />
                               <Route path={ROUTES.CONTACT} element={<ContactPage />} />
+                              <Route path={ROUTES.LOGIN} element={<LoginPage />} />
+                              <Route path={ROUTES.REGISTER} element={<RegisterPage />} />
+                              <Route path={ROUTES.FORGOT_PASSWORD} element={<ForgotPasswordPage />} />
                               
                               <Route 
                                 path={ROUTES.CHECKOUT} 
@@ -108,7 +104,7 @@ const App: React.FC = () => {
                               </Route>
                               
                               <Route path="*" element={<NotFoundPage />} />
-                          </Routes>
+                           </Routes>
                         </main>
                         <Footer />
                       </>

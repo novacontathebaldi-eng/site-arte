@@ -21,8 +21,7 @@ const CheckoutAddressStep: React.FC<CheckoutAddressStepProps> = ({ onAddressSele
   useEffect(() => {
     const fetchAddresses = async () => {
       if (user) {
-        // FIX: Property 'id' does not exist on type 'UserData'. Use 'uid' instead.
-        const userAddresses = await getAddresses(user.uid);
+        const userAddresses = await getAddresses(user.id);
         setAddresses(userAddresses);
         const defaultAddress = userAddresses.find(a => a.isDefault);
         if (defaultAddress) {
@@ -37,8 +36,7 @@ const CheckoutAddressStep: React.FC<CheckoutAddressStepProps> = ({ onAddressSele
 
   const handleSaveNewAddress = async (addressData: Address) => {
     if (!user) return;
-    // FIX: Property 'id' does not exist on type 'UserData'. Use 'uid' instead.
-    const newAddress = await addAddress(user.uid, addressData);
+    const newAddress = await addAddress(user.id, addressData);
     setAddresses(prev => [...prev, newAddress]);
     setSelectedAddressId(newAddress.id);
     setIsModalOpen(false);

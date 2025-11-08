@@ -32,8 +32,7 @@ const CheckoutReviewStep: React.FC<CheckoutReviewStepProps> = ({ selectedAddress
       if (!user) return;
       setIsPlacingOrder(true);
       try {
-          // FIX: Property 'id' does not exist on type 'UserData'. Use 'uid' instead.
-          const { orderId } = await placeOrder(user.uid, state.items, selectedAddress);
+          const { orderId } = await placeOrder(user.id, state.items, selectedAddress);
           clearCart();
           navigate(`${ROUTES.ORDER_CONFIRMATION}/${orderId}`);
       } catch (error) {

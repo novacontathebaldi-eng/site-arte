@@ -38,10 +38,8 @@ const DashboardOverviewPage: React.FC = () => {
                 try {
                     setIsLoading(true);
                     const [userStats, allOrders] = await Promise.all([
-                        // FIX: Property 'id' does not exist on type 'UserData'. Use 'uid' instead.
-                        getUserDashboardStats(user.uid),
-                        // FIX: Property 'id' does not exist on type 'UserData'. Use 'uid' instead.
-                        getOrdersByUserId(user.uid)
+                        getUserDashboardStats(user.id),
+                        getOrdersByUserId(user.id)
                     ]);
                     setStats(userStats);
                     setRecentOrders(allOrders.slice(0, 3));

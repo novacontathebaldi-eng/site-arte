@@ -3,8 +3,7 @@ import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { ROUTES } from '../../constants';
 import { supabase } from '../../lib/supabase';
-// FIX: Replaced non-existent icons with available ones: ChartBarIcon -> OverviewIcon, BoxIcon -> PackageIcon, UsersIcon -> UserIcon.
-import { OverviewIcon, PackageIcon, UserIcon, LogoutIcon } from '../../components/ui/icons';
+import { ChartBarIcon, BoxIcon, UsersIcon, LogoutIcon } from '../../components/ui/icons';
 
 const AdminLayout: React.FC = () => {
   const { user } = useAuth();
@@ -16,9 +15,9 @@ const AdminLayout: React.FC = () => {
   };
   
   const navItems = [
-    { to: ROUTES.ADMIN_DASHBOARD, label: 'Dashboard', icon: OverviewIcon, end: true },
-    { to: ROUTES.ADMIN_PRODUCTS, label: 'Products', icon: PackageIcon },
-    { to: ROUTES.ADMIN_ORDERS, label: 'Orders', icon: UserIcon },
+    { to: ROUTES.ADMIN_DASHBOARD, label: 'Dashboard', icon: ChartBarIcon, end: true },
+    { to: ROUTES.ADMIN_PRODUCTS, label: 'Products', icon: BoxIcon },
+    { to: ROUTES.ADMIN_ORDERS, label: 'Orders', icon: UsersIcon },
   ];
 
   const navLinkClasses = ({ isActive }: { isActive: boolean }) =>
@@ -29,8 +28,7 @@ const AdminLayout: React.FC = () => {
     }`;
 
   const displayName = user?.profile?.display_name || user?.email;
-  // FIX: Property 'user_metadata' does not exist on type 'UserData'. Fallback to 'photoURL' from Firebase User.
-  const photoURL = user?.profile?.photo_url || user?.photoURL;
+  const photoURL = user?.profile?.photo_url || user?.user_metadata?.avatar_url;
 
   return (
     <div className="flex min-h-screen bg-gray-100">

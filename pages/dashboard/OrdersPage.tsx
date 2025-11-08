@@ -30,8 +30,7 @@ const OrdersPage: React.FC = () => {
             if (user) {
                 try {
                     setIsLoading(true);
-                    // FIX: Property 'id' does not exist on type 'UserData'. Use 'uid' instead.
-                    const userOrders = await getOrdersByUserId(user.uid);
+                    const userOrders = await getOrdersByUserId(user.id);
                     setOrders(userOrders);
                 } catch (error) {
                     console.error("Failed to fetch orders:", error);

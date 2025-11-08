@@ -47,27 +47,22 @@ const SecuritySettingsTab: React.FC = () => {
     <div>
       <h2 className="text-xl font-bold text-text-primary mb-4">{t('dashboard.changePassword')}</h2>
       <form onSubmit={handlePasswordChange} className="space-y-4 max-w-lg">
-        {/* FIX: Removed 'label' prop from Input components and added explicit <label> elements. */}
-        <div>
-            <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-1">{t('dashboard.newPassword')}</label>
-            <Input
-              id="newPassword"
-              type="password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              required
-            />
-        </div>
-        <div>
-            <label htmlFor="confirmNewPassword" className="block text-sm font-medium text-gray-700 mb-1">{t('dashboard.confirmNewPassword')}</label>
-            <Input
-              id="confirmNewPassword"
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-            />
-        </div>
+        <Input
+          id="newPassword"
+          type="password"
+          label={t('dashboard.newPassword')}
+          value={newPassword}
+          onChange={(e) => setNewPassword(e.target.value)}
+          required
+        />
+        <Input
+          id="confirmNewPassword"
+          type="password"
+          label={t('dashboard.confirmNewPassword')}
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          required
+        />
         <div className="pt-2">
             <Button type="submit" variant="primary" disabled={isLoading} className="w-auto">
                 {isLoading ? t('dashboard.saving') : t('dashboard.updatePassword')}
