@@ -145,7 +145,14 @@ export const translations: Record<SupportedLanguage, Record<string, string>> = {
     'chatbot_title': 'Assistant d\'Art',
     'chatbot_greeting': 'Bonjour! Comment puis-je vous aider aujourd\'hui?',
     'chatbot_placeholder': 'Posez votre question...',
-    'chatbot_send': 'Envoyer'
+    'chatbot_send': 'Envoyer',
+    'chatbot_header_title': 'Meeh - Assistant d\'Art',
+    'chatbot_close_button_aria': 'Fermer le chat',
+    'chatbot_typing': 'L\'assistant écrit...',
+    'chatbot_user_alt': 'Utilisateur',
+    'chatbot_bot_alt': 'Assistant d\'Art',
+    'chatbot_send_button_aria': 'Envoyer le message',
+    'chatbot_open_button_aria': 'Ouvrir le chat'
   },
   en: {
     'home': 'Home',
@@ -291,7 +298,14 @@ export const translations: Record<SupportedLanguage, Record<string, string>> = {
     'chatbot_title': 'Art Assistant',
     'chatbot_greeting': 'Hello! How can I assist you today?',
     'chatbot_placeholder': 'Ask a question...',
-    'chatbot_send': 'Send'
+    'chatbot_send': 'Send',
+    'chatbot_header_title': 'Meeh - Art Assistant',
+    'chatbot_close_button_aria': 'Close chat',
+    'chatbot_typing': 'Assistant is typing...',
+    'chatbot_user_alt': 'User',
+    'chatbot_bot_alt': 'Art Assistant',
+    'chatbot_send_button_aria': 'Send message',
+    'chatbot_open_button_aria': 'Open chat'
   },
   de: {
     'home': 'Startseite',
@@ -437,7 +451,14 @@ export const translations: Record<SupportedLanguage, Record<string, string>> = {
     'chatbot_title': 'Kunst-Assistent',
     'chatbot_greeting': 'Hallo! Wie kann ich Ihnen heute helfen?',
     'chatbot_placeholder': 'Stellen Sie eine Frage...',
-    'chatbot_send': 'Senden'
+    'chatbot_send': 'Senden',
+    'chatbot_header_title': 'Meeh - Kunst-Assistent',
+    'chatbot_close_button_aria': 'Chat schließen',
+    'chatbot_typing': 'Assistent tippt...',
+    'chatbot_user_alt': 'Benutzer',
+    'chatbot_bot_alt': 'Kunst-Assistent',
+    'chatbot_send_button_aria': 'Nachricht senden',
+    'chatbot_open_button_aria': 'Chat öffnen'
   },
   pt: {
     'home': 'Início',
@@ -583,6 +604,13 @@ export const translations: Record<SupportedLanguage, Record<string, string>> = {
     'chatbot_title': 'Assistente de Arte',
     'chatbot_greeting': 'Olá! Como posso te ajudar hoje?',
     'chatbot_placeholder': 'Faça uma pergunta...',
-    'chatbot_send': 'Enviar'
+    'chatbot_send': 'Enviar',
+    'chatbot_header_title': 'Meeh - Assistente de Arte',
+    'chatbot_close_button_aria': 'Fechar chat',
+    'chatbot_typing': 'Assistente está digitando...',
+    'chatbot_user_alt': 'Usuário',
+    'chatbot_bot_alt': 'Assistente de Arte',
+    'chatbot_send_button_aria': 'Enviar mensagem',
+    'chatbot_open_button_aria': 'Abrir chat'
   },
 };
