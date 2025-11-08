@@ -3,7 +3,8 @@ import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { ROUTES } from '../../constants';
 import { supabase } from '../../lib/supabase';
-import { ChartBarIcon, BoxIcon, UsersIcon, LogoutIcon } from '../../components/ui/icons';
+// FIX: Replaced non-existent icons with available ones: ChartBarIcon -> OverviewIcon, BoxIcon -> PackageIcon, UsersIcon -> UserIcon.
+import { OverviewIcon, PackageIcon, UserIcon, LogoutIcon } from '../../components/ui/icons';
 
 const AdminLayout: React.FC = () => {
   const { user } = useAuth();
@@ -15,9 +16,9 @@ const AdminLayout: React.FC = () => {
   };
   
   const navItems = [
-    { to: ROUTES.ADMIN_DASHBOARD, label: 'Dashboard', icon: ChartBarIcon, end: true },
-    { to: ROUTES.ADMIN_PRODUCTS, label: 'Products', icon: BoxIcon },
-    { to: ROUTES.ADMIN_ORDERS, label: 'Orders', icon: UsersIcon },
+    { to: ROUTES.ADMIN_DASHBOARD, label: 'Dashboard', icon: OverviewIcon, end: true },
+    { to: ROUTES.ADMIN_PRODUCTS, label: 'Products', icon: PackageIcon },
+    { to: ROUTES.ADMIN_ORDERS, label: 'Orders', icon: UserIcon },
   ];
 
   const navLinkClasses = ({ isActive }: { isActive: boolean }) =>

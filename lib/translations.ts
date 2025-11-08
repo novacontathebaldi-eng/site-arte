@@ -261,7 +261,10 @@ export const translations = {
       errorWeakPassword: 'Le mot de passe est trop faible.',
       errorResetPassword: 'Erreur lors de l\'envoi de l\'e-mail de réinitialisation.',
       checkingEmail: 'Vérification...',
-      emailAvailable: 'E-mail disponible'
+      emailAvailable: 'E-mail disponible',
+      sending: 'Envoi en cours...',
+      checkInboxAndSpam: 'Vérifiez votre boîte de réception et vos spams.',
+      rememberedPassword: 'Vous vous souvenez de votre mot de passe ? Se connecter',
     },
     dashboard: {
       overview: 'Aperçu',
@@ -644,7 +647,10 @@ export const translations = {
       errorWeakPassword: 'Password is too weak.',
       errorResetPassword: 'Error sending reset email.',
       checkingEmail: 'Checking...',
-      emailAvailable: 'Email available'
+      emailAvailable: 'Email available',
+      sending: 'Sending...',
+      checkInboxAndSpam: 'Check your inbox and spam folder.',
+      rememberedPassword: 'Remembered your password? Log in',
     },
     dashboard: {
       overview: 'Overview',
@@ -1027,7 +1033,10 @@ export const translations = {
       errorWeakPassword: 'Das Passwort ist zu schwach.',
       errorResetPassword: 'Fehler beim Senden der E-Mail zum Zurücksetzen.',
       checkingEmail: 'Überprüfung...',
-      emailAvailable: 'E-Mail verfügbar'
+      emailAvailable: 'E-Mail verfügbar',
+      sending: 'Wird gesendet...',
+      checkInboxAndSpam: 'Überprüfen Sie Ihren Posteingang und Spam-Ordner.',
+      rememberedPassword: 'Passwort wieder eingefallen? Anmelden',
     },
     dashboard: {
       overview: 'Übersicht',
@@ -1410,7 +1419,10 @@ export const translations = {
       errorWeakPassword: 'A senha é muito fraca.',
       errorResetPassword: 'Erro ao enviar e-mail de redefinição.',
       checkingEmail: 'Verificando...',
-      emailAvailable: 'E-mail disponível'
+      emailAvailable: 'E-mail disponível',
+      sending: 'Enviando...',
+      checkInboxAndSpam: 'Verifique sua caixa de entrada e spam.',
+      rememberedPassword: 'Lembrou sua senha? Faça login',
     },
     dashboard: {
       overview: 'Visão Geral',
