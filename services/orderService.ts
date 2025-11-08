@@ -1,4 +1,4 @@
-import { collection, addDoc, getDocs, query, where, serverTimestamp, orderBy } from 'firebase/firestore';
+import { collection, addDoc, getDocs, query, where, serverTimestamp, orderBy, getDoc, doc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { CartItem, Address, Order } from '../types';
 import { useTranslation } from '../hooks/useTranslation';
@@ -68,4 +68,27 @@ export const getUserOrders = async (userId: string): Promise<Order[]> => {
         console.error("Error fetching user orders:", error);
         return [];
     }
-}
+};
+
+export const getOrderById = async (orderId: string, userId: string): Promise<Order | null> => {
+    try {
+        const orderRef = doc(db, 'orders', orderId);
+        const docSnap = await getDoc(orderRef);
+
+        if (docSnap.exists() && docSnap.data().userId === userId) {
+            const data = docSnap.data();
+            return {
+                id: docSnap.id,
+                ...data,
+                createdAt: data.createdAt?.toDate(),
+            } as Order;
+        } else {
+            // Doc doesn't exist or doesn't belong to the user
+            console.log("No such document or access denied!");
+            return null;
+        }
+    } catch (error) {
+        console.error("Error fetching order:", error);
+        return null;
+    }
+};

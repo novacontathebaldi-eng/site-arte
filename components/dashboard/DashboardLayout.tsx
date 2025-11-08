@@ -16,6 +16,7 @@ const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ children }) 
         { to: '/dashboard', label: t('overview'), end: true },
         { to: '/dashboard/orders', label: t('my_orders') },
         { to: '/dashboard/addresses', label: t('my_addresses') },
+        { to: '/dashboard/wishlist', label: t('my_wishlist') },
     ];
 
     return (

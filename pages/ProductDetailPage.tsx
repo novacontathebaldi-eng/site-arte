@@ -5,14 +5,18 @@ import { Product } from '../types';
 import Spinner from '../components/Spinner';
 import { useTranslation } from '../hooks/useTranslation';
 import { CartContext } from '../context/CartContext';
+import { WishlistContext } from '../context/WishlistContext';
 import toast from 'react-hot-toast';
+import { useAuth } from '../context/AuthContext';
 
 const ProductDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const { language, getTranslated, t } = useTranslation();
+  const { user } = useAuth();
   const cartContext = useContext(CartContext);
+  const wishlistContext = useContext(WishlistContext);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -32,7 +36,23 @@ const ProductDetailPage: React.FC = () => {
       toast.success(t('added_to_cart'));
     }
   };
-  
+
+  const handleWishlistToggle = () => {
+    if (!user) {
+        toast.error("Please log in to use the wishlist.");
+        return;
+    }
+    if (product) {
+        if (wishlistContext?.isInWishlist(product.id)) {
+            wishlistContext?.removeFromWishlist(product.id);
+            toast.success(t('removed_from_wishlist'));
+        } else {
+            wishlistContext?.addToWishlist(product.id);
+            toast.success(t('added_to_wishlist'));
+        }
+    }
+  };
+
   const getStatusBadge = (status: Product['status']) => {
     switch (status) {
         case 'available':
@@ -63,6 +83,8 @@ const ProductDetailPage: React.FC = () => {
       </div>
     );
   }
+
+  const inWishlist = product ? wishlistContext?.isInWishlist(product.id) : false;
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -117,7 +139,7 @@ const ProductDetailPage: React.FC = () => {
             </ul>
           </div>
 
-          <div className="mt-8">
+          <div className="mt-8 flex items-center gap-4">
             <button 
               onClick={handleAddToCart}
               disabled={product.status === 'sold'}
@@ -125,6 +147,11 @@ const ProductDetailPage: React.FC = () => {
             >
               {product.status === 'sold' ? t('sold') : t('add_to_cart')}
             </button>
+            {user && (
+                 <button onClick={handleWishlistToggle} className="p-3 border border-border-color rounded-md hover:bg-surface transition-colors" aria-label={inWishlist ? t('remove_from_wishlist') : t('add_to_wishlist')}>
+                    <svg className={`w-6 h-6 ${inWishlist ? 'text-red-500 fill-current' : 'text-gray-500'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 016.364 0L12 7.636l1.318-1.318a4.5 4.5 0 016.364 6.364L12 20.364l-7.682-7.682a4.5 4.5 0 010-6.364z" /></svg>
+                </button>
+            )}
           </div>
         </div>
       </div>

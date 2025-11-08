@@ -32,6 +32,20 @@ export const getProducts = async (filters?: { category?: string }): Promise<Prod
   }
 };
 
+export const getProductsByIds = async (ids: string[]): Promise<Product[]> => {
+    if (ids.length === 0) {
+        return [];
+    }
+    try {
+        const q = query(productsCollection, where('__name__', 'in', ids));
+        const querySnapshot = await getDocs(q);
+        return querySnapshot.docs.map(mapDocToProduct);
+    } catch (error) {
+        console.error("Error fetching products by ids: ", error);
+        return [];
+    }
+};
+
 export const getFeaturedProducts = async (): Promise<Product[]> => {
   try {
     const q = query(productsCollection, where("featured", "==", true), where("publishedAt", "!=", null), limit(6));

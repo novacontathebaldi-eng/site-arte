@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { getUserOrders } from '../../services/orderService';
 import { Order } from '../../types';
@@ -32,8 +33,8 @@ const DashboardOrdersPage: React.FC = () => {
             ) : (
                 <div className="space-y-4">
                     {orders.map(order => (
-                        <div key={order.id} className="p-4 border border-border-color rounded-lg">
-                            <div className="flex justify-between items-start">
+                        <div key={order.id} className="p-4 border border-border-color rounded-lg hover:shadow-md transition-shadow">
+                            <div className="flex justify-between items-start flex-wrap gap-2">
                                 <div>
                                     <p className="font-semibold text-primary">{t('order_number')} {order.orderNumber}</p>
                                     <p className="text-sm text-text-secondary">{t('date')}: {new Date(order.createdAt).toLocaleDateString()}</p>
@@ -43,18 +44,23 @@ const DashboardOrdersPage: React.FC = () => {
                                 </span>
                             </div>
                             <div className="mt-4 border-t pt-4">
-                                {order.items.map((item, index) => (
-                                    <div key={index} className="flex items-center gap-4 mb-2">
-                                        <img src={item.productSnapshot.image} alt={item.productSnapshot.title} className="w-16 h-16 object-cover rounded"/>
-                                        <div>
-                                            <p>{item.productSnapshot.title}</p>
-                                            <p className="text-sm text-text-secondary">{item.quantity} x €{item.productSnapshot.price.toFixed(2)}</p>
-                                        </div>
-                                    </div>
-                                ))}
+                               <p className="text-sm text-text-secondary mb-2">
+                                   {order.items.length} item(s)
+                               </p>
+                                <div className="flex -space-x-4">
+                                    {order.items.slice(0, 5).map((item, index) => (
+                                        <img key={index} src={item.productSnapshot.image} alt={item.productSnapshot.title} className="w-12 h-12 object-cover rounded-full border-2 border-white"/>
+                                    ))}
+                                    {order.items.length > 5 && <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center text-sm font-semibold">+{order.items.length - 5}</div>}
+                                </div>
                             </div>
-                             <div className="text-right font-bold mt-2">
-                                {t('total')}: €{order.pricing.total.toFixed(2)}
+                             <div className="flex justify-between items-center mt-4">
+                                <div className="font-bold">
+                                    {t('total')}: €{order.pricing.total.toFixed(2)}
+                                </div>
+                                <Link to={`/dashboard/orders/${order.id}`} className="text-secondary font-semibold hover:underline">
+                                    {t('view_order_details')}
+                                </Link>
                             </div>
                         </div>
                     ))}

@@ -85,3 +85,13 @@ export interface Order {
     shippingAddress: Omit<Address, 'id' | 'isDefault'>;
     createdAt: any; // Firestore Timestamp
 }
+
+export interface WishlistItem {
+    productId: string;
+    addedAt: any; // Firestore Timestamp
+}
+
+export interface Wishlist {
+    items: WishlistItem[];
+    updatedAt: any; // Firestore Timestamp
+}
