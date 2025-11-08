@@ -3,7 +3,8 @@ import { useTranslation } from '../hooks/useTranslation';
 import { useAuth } from '../context/AuthContext';
 import { GoogleGenAI } from '@google/genai';
 
-// IMPORTANT: Ensure GEMINI_API_KEY is set in your environment variables.
+// Per Gemini API guidelines, process.env.API_KEY is the standard.
+// Using GEMINI_API_KEY to match your Vercel setup.
 const API_KEY = process.env.GEMINI_API_KEY;
 
 // Define message type locally for this component
@@ -128,7 +129,7 @@ const Chatbot: React.FC = () => {
     <>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-5 left-5 z-[9998] w-16 h-16 bg-primary text-white rounded-full shadow-lg flex items-center justify-center hover:bg-opacity-90 transition-transform transform hover:scale-110"
+        className="fixed bottom-5 right-5 z-[9998] w-16 h-16 bg-primary text-white rounded-full shadow-lg flex items-center justify-center hover:bg-opacity-90 transition-transform transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
         aria-label={t('chatbot_open_button_aria')}
       >
         {isOpen ? (

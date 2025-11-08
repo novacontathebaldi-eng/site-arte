@@ -3,8 +3,8 @@ import { getFirestore } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 // import { getStorage } from 'firebase/storage';
 
-// These variables are securely managed by the Vercel environment.
-// Corrected env var names by removing the framework-specific 'NEXT_PUBLIC_' prefix.
+// Vercel environment variables are exposed via `process.env` in this environment.
+// Using the exact names from your Vercel settings screenshots.
 const firebaseConfig = {
   apiKey: process.env.FIREBASE_API_KEY,
   authDomain: process.env.FIREBASE_AUTH_DOMAIN,
