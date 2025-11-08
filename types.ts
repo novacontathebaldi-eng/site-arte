@@ -269,3 +269,23 @@ export interface SupabaseProduct {
   product_images?: SupabaseProductImage[];
   product_dimensions?: SupabaseProductDimension[];
 }
+
+// --- TIPOS PARA O NOVO SISTEMA DE CARRINHO (ZUSTAND) ---
+
+export interface SupabaseCartItem {
+  id: string; // product_id
+  product: SupabaseProduct;
+  quantity: number;
+  unit_price: number;
+  subtotal: number;
+}
+
+export interface CartStoreState {
+  items: SupabaseCartItem[];
+  itemCount: number;
+  total: number;
+  addItem: (product: SupabaseProduct, quantity: number) => void;
+  removeItem: (productId: string) => void;
+  updateQuantity: (productId: string, newQuantity: number) => void;
+  clearCart: () => void;
+}

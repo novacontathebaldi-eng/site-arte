@@ -1,17 +1,17 @@
-import { useContext } from 'react';
-import { CartContext } from '../context/CartContext';
+import { useCartStore } from '../store/cartStore';
 
-// Este hook customizado, `useCart`, simplifica o acesso ao contexto do carrinho.
+// Este hook customizado, `useCart`, simplifica o acesso ao estado global do carrinho via Zustand.
 export const useCart = () => {
-  const context = useContext(CartContext);
+  const { items, itemCount, total, ...actions } = useCartStore();
 
-  // Se um componente tentar usar este hook sem estar dentro de um CartProvider,
-  // um erro será lançado. Isso ajuda a evitar bugs.
-  if (!context) {
-    throw new Error('useCart must be used within a CartProvider');
-  }
-
-  // Retorna o estado do carrinho e as funções para modificá-lo.
-  // Em qualquer componente, basta fazer `const { state, addItem } = useCart();`
-  return context;
+  // Retorna uma estrutura compatível com a API do Context anterior
+  // para minimizar a necessidade de refatoração imediata nos componentes.
+  return {
+    state: {
+      items,
+      itemCount,
+      total,
+    },
+    ...actions,
+  };
 };
