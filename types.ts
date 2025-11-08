@@ -215,3 +215,57 @@ export interface DashboardStats {
 
 // --- TIPOS PARA CHECKOUT ---
 export type CheckoutStep = 'address' | 'payment' | 'review';
+
+// --- TIPOS PARA O NOVO PRODUCT SERVICE (SUPABASE) ---
+
+export interface ProductFilters {
+  category?: string[];
+  minPrice?: number;
+  maxPrice?: number;
+  technique?: string[];
+  sizeMin?: number;
+  sizeMax?: number;
+  yearMin?: number;
+  yearMax?: number;
+  available?: boolean;
+  search?: string;
+  sortBy?: 'price_asc' | 'price_desc' | 'newest' | 'rating';
+  page?: number;
+  limit?: number;
+}
+
+export interface SupabaseProductImage {
+  id: string;
+  product_id: string;
+  image_url: string;
+  alt_text: { [key in Language]?: string };
+  is_primary: boolean;
+  order: number;
+}
+
+export interface SupabaseProductDimension {
+  id: string;
+  product_id: string;
+  width: number;
+  height: number;
+  depth: number | null;
+  unit: 'cm' | 'inches';
+}
+
+export interface SupabaseProduct {
+  id: string;
+  title: { [key in Language]?: string };
+  description: { [key in Language]?: string };
+  price: number;
+  currency: string;
+  category: 'Painting' | 'Sculpture' | 'Drawing' | 'Print';
+  technique: string[];
+  featured: boolean;
+  available: boolean;
+  year: number;
+  rating: number;
+  created_at: string;
+  updated_at: string;
+  product_images?: SupabaseProductImage[];
+  product_dimensions?: SupabaseProductDimension[];
+}
