@@ -1,5 +1,5 @@
 // Utiliza a sintaxe do Firebase v8 (namespaced)
-// FIX: Switched to Firebase v8 compat libraries to match namespaced syntax and resolve type/initialization errors.
+// FIX: Using Firebase v9 compatibility layer ('firebase/compat/app' and 'firebase/compat/auth') to resolve errors with Firebase v8 namespaced syntax.
 import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
 

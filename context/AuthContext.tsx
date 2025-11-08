@@ -1,8 +1,9 @@
 import React, { createContext, useReducer, useEffect, ReactNode, useCallback } from 'react';
 import { auth, googleProvider } from '../lib/firebase';
 import { supabase } from '../lib/supabase';
-// FIX: Switched to Firebase v8 compat library to match namespaced syntax and resolve type errors.
+// FIX: Using Firebase v9 compatibility layer ('firebase/compat/app' and 'firebase/compat/auth') to resolve errors with Firebase v8 namespaced syntax.
 import firebase from 'firebase/compat/app';
+import 'firebase/compat/auth';
 import { UserData, UserPreferences } from '../types';
 
 // Tipos

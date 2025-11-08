@@ -1,5 +1,6 @@
-// FIX: Switched to Firebase v8 compat library to resolve User type error.
+// FIX: Using Firebase v9 compatibility layer ('firebase/compat/app' and 'firebase/compat/auth') to resolve errors with Firebase v8 namespaced syntax. This makes types like 'firebase.User' available.
 import firebase from 'firebase/compat/app';
+import 'firebase/compat/auth';
 
 // Este arquivo define a "forma" dos dados que usamos no site.
 // Pense nisso como um contrato: se um objeto é um "Produto", ele TEM que ter
