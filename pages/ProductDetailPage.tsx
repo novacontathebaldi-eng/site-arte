@@ -1,172 +1,130 @@
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { useTranslation } from '../hooks/useTranslation';
+import React, { useEffect, useState, useContext } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import { getProductBySlug } from '../services/firestoreService';
 import { Product } from '../types';
-import { getProductBySlug } from '../services/api';
-import { ProductDetailSkeleton } from '../components/SkeletonLoader';
-import NotFoundPage from './NotFoundPage';
-import { useCart } from '../hooks/useCart';
-import { useToast } from '../hooks/useToast';
-import { useWishlist } from '../hooks/useWishlist';
-import { HeartIcon, HeartSolidIcon } from '../components/ui/icons';
+import Spinner from '../components/Spinner';
+import { useTranslation } from '../hooks/useTranslation';
+import { CartContext } from '../context/CartContext';
+import toast from 'react-hot-toast';
 
-// Esta é a Página de Detalhes do Produto. Ela mostra todas as informações de uma única obra.
 const ProductDetailPage: React.FC = () => {
-  const { slug } = useParams<{ slug: string }>(); // Pega o 'slug' do produto da URL.
-  const { language, t } = useTranslation();
-  const { addItem } = useCart();
-  const { showToast } = useToast();
-  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
-
-
+  const { slug } = useParams<{ slug: string }>();
   const [product, setProduct] = useState<Product | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(false);
-  const [quantity, setQuantity] = useState(1);
-  const [isAdded, setIsAdded] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const { language, getTranslated, t } = useTranslation();
+  const cartContext = useContext(CartContext);
 
-  // Busca os detalhes do produto específico usando o slug.
   useEffect(() => {
-    if (!slug) return;
     const fetchProduct = async () => {
-      try {
-        setIsLoading(true);
-        setError(false);
+      if (slug) {
+        setLoading(true);
         const fetchedProduct = await getProductBySlug(slug);
-        if (fetchedProduct) {
-          setProduct(fetchedProduct);
-        } else {
-          setError(true);
-        }
-      } catch (err: any) {
-        console.error("Failed to fetch product:", err.message);
-        setError(true);
-      } finally {
-        setIsLoading(false);
+        setProduct(fetchedProduct || null);
+        setLoading(false);
       }
     };
     fetchProduct();
   }, [slug]);
 
   const handleAddToCart = () => {
-    if (!product) return;
-    
-    addItem({
-      id: product.id,
-      slug: product.slug,
-      title: product.translations[language].title,
-      image: product.images[0].url,
-      price: product.price.amount,
-      quantity: quantity,
-      stock: product.stock,
-    });
-
-    showToast(t('toast.itemAdded'), 'success');
-    setIsAdded(true);
-    setTimeout(() => setIsAdded(false), 2000); // Reseta o estado do botão após 2 segundos
+    if (product && (product.status === 'available' || product.status === 'made-to-order')) {
+      cartContext?.addToCart(product, 1);
+      toast.success(t('added_to_cart'));
+    }
   };
-
-  const handleWishlistToggle = () => {
-    if (!product) return;
-    if (isInWishlist(product.id)) {
-        removeFromWishlist(product.id);
-    } else {
-        addToWishlist(product.id);
+  
+  const getStatusBadge = (status: Product['status']) => {
+    switch (status) {
+        case 'available':
+            return <span className="inline-block bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full">{t('available')}</span>;
+        case 'sold':
+            return <span className="inline-block bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded-full">{t('sold')}</span>;
+        case 'made-to-order':
+            return <span className="inline-block bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded-full">{t('made_to_order')}</span>;
     }
   };
 
-  // Se estiver carregando, mostra o esqueleto.
-  if (isLoading) {
-    return <ProductDetailSkeleton />;
+  if (loading) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <Spinner />
+      </div>
+    );
   }
 
-  // Se deu erro ou o produto não foi encontrado, mostra a página 404.
-  if (error || !product) {
-    return <NotFoundPage />;
+  if (!product) {
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center text-center">
+        <h2 className="text-2xl font-serif text-primary">Artwork Not Found</h2>
+        <p className="mt-2 text-text-secondary">The piece you are looking for does not exist or has been moved.</p>
+        <Link to="/catalog" className="mt-6 bg-primary text-white font-bold py-2 px-6 rounded-md hover:bg-opacity-90 transition-all duration-300">
+          Back to Catalog
+        </Link>
+      </div>
+    );
   }
-
-  const productTranslation = product.translations[language];
-  const formattedPrice = new Intl.NumberFormat(language + '-LU', {
-    style: 'currency',
-    currency: 'EUR',
-  }).format(product.price.amount);
-
-  const statusInfo = {
-    available: { text: t('product.available'), color: 'bg-green-100 text-green-800' },
-    sold: { text: t('product.sold'), color: 'bg-red-100 text-red-800' },
-    'made-to-order': { text: t('product.madeToOrder'), color: 'bg-yellow-100 text-yellow-800' },
-  };
-
-  const isAddToCartDisabled = product.status !== 'available' || isAdded;
-  const isProductInWishlist = isInWishlist(product.id);
 
   return (
-    <div className="bg-white">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* Coluna da Esquerda: Galeria de Imagens */}
-          <div>
-            <img 
-              src={product.images[0].url} 
-              alt={product.images[0].alt}
-              className="w-full rounded-lg shadow-lg"
-            />
-            {/* Thumbnails podem ser adicionados aqui */}
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+        {/* Image Gallery */}
+        <div>
+          <img 
+            src={product.images[0].url} 
+            alt={getTranslated(product, 'title')}
+            className="w-full h-auto object-contain rounded-lg shadow-lg"
+          />
+          {/* Thumbnails would go here */}
+        </div>
+
+        {/* Product Information */}
+        <div>
+          <div className="text-sm text-text-secondary mb-2">
+            <Link to="/catalog" className="hover:text-secondary">Catalog</Link> / 
+            <span className="capitalize"> {product.category}</span>
+          </div>
+          <h1 className="text-4xl md:text-5xl font-serif font-bold text-primary">
+            {getTranslated(product, 'title')}
+          </h1>
+          <p className="mt-2 text-lg text-text-secondary">{t('by_artist')}</p>
+
+          <p className="mt-4 text-4xl font-serif text-secondary">
+            €{product.price.amount.toFixed(2)}
+          </p>
+
+          <div className="mt-4 flex items-center gap-4">
+              {getStatusBadge(product.status)}
+              {product.certificateOfAuthenticity && 
+                <span className="text-sm text-accent flex items-center gap-1">
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zM12 12a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" /><path d="M11 6a1 1 0 10-2 0v1a1 1 0 102 0V6z" /></svg>
+                    Certificate of Authenticity
+                </span>}
           </div>
 
-          {/* Coluna da Direita: Informações do Produto */}
-          <div>
-            <h1 className="text-4xl lg:text-5xl font-heading font-bold text-primary">{productTranslation.title}</h1>
-            <p className="text-lg text-text-secondary mt-2">{t('product.byArtist')}</p>
-            
-            <p className="text-3xl font-bold text-secondary my-6">{formattedPrice}</p>
-            
-            <span className={`text-sm font-bold px-3 py-1 rounded-full ${statusInfo[product.status].color}`}>
-              {statusInfo[product.status].text}
-            </span>
-
-            <div className="mt-8 prose max-w-none text-text-secondary">
-              <p>{productTranslation.description}</p>
+          <div className="mt-6 border-t border-border-color pt-6">
+            <h2 className="text-xl font-serif font-semibold text-primary">Description</h2>
+            <div className="mt-2 text-text-secondary leading-relaxed prose"
+                 dangerouslySetInnerHTML={{ __html: getTranslated(product.translations[language], 'description')}}>
             </div>
-            
-            <ul className="mt-8 space-y-2 text-sm text-text-secondary border-t pt-6">
-              <li><strong>{t('product.year')}:</strong> {product.yearCreated}</li>
-              <li><strong>{t('product.category')}:</strong> {t(`catalog.${product.category}`)}</li>
-              <li><strong>{t('product.technique')}:</strong> {productTranslation.materials}</li>
-              <li><strong>{t('product.dimensions')}:</strong> {product.dimensions.height} x {product.dimensions.width} {product.dimensions.depth ? `x ${product.dimensions.depth}` : ''} cm</li>
+          </div>
+          
+          <div className="mt-6">
+            <h3 className="text-lg font-semibold text-primary">Details</h3>
+            <ul className="mt-2 text-sm text-text-secondary space-y-1 list-disc list-inside">
+                <li>Materials: {getTranslated(product.translations[language], 'materials')}</li>
+                <li>Dimensions: {product.dimensions.height} x {product.dimensions.width} {product.dimensions.depth ? `x ${product.dimensions.depth}` : ''} cm</li>
+                <li>Year: {product.yearCreated}</li>
             </ul>
+          </div>
 
-            <div className="mt-8 flex items-center gap-4">
-                {product.status === 'available' && (
-                  <>
-                    {product.stock > 1 && (
-                        <div className="flex items-center border rounded-lg">
-                            <button onClick={() => setQuantity(q => Math.max(1, q - 1))} className="px-4 py-3 h-full">-</button>
-                            <input type="number" value={quantity} readOnly className="w-12 text-center border-l border-r" />
-                            <button onClick={() => setQuantity(q => Math.min(product.stock, q + 1))} className="px-4 py-3 h-full">+</button>
-                        </div>
-                    )}
-                    <button 
-                      onClick={handleAddToCart}
-                      disabled={isAddToCartDisabled}
-                      className={`w-full bg-primary text-white font-bold py-3 px-8 rounded-lg text-lg transition-all duration-300 ${isAddToCartDisabled ? 'bg-gray-400 cursor-not-allowed' : 'hover:bg-opacity-80'}`}
-                    >
-                      {isAdded ? t('product.addedToCart') : t('product.addToCart')}
-                    </button>
-                  </>
-                )}
-                <button 
-                  onClick={handleWishlistToggle}
-                  className="p-3 border rounded-lg hover:bg-surface transition-colors"
-                  aria-label={isProductInWishlist ? t('product.removeFromWishlist') : t('product.addToWishlist')}
-                >
-                    {isProductInWishlist ? (
-                        <HeartSolidIcon className="w-6 h-6 text-red-500"/>
-                    ) : (
-                        <HeartIcon className="w-6 h-6 text-text-secondary"/>
-                    )}
-                </button>
-            </div>
+          <div className="mt-8">
+            <button 
+              onClick={handleAddToCart}
+              disabled={product.status === 'sold'}
+              className="w-full bg-primary text-white font-bold py-3 px-8 rounded-md hover:bg-opacity-90 transition-all duration-300 disabled:bg-gray-400 disabled:cursor-not-allowed"
+            >
+              {product.status === 'sold' ? t('sold') : t('add_to_cart')}
+            </button>
           </div>
         </div>
       </div>

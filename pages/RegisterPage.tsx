@@ -1,139 +1,113 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { supabase } from '../lib/supabase';
+import { useAuth } from '../context/AuthContext';
 import { useTranslation } from '../hooks/useTranslation';
-import { useToast } from '../hooks/useToast';
-import { ROUTES } from '../constants';
-import Input from '../components/ui/Input';
-import Button from '../components/ui/Button';
-import { GoogleIcon } from '../components/ui/icons';
-import { useAuth } from '../hooks/useAuth';
-
-const PasswordStrengthMeter: React.FC<{ password: string }> = ({ password }) => {
-    const { t } = useTranslation();
-    const strength = useMemo(() => {
-        let score = 0;
-        if (password.length > 7) score++;
-        if (password.match(/[a-z]/)) score++;
-        if (password.match(/[A-Z]/)) score++;
-        if (password.match(/[0-9]/)) score++;
-        if (password.match(/[^a-zA-Z0-9]/)) score++;
-        return score;
-    }, [password]);
-
-    const strengthLabel = [t('auth.weak'), t('auth.weak'), t('auth.medium'), t('auth.medium'), t('auth.strong'), t('auth.strong')];
-    const strengthColor = ['bg-red-500', 'bg-red-500', 'bg-yellow-500', 'bg-yellow-500', 'bg-green-500', 'bg-green-500'];
-
-    return (
-        <div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
-                <div className={`h-2 rounded-full ${strengthColor[strength]}`} style={{ width: `${(strength / 5) * 100}%` }}></div>
-            </div>
-            <p className="text-xs text-right mt-1">{strengthLabel[strength]}</p>
-        </div>
-    );
-};
-
+import toast from 'react-hot-toast';
 
 const RegisterPage: React.FC = () => {
-  const { t } = useTranslation();
-  const navigate = useNavigate();
-  const { showToast } = useToast();
-  const { user } = useAuth();
+    const { t } = useTranslation();
+    const { register, signInWithGoogle } = useAuth();
+    const navigate = useNavigate();
+    const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [loading, setLoading] = useState(false);
 
-  const [fullName, setFullName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
-  
-  useEffect(() => {
-    if (user) {
-      navigate(ROUTES.DASHBOARD, { replace: true });
-    }
-  }, [user, navigate]);
-
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError('');
-    try {
-        const { error: signUpError } = await supabase.auth.signUp({
-            email,
-            password,
-            options: {
-                data: {
-                    display_name: fullName,
-                }
-            }
-        });
-        if (signUpError) throw signUpError;
-        
-        // Agora, faça login do usuário para criar uma sessão imediatamente
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-
-        if (signInError) {
-          // Mesmo que o login falhe (caso raro), o usuário foi criado.
-          // O usuário pode então fazer login manualmente.
-          console.error("Sign in after sign up failed:", signInError);
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (password !== confirmPassword) {
+            toast.error("Passwords do not match.");
+            return;
         }
-
-        showToast(t('toast.registerSuccess'), 'info');
-        navigate(ROUTES.DASHBOARD);
-
-    } catch (err: any) {
-      setError(err.message || t('toast.error'));
-      // O erro 'Email rate limit exceeded' será exibido aqui
-      showToast(err.error_description || err.message || t('toast.error'), 'error');
-    } finally {
-      setIsLoading(false);
+        setLoading(true);
+        try {
+            await register(name, email, password);
+        } catch (error) {
+            // Error is handled by AuthContext
+        } finally {
+            setLoading(false);
+        }
+    };
+    
+    const handleGoogleSignIn = async () => {
+        try {
+            await signInWithGoogle();
+        } catch (error) {
+            // Error handled in context
+        }
     }
-  };
 
-   const handleGoogleLogin = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: window.location.origin,
-      }
-    });
-     if (error) {
-        showToast(t('toast.error'), 'error');
-    }
-  };
 
-  return (
-    <div className="flex justify-center items-center py-12 px-4">
-      <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
-        <h1 className="text-2xl font-bold text-center">{t('auth.registerTitle')}</h1>
-        <form onSubmit={handleRegister} className="space-y-6">
-          <Input id="fullName" type="text" label={t('auth.fullName')} value={fullName} onChange={(e) => setFullName(e.target.value)} required />
-          <Input id="email" type="email" label={t('auth.email')} value={email} onChange={(e) => setEmail(e.target.value)} required />
-          <div>
-            <Input id="password" type="password" label={t('auth.password')} value={password} onChange={(e) => setPassword(e.target.value)} required />
-            <PasswordStrengthMeter password={password} />
-          </div>
-          {error && <p className="text-red-500 text-sm">{error}</p>}
-          <Button type="submit" variant="primary" className="w-full" disabled={isLoading}>
-            {isLoading ? `${t('auth.loading')}...` : t('auth.register')}
-          </Button>
-        </form>
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center"><span className="w-full border-t"></span></div>
-          <div className="relative flex justify-center text-sm"><span className="px-2 bg-white text-gray-500">{t('auth.or')}</span></div>
+    return (
+        <div className="flex items-center justify-center min-h-[70vh] bg-surface">
+            <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
+                <h1 className="text-3xl font-serif font-bold text-center text-primary">{t('create_your_account')}</h1>
+                <form onSubmit={handleSubmit} className="space-y-6">
+                     <div>
+                        <label htmlFor="name" className="block text-sm font-medium text-text-secondary">{t('full_name')}</label>
+                        <input
+                            type="text"
+                            id="name"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            required
+                            className="mt-1 block w-full px-3 py-2 bg-white border border-border-color rounded-md shadow-sm focus:outline-none focus:ring-secondary focus:border-secondary"
+                        />
+                    </div>
+                    <div>
+                        <label htmlFor="email" className="block text-sm font-medium text-text-secondary">{t('email_address')}</label>
+                        <input
+                            type="email"
+                            id="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                            className="mt-1 block w-full px-3 py-2 bg-white border border-border-color rounded-md shadow-sm focus:outline-none focus:ring-secondary focus:border-secondary"
+                        />
+                    </div>
+                    <div>
+                        <label htmlFor="password" className="block text-sm font-medium text-text-secondary">{t('password')}</label>
+                        <input
+                            type="password"
+                            id="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                            className="mt-1 block w-full px-3 py-2 bg-white border border-border-color rounded-md shadow-sm focus:outline-none focus:ring-secondary focus:border-secondary"
+                        />
+                    </div>
+                     <div>
+                        <label htmlFor="confirm-password" className="block text-sm font-medium text-text-secondary">{t('confirm_password')}</label>
+                        <input
+                            type="password"
+                            id="confirm-password"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            required
+                            className="mt-1 block w-full px-3 py-2 bg-white border border-border-color rounded-md shadow-sm focus:outline-none focus:ring-secondary focus:border-secondary"
+                        />
+                    </div>
+                    <div>
+                        <button type="submit" disabled={loading} className="w-full bg-primary text-white font-bold py-3 px-8 rounded-md hover:bg-opacity-90 transition-all duration-300 disabled:bg-gray-400">
+                             {loading ? '...' : t('register')}
+                        </button>
+                    </div>
+                </form>
+                 <div className="relative flex items-center justify-center">
+                    <span className="absolute inset-x-0 h-px bg-border-color"></span>
+                    <span className="relative bg-white px-2 text-sm text-text-secondary">{t('or')}</span>
+                </div>
+                 <button onClick={handleGoogleSignIn} className="w-full flex items-center justify-center gap-2 border border-border-color py-3 px-4 rounded-md hover:bg-surface transition-colors">
+                     <svg className="w-5 h-5" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4C12.955 4 4 12.955 4 24s8.955 20 20 20s20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"></path><path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4C16.318 4 9.656 8.337 6.306 14.691z"></path><path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238C29.211 35.091 26.715 36 24 36c-5.222 0-9.618-3.317-11.28-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"></path><path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303c-.792 2.237-2.231 4.166-4.087 5.571l6.19 5.238C41.389 36.091 44 30.651 44 24c0-1.341-.138-2.65-.389-3.917z"></path></svg>
+                    {t('login_with_google')}
+                </button>
+                <p className="text-center text-sm text-text-secondary">
+                    {t('already_have_account')} <Link to="/login" className="font-medium text-secondary hover:underline">{t('login')}</Link>
+                </p>
+            </div>
         </div>
-        <Button variant="secondary" onClick={handleGoogleLogin} className="w-full flex justify-center items-center gap-2">
-            <GoogleIcon className="w-5 h-5" /> {t('auth.loginWithGoogle')}
-        </Button>
-        <p className="text-center text-sm">
-          {t('auth.alreadyHaveAccount')} <Link to={ROUTES.LOGIN} className="font-medium text-secondary hover:underline">{t('auth.login')}</Link>
-        </p>
-      </div>
-    </div>
-  );
+    );
 };
 
 export default RegisterPage;
