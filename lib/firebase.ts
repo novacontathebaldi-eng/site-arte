@@ -20,7 +20,7 @@ const app = initializeApp(firebaseConfig);
 // Initialize services
 const db = getFirestore(app);
 const auth = getAuth(app);
-// const storage = getStorage(app);
+// const storage = getStorage(app); // Supabase is used for storage in this project.
 
 
 // NOTE: Supabase is used for storage in this project.
