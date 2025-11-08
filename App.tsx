@@ -31,10 +31,10 @@ import DashboardOrderDetailPage from './pages/dashboard/DashboardOrderDetailPage
 const App: React.FC = () => {
   return (
     <LanguageProvider>
-      <AuthProvider>
-        <CartProvider>
-          <WishlistProvider>
-            <HashRouter>
+      <HashRouter>
+        <AuthProvider>
+          <CartProvider>
+            <WishlistProvider>
               <Toaster position="bottom-center" reverseOrder={false} />
               <div className="flex flex-col min-h-screen bg-white text-text-primary font-sans">
                 <Header />
@@ -69,10 +69,10 @@ const App: React.FC = () => {
                 </main>
                 <Footer />
               </div>
-            </HashRouter>
-          </WishlistProvider>
-        </CartProvider>
-      </AuthProvider>
+            </WishlistProvider>
+          </CartProvider>
+        </AuthProvider>
+      </HashRouter>
     </LanguageProvider>
   );
 };
