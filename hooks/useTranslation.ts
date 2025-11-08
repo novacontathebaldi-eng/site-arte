@@ -16,17 +16,22 @@ export const useTranslation = () => {
     return translations[language][key] || key;
   };
   
-  const getTranslated = <T,>(obj: T, key: keyof T, lang: SupportedLanguage = language): string => {
+  const getTranslated = <T, K extends keyof T>(obj: T, key: K, lang: SupportedLanguage = language): string => {
     if (obj && typeof obj === 'object' && 'translations' in obj && typeof obj.translations === 'object' && obj.translations && lang in obj.translations) {
-        const typedTranslations = obj.translations as Record<SupportedLanguage, Record<string, string>>;
-        const translation = typedTranslations[lang];
-        if (translation && typeof translation === 'object' && String(key) in translation) {
-            return translation[String(key)];
+        const langTranslations = (obj.translations as any)[lang];
+        if (langTranslations && typeof langTranslations === 'object' && key in langTranslations) {
+            const value = langTranslations[key as keyof typeof langTranslations];
+            if (typeof value === 'string') {
+              return value;
+            }
         }
     }
-    // Fallback logic
+    // Fallback logic for non-translatable fields
     if (obj && typeof obj === 'object' && key in obj) {
-        return String(obj[key]);
+        const value = obj[key];
+        if(typeof value === 'string' || typeof value === 'number') {
+          return String(value);
+        }
     }
     return '';
   };

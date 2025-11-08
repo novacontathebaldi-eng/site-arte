@@ -10,8 +10,9 @@ const AddressForm: React.FC<{ onSave: () => void; onCancel: () => void; address?
     const { t } = useTranslation();
     const { user } = useAuth();
     const [formData, setFormData] = useState({
-        recipientName: address?.recipientName || '',
-        addressLine1: address?.addressLine1 || '',
+        name: address?.name || '',
+        line1: address?.line1 || '',
+        line2: address?.line2 || '',
         city: address?.city || '',
         postalCode: address?.postalCode || '',
         country: address?.country || '',
@@ -24,12 +25,13 @@ const AddressForm: React.FC<{ onSave: () => void; onCancel: () => void; address?
         if (!user) return;
 
         try {
+             const addressPayload = { ...formData };
             if (address?.id) {
                 // Update existing address
-                await updateAddress(user.uid, address.id, formData);
+                await updateAddress(user.uid, address.id, addressPayload);
             } else {
                 // Add new address
-                await addAddress(user.uid, formData);
+                await addAddress(user.uid, addressPayload);
             }
             toast.success(t('address_saved'));
             onSave();
@@ -48,8 +50,9 @@ const AddressForm: React.FC<{ onSave: () => void; onCancel: () => void; address?
             <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
                 <h2 className="text-2xl font-serif mb-4">{address ? t('edit_address') : t('add_new_address')}</h2>
                 <form onSubmit={handleSubmit} className="space-y-4">
-                    <input name="recipientName" value={formData.recipientName} onChange={handleChange} placeholder={t('recipient_name')} required className="w-full p-2 border rounded" />
-                    <input name="addressLine1" value={formData.addressLine1} onChange={handleChange} placeholder={t('address_line_1')} required className="w-full p-2 border rounded" />
+                    <input name="name" value={formData.name} onChange={handleChange} placeholder={t('recipient_name')} required className="w-full p-2 border rounded" />
+                    <input name="line1" value={formData.line1} onChange={handleChange} placeholder={t('address_line_1')} required className="w-full p-2 border rounded" />
+                    <input name="line2" value={formData.line2} onChange={handleChange} placeholder={t('address_line_2')} className="w-full p-2 border rounded" />
                     <input name="city" value={formData.city} onChange={handleChange} placeholder={t('city')} required className="w-full p-2 border rounded" />
                     <input name="postalCode" value={formData.postalCode} onChange={handleChange} placeholder={t('postal_code')} required className="w-full p-2 border rounded" />
                     <input name="country" value={formData.country} onChange={handleChange} placeholder={t('country')} required className="w-full p-2 border rounded" />
@@ -132,8 +135,9 @@ const DashboardAddressesPage: React.FC = () => {
                     {addresses.map(address => (
                         <div key={address.id} className="p-6 bg-surface rounded-lg shadow-sm">
                             {address.isDefault && <span className="text-xs font-bold text-accent mb-2 inline-block">{t('default')}</span>}
-                            <p className="font-semibold text-lg">{address.recipientName}</p>
-                            <p>{address.addressLine1}</p>
+                            <p className="font-semibold text-lg">{address.name}</p>
+                            <p>{address.line1}</p>
+                            {address.line2 && <p>{address.line2}</p>}
                             <p>{address.city}, {address.postalCode}</p>
                             <p>{address.country}</p>
                             <p>{address.phone}</p>

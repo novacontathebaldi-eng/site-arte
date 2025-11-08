@@ -85,6 +85,7 @@ const ProductDetailPage: React.FC = () => {
   }
 
   const inWishlist = product ? wishlistContext?.isInWishlist(product.id) : false;
+  const currentTranslation = product.translations[language] || product.translations.en;
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -92,8 +93,8 @@ const ProductDetailPage: React.FC = () => {
         {/* Image Gallery */}
         <div>
           <img 
-            src={product.images[0].url} 
-            alt={getTranslated(product, 'title')}
+            src={product.cover_original} 
+            alt={currentTranslation.title}
             className="w-full h-auto object-contain rounded-lg shadow-lg"
           />
           {/* Thumbnails would go here */}
@@ -106,12 +107,12 @@ const ProductDetailPage: React.FC = () => {
             <span className="capitalize"> {product.category}</span>
           </div>
           <h1 className="text-4xl md:text-5xl font-serif font-bold text-primary">
-            {getTranslated(product, 'title')}
+            {currentTranslation.title}
           </h1>
           <p className="mt-2 text-lg text-text-secondary">{t('by_artist')}</p>
 
           <p className="mt-4 text-4xl font-serif text-secondary">
-            €{product.price.amount.toFixed(2)}
+            €{(product.priceCents / 100).toFixed(2)}
           </p>
 
           <div className="mt-4 flex items-center gap-4">
@@ -126,15 +127,15 @@ const ProductDetailPage: React.FC = () => {
           <div className="mt-6 border-t border-border-color pt-6">
             <h2 className="text-xl font-serif font-semibold text-primary">Description</h2>
             <div className="mt-2 text-text-secondary leading-relaxed prose"
-                 dangerouslySetInnerHTML={{ __html: getTranslated(product.translations[language], 'description')}}>
+                 dangerouslySetInnerHTML={{ __html: currentTranslation.description }}>
             </div>
           </div>
           
           <div className="mt-6">
             <h3 className="text-lg font-semibold text-primary">Details</h3>
             <ul className="mt-2 text-sm text-text-secondary space-y-1 list-disc list-inside">
-                <li>Materials: {getTranslated(product.translations[language], 'materials')}</li>
-                <li>Dimensions: {product.dimensions.height} x {product.dimensions.width} {product.dimensions.depth ? `x ${product.dimensions.depth}` : ''} cm</li>
+                {currentTranslation.materials && <li>Materials: {currentTranslation.materials}</li>}
+                {product.dimensions && <li>Dimensions: {product.dimensions.heightCm} x {product.dimensions.widthCm} {product.dimensions.depthCm ? `x ${product.dimensions.depthCm}` : ''} cm</li>}
                 <li>Year: {product.yearCreated}</li>
             </ul>
           </div>

@@ -46,7 +46,7 @@ const DashboardOrderDetailPage: React.FC = () => {
                     {order.status}
                 </span>
             </div>
-            <p className="text-sm text-text-secondary mb-6">{t('order_number')} {order.orderNumber} &bull; {t('date')}: {new Date(order.createdAt).toLocaleDateString()}</p>
+            <p className="text-sm text-text-secondary mb-6">{t('order_number')} {order.number} &bull; {t('date')}: {new Date(order.createdAt).toLocaleDateString()}</p>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div className="md:col-span-2">
@@ -54,12 +54,12 @@ const DashboardOrderDetailPage: React.FC = () => {
                     <div className="space-y-4">
                         {order.items.map((item, index) => (
                             <div key={index} className="flex items-center gap-4 p-4 border rounded-md">
-                                <img src={item.productSnapshot.image} alt={item.productSnapshot.title} className="w-20 h-20 object-cover rounded"/>
+                                <img src={item.image_thumb} alt={item.title} className="w-20 h-20 object-cover rounded"/>
                                 <div className="flex-grow">
-                                    <p className="font-semibold">{item.productSnapshot.title}</p>
-                                    <p className="text-sm text-text-secondary">{item.quantity} x €{item.productSnapshot.price.toFixed(2)}</p>
+                                    <p className="font-semibold">{item.title}</p>
+                                    <p className="text-sm text-text-secondary">{item.qty} x €{(item.priceCents / 100).toFixed(2)}</p>
                                 </div>
-                                <p className="font-semibold">€{item.subtotal.toFixed(2)}</p>
+                                <p className="font-semibold">€{(item.priceCents * item.qty / 100).toFixed(2)}</p>
                             </div>
                         ))}
                     </div>
@@ -68,9 +68,9 @@ const DashboardOrderDetailPage: React.FC = () => {
                     <div className="bg-surface p-6 rounded-lg shadow-sm">
                          <h2 className="text-xl font-semibold font-serif mb-4">{t('shipped_to')}</h2>
                          <div className="text-sm space-y-1">
-                             <p className="font-bold">{order.shippingAddress.recipientName}</p>
-                             <p>{order.shippingAddress.addressLine1}</p>
-                             {order.shippingAddress.addressLine2 && <p>{order.shippingAddress.addressLine2}</p>}
+                             <p className="font-bold">{order.shippingAddress.name}</p>
+                             <p>{order.shippingAddress.line1}</p>
+                             {order.shippingAddress.line2 && <p>{order.shippingAddress.line2}</p>}
                              <p>{order.shippingAddress.city}, {order.shippingAddress.postalCode}</p>
                              <p>{order.shippingAddress.country}</p>
                              <p>{order.shippingAddress.phone}</p>
@@ -79,9 +79,9 @@ const DashboardOrderDetailPage: React.FC = () => {
                     <div className="bg-surface p-6 rounded-lg shadow-sm mt-6">
                          <h2 className="text-xl font-semibold font-serif mb-4">{t('order_summary')}</h2>
                          <div className="space-y-2 text-sm">
-                            <div className="flex justify-between"><span>{t('subtotal')}</span><span>€{order.pricing.subtotal.toFixed(2)}</span></div>
-                            <div className="flex justify-between"><span>{t('shipping')}</span><span>€{order.pricing.shipping.toFixed(2)}</span></div>
-                            <div className="flex justify-between font-bold text-base border-t pt-2 mt-2"><span>{t('total')}</span><span>€{order.pricing.total.toFixed(2)}</span></div>
+                            <div className="flex justify-between"><span>{t('subtotal')}</span><span>€{(order.totals.subtotalCents / 100).toFixed(2)}</span></div>
+                            <div className="flex justify-between"><span>{t('shipping')}</span><span>€{(order.totals.shippingCents / 100).toFixed(2)}</span></div>
+                            <div className="flex justify-between font-bold text-base border-t pt-2 mt-2"><span>{t('total')}</span><span>€{(order.totals.totalCents / 100).toFixed(2)}</span></div>
                          </div>
                     </div>
                 </div>

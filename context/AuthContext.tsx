@@ -8,7 +8,8 @@ import {
     signOut, 
     updateProfile,
     GoogleAuthProvider,
-    signInWithPopup
+    signInWithPopup,
+    sendEmailVerification
 } from 'firebase/auth';
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from '../lib/firebase';
@@ -33,7 +34,7 @@ const createUserProfileDocument = async (user: User, additionalData?: {displayNa
     const snapshot = await getDoc(userRef);
 
     if (!snapshot.exists()) {
-        const { email, displayName, photoURL } = user;
+        const { email, displayName, photoURL, emailVerified } = user;
         const createdAt = serverTimestamp();
         try {
             await setDoc(userRef, {
@@ -41,12 +42,25 @@ const createUserProfileDocument = async (user: User, additionalData?: {displayNa
                 displayName: additionalData?.displayName || displayName,
                 email,
                 photoURL,
+                emailVerified,
                 createdAt,
-                role: 'customer',
-                language: 'en', // default language
+                lastLogin: createdAt, // Set lastLogin on creation
+                language: 'fr', // Default language
+                role: 'user',
+                stats: {
+                    ordersCount: 0,
+                    spentCents: 0,
+                },
             });
         } catch(error) {
             console.error("Error creating user document", error);
+        }
+    } else {
+        // Update last login time for existing users
+        try {
+            await setDoc(userRef, { lastLogin: serverTimestamp() }, { merge: true });
+        } catch (error) {
+            console.error("Error updating last login", error);
         }
     }
     return userRef;
@@ -89,9 +103,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             const { user: createdUser } = await createUserWithEmailAndPassword(auth, email, pass);
             await updateProfile(createdUser, { displayName: name });
             await createUserProfileDocument(createdUser, { displayName: name });
+            // Send verification email without blocking the user flow
+            sendEmailVerification(createdUser).catch(err => console.error("Email verification error:", err));
             setUser(createdUser); // update state immediately
             toast.success(t('registered_successfully'));
-            navigate('/');
+            navigate('/dashboard');
         } catch (error) {
             handleAuthError(error);
         }
@@ -99,9 +115,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     const login = async (email: string, pass: string) => {
         try {
-            await signInWithEmailAndPassword(auth, email, pass);
+            const { user } = await signInWithEmailAndPassword(auth, email, pass);
+            await createUserProfileDocument(user); // This will update lastLogin
             toast.success(t('logged_in_successfully'));
-            navigate('/');
+            navigate('/dashboard');
         } catch (error) {
             handleAuthError(error);
         }
@@ -113,7 +130,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             const { user: googleUser } = await signInWithPopup(auth, provider);
             await createUserProfileDocument(googleUser);
             toast.success(t('logged_in_successfully'));
-            navigate('/');
+            navigate('/dashboard');
         } catch (error) {
             handleAuthError(error);
         }

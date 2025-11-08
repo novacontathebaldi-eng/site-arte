@@ -63,17 +63,17 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         </button>
        )}
       <Link to={`/product/${product.slug}`} className="block">
-        <div className="overflow-hidden">
+        <div className="overflow-hidden aspect-square">
           <img
-            src={product.images[0].url}
-            alt={getTranslated(product, 'title')}
-            className="w-full h-80 object-cover transition-transform duration-500 ease-in-out group-hover:scale-105"
+            src={product.cover_thumb}
+            alt={getTranslated(product.translations.fr, 'title')}
+            className="w-full h-full object-cover transition-transform duration-500 ease-in-out group-hover:scale-105"
           />
         </div>
         <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-500 flex items-center justify-center">
             <div className="text-center text-white p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                <h3 className="font-serif text-2xl font-semibold">{getTranslated(product, 'title')}</h3>
-                <p className="mt-1 text-lg">€{product.price.amount.toFixed(2)}</p>
+                <h3 className="font-serif text-2xl font-semibold">{getTranslated(product.translations.fr, 'title')}</h3>
+                <p className="mt-1 text-lg">€{(product.priceCents / 100).toFixed(2)}</p>
                 <span className="mt-4 inline-block bg-secondary text-primary py-2 px-4 rounded-md text-sm font-semibold">
                     {t('view_details')}
                 </span>

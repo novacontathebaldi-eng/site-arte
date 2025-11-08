@@ -36,7 +36,7 @@ const DashboardOrdersPage: React.FC = () => {
                         <div key={order.id} className="p-4 border border-border-color rounded-lg hover:shadow-md transition-shadow">
                             <div className="flex justify-between items-start flex-wrap gap-2">
                                 <div>
-                                    <p className="font-semibold text-primary">{t('order_number')} {order.orderNumber}</p>
+                                    <p className="font-semibold text-primary">{t('order_number')} {order.number}</p>
                                     <p className="text-sm text-text-secondary">{t('date')}: {new Date(order.createdAt).toLocaleDateString()}</p>
                                 </div>
                                 <span className={`capitalize text-sm font-medium px-2 py-1 rounded-full ${order.status === 'delivered' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
@@ -49,14 +49,14 @@ const DashboardOrdersPage: React.FC = () => {
                                </p>
                                 <div className="flex -space-x-4">
                                     {order.items.slice(0, 5).map((item, index) => (
-                                        <img key={index} src={item.productSnapshot.image} alt={item.productSnapshot.title} className="w-12 h-12 object-cover rounded-full border-2 border-white"/>
+                                        <img key={index} src={item.image_thumb} alt={item.title} className="w-12 h-12 object-cover rounded-full border-2 border-white"/>
                                     ))}
                                     {order.items.length > 5 && <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center text-sm font-semibold">+{order.items.length - 5}</div>}
                                 </div>
                             </div>
                              <div className="flex justify-between items-center mt-4">
                                 <div className="font-bold">
-                                    {t('total')}: €{order.pricing.total.toFixed(2)}
+                                    {t('total')}: €{(order.totals.totalCents / 100).toFixed(2)}
                                 </div>
                                 <Link to={`/dashboard/orders/${order.id}`} className="text-secondary font-semibold hover:underline">
                                     {t('view_order_details')}

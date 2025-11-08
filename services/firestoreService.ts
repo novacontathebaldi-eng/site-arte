@@ -6,9 +6,20 @@ const productsCollection = collection(db, 'products');
 
 const mapDocToProduct = (doc: any): Product => {
     const data = doc.data();
+    // Bridge the gap between potential old data structures in Firestore and the new strict types
+    const images = data.images || [];
+    const cover_thumb = data.cover_thumb || (images.length > 0 ? images[0].thumbnail : '');
+    const cover_original = data.cover_original || (images.length > 0 ? images[0].url : '');
+    const gallery = data.gallery || images.map((img: any) => ({ original: img.url, thumb: img.thumbnail }));
+    const priceCents = data.priceCents ?? (data.price?.amount ? data.price.amount * 100 : 0);
+
     return {
-        id: doc.id,
         ...data,
+        id: doc.id,
+        priceCents,
+        cover_thumb,
+        cover_original,
+        gallery,
         createdAt: data.createdAt?.toDate(),
         updatedAt: data.updatedAt?.toDate(),
         publishedAt: data.publishedAt?.toDate(),
@@ -79,14 +90,23 @@ export const getAddresses = async (userId: string): Promise<Address[]> => {
     try {
         const addressesRef = getAddressesCollection(userId);
         const querySnapshot = await getDocs(addressesRef);
-        return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Address));
+        return querySnapshot.docs.map(doc => {
+            const data = doc.data();
+            return { 
+                id: doc.id,
+                userId: userId,
+                name: data.recipientName || data.name,
+                line1: data.addressLine1 || data.line1,
+                ...data
+            } as Address
+        });
     } catch (error) {
         console.error("Error fetching addresses:", error);
         return [];
     }
 };
 
-export const addAddress = async (userId: string, addressData: Omit<Address, 'id'>): Promise<string | null> => {
+export const addAddress = async (userId: string, addressData: Omit<Address, 'id' | 'userId' | 'createdAt' | 'updatedAt'>): Promise<string | null> => {
     try {
         const addressesRef = getAddressesCollection(userId);
         if (addressData.isDefault) {
@@ -99,7 +119,7 @@ export const addAddress = async (userId: string, addressData: Omit<Address, 'id'
             });
             await batch.commit();
         }
-        const docRef = await addDoc(addressesRef, addressData);
+        const docRef = await addDoc(addressesRef, {...addressData, userId});
         return docRef.id;
     } catch (error) {
         console.error("Error adding address:", error);
@@ -107,7 +127,7 @@ export const addAddress = async (userId: string, addressData: Omit<Address, 'id'
     }
 };
 
-export const updateAddress = async (userId: string, addressId: string, addressData: Partial<Address>): Promise<boolean> => {
+export const updateAddress = async (userId: string, addressId: string, addressData: Partial<Omit<Address, 'id' | 'userId'>>): Promise<boolean> => {
     try {
         const addressRef = doc(db, `users/${userId}/addresses`, addressId);
         await updateDoc(addressRef, addressData);

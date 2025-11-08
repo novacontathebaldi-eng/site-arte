@@ -141,7 +141,11 @@ export const translations: Record<SupportedLanguage, Record<string, string>> = {
     'price': 'Prix',
     'shipped_to': 'Expédié à',
     'order_not_found': 'Commande non trouvée.',
-    'view_order_details': 'Voir les détails'
+    'view_order_details': 'Voir les détails',
+    'chatbot_title': 'Assistant d\'Art',
+    'chatbot_greeting': 'Bonjour! Comment puis-je vous aider aujourd\'hui?',
+    'chatbot_placeholder': 'Posez votre question...',
+    'chatbot_send': 'Envoyer'
   },
   en: {
     'home': 'Home',
@@ -283,7 +287,11 @@ export const translations: Record<SupportedLanguage, Record<string, string>> = {
     'price': 'Price',
     'shipped_to': 'Shipped To',
     'order_not_found': 'Order not found.',
-    'view_order_details': 'View Details'
+    'view_order_details': 'View Details',
+    'chatbot_title': 'Art Assistant',
+    'chatbot_greeting': 'Hello! How can I assist you today?',
+    'chatbot_placeholder': 'Ask a question...',
+    'chatbot_send': 'Send'
   },
   de: {
     'home': 'Startseite',
@@ -425,7 +433,11 @@ export const translations: Record<SupportedLanguage, Record<string, string>> = {
     'price': 'Preis',
     'shipped_to': 'Versendet an',
     'order_not_found': 'Bestellung nicht gefunden.',
-    'view_order_details': 'Details anzeigen'
+    'view_order_details': 'Details anzeigen',
+    'chatbot_title': 'Kunst-Assistent',
+    'chatbot_greeting': 'Hallo! Wie kann ich Ihnen heute helfen?',
+    'chatbot_placeholder': 'Stellen Sie eine Frage...',
+    'chatbot_send': 'Senden'
   },
   pt: {
     'home': 'Início',
@@ -567,6 +579,10 @@ export const translations: Record<SupportedLanguage, Record<string, string>> = {
     'price': 'Preço',
     'shipped_to': 'Enviado para',
     'order_not_found': 'Pedido não encontrado.',
-    'view_order_details': 'Ver Detalhes'
+    'view_order_details': 'Ver Detalhes',
+    'chatbot_title': 'Assistente de Arte',
+    'chatbot_greeting': 'Olá! Como posso te ajudar hoje?',
+    'chatbot_placeholder': 'Faça uma pergunta...',
+    'chatbot_send': 'Enviar'
   },
 };

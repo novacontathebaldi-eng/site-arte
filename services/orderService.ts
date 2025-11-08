@@ -1,7 +1,6 @@
 import { collection, addDoc, getDocs, query, where, serverTimestamp, orderBy, getDoc, doc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { CartItem, Address, Order } from '../types';
-import { useTranslation } from '../hooks/useTranslation';
+import { CartItem, Address, Order, SupportedLanguage } from '../types';
 
 const ordersCollection = collection(db, 'orders');
 
@@ -9,38 +8,46 @@ export const createOrder = async (
     userId: string, 
     cart: CartItem[], 
     shippingAddress: Address, 
-    pricing: { subtotal: number; shipping: number; total: number },
-    language: string,
+    totals: { subtotalCents: number; shippingCents: number; totalCents: number; discountCents: number; taxCents: number },
+    language: SupportedLanguage,
 ): Promise<string | null> => {
     try {
-        const orderNumber = `#${Date.now().toString().slice(-6)}`;
+        const orderNumber = `ART-${new Date().getFullYear()}${Date.now().toString().slice(-6)}`;
         
-        const orderData = {
-            orderNumber,
+        const orderData: Omit<Order, 'id'> = {
+            number: orderNumber,
             userId,
-            status: 'pending',
+            status: 'created',
             items: cart.map(item => ({
                 productId: item.id,
-                quantity: item.quantity,
-                subtotal: item.price.amount * item.quantity,
-                productSnapshot: {
-                    title: item.translations[language as keyof typeof item.translations]?.title || item.translations.en.title,
-                    image: item.images[0].thumbnail,
-                    price: item.price.amount,
-                },
+                qty: item.quantity,
+                priceCents: item.priceCents,
+                currency: 'EUR',
+                title: item.translations[language]?.title || item.translations.en.title,
+                image_thumb: item.cover_thumb,
             })),
             shippingAddress: {
-                recipientName: shippingAddress.recipientName,
-                addressLine1: shippingAddress.addressLine1,
-                addressLine2: shippingAddress.addressLine2 || '',
+                name: shippingAddress.name,
+                line1: shippingAddress.line1,
+                line2: shippingAddress.line2 || '',
                 city: shippingAddress.city,
                 postalCode: shippingAddress.postalCode,
                 country: shippingAddress.country,
                 phone: shippingAddress.phone,
             },
-            pricing,
+            totals: {
+                ...totals,
+                currency: 'EUR',
+            },
+            timeline: [
+                {
+                    status: 'created',
+                    at: serverTimestamp(),
+                    by: userId
+                }
+            ],
             createdAt: serverTimestamp(),
-            language,
+            updatedAt: serverTimestamp(),
         };
 
         const docRef = await addDoc(ordersCollection, orderData);
@@ -83,7 +90,6 @@ export const getOrderById = async (orderId: string, userId: string): Promise<Ord
                 createdAt: data.createdAt?.toDate(),
             } as Order;
         } else {
-            // Doc doesn't exist or doesn't belong to the user
             console.log("No such document or access denied!");
             return null;
         }

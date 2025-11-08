@@ -27,6 +27,7 @@ import TermsOfServicePage from './pages/TermsOfServicePage';
 import ShippingReturnsPage from './pages/ShippingReturnsPage';
 import DashboardWishlistPage from './pages/dashboard/DashboardWishlistPage';
 import DashboardOrderDetailPage from './pages/dashboard/DashboardOrderDetailPage';
+import Chatbot from './components/Chatbot';
 
 const App: React.FC = () => {
   return (
@@ -68,6 +69,7 @@ const App: React.FC = () => {
                   </Routes>
                 </main>
                 <Footer />
+                <Chatbot />
               </div>
             </WishlistProvider>
           </CartProvider>
