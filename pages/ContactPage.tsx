@@ -90,8 +90,15 @@ const ContactPage: React.FC = () => {
         <div className="bg-white p-8 rounded-lg shadow-md">
           <h2 className="text-2xl font-bold text-primary mb-6">{t('contact.formTitle')}</h2>
           <form onSubmit={handleSubmit} className="space-y-6">
-            <Input id="name" name="name" label={t('contact.fullNameLabel')} type="text" value={formData.name} onChange={handleChange} required />
-            <Input id="email" name="email" label={t('contact.emailLabel')} type="email" value={formData.email} onChange={handleChange} required />
+            {/* FIX: Removed 'label' prop from Input components and added explicit <label> elements. */}
+            <div>
+              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">{t('contact.fullNameLabel')}</label>
+              <Input id="name" name="name" type="text" value={formData.name} onChange={handleChange} required />
+            </div>
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">{t('contact.emailLabel')}</label>
+              <Input id="email" name="email" type="email" value={formData.email} onChange={handleChange} required />
+            </div>
             <div>
                 <label htmlFor="subject" className="block text-sm font-medium text-gray-700">{t('contact.subjectLabel')}</label>
                 <select id="subject" name="subject" value={formData.subject} onChange={handleChange} className="mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-secondary focus:border-secondary sm:text-sm">

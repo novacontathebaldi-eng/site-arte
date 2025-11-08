@@ -17,7 +17,8 @@ export const useWishlist = () => {
         if (user) {
             try {
                 setLoading(true);
-                const userWishlist = await apiGetWishlist(user.id);
+                // FIX: Property 'id' does not exist on type 'UserData'. Use 'uid' instead.
+                const userWishlist = await apiGetWishlist(user.uid);
                 setWishlist(userWishlist);
             } catch (error) {
                 console.error("Failed to fetch wishlist:", error);
@@ -38,7 +39,8 @@ export const useWishlist = () => {
         if (user) {
             try {
                 setWishlist(updatedWishlist); // Optimistic update
-                await apiUpdateWishlist(user.id, updatedWishlist);
+                // FIX: Property 'id' does not exist on type 'UserData'. Use 'uid' instead.
+                await apiUpdateWishlist(user.uid, updatedWishlist);
             } catch (error) {
                 console.error("Failed to update wishlist:", error);
                 showToast(t('toast.error'), 'error');

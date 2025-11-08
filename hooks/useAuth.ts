@@ -1,42 +1,31 @@
+import { useContext } from 'react';
+import { AuthContext, AuthContextType } from '../context/AuthContext';
 import { UserData, UserPreferences } from '../types';
 
 /**
- * Mock implementation of the `useAuth` hook.
+ * Hook de autenticação real que consome o AuthContext.
  *
- * This serves as a placeholder while the new Firebase authentication system is being built.
- * It returns a mock 'admin' user by default. This allows protected routes and
- * components that rely on user data to render without crashing.
- *
- * NOTE: The logout functionality in the UI will not reflect a state change
- * because this hook always returns the same mock user. This is expected temporary behavior.
+ * Este hook atua como uma ponte (Adapter Pattern) entre o novo sistema de autenticação
+ * baseado em Context/Firebase e os componentes existentes que esperam a assinatura do
+ * hook `useAuth` original. Ele extrai os dados do contexto e os retorna no formato
+ * esperado, minimizando a necessidade de refatoração em toda a aplicação.
  */
-export const useAuth = () => {
-  const mockUser: UserData = {
-    id: 'mock-admin-id',
-    email: 'admin@example.com',
-    user_metadata: { display_name: 'Admin User' },
-    created_at: new Date().toISOString(),
-    email_confirmed_at: new Date().toISOString(),
-    profile: {
-        id: 'mock-admin-id',
-        display_name: 'Admin User',
-        photo_url: null,
-        phone: null,
-        role: 'admin', // This user is an admin to allow access to admin routes
-        language: 'en',
-        updated_at: new Date().toISOString(),
-        preferences: { orderUpdates: true, promotions: true, newArtworks: true },
-    }
-  };
-  
+export const useAuth = (): Omit<AuthContextType, 'state'> & { user: UserData | null; loading: boolean } => {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+
+  // Mapeia o estado do contexto para a estrutura do hook antigo
   return {
-    user: mockUser,
-    loading: false,
-    refetchUser: async (): Promise<void> => {
-      // This is a no-op for the mock implementation.
-    },
-    updateUserPreferences: async (preferences: Partial<UserPreferences>): Promise<void> => {
-       // This is a no-op for the mock implementation.
-    },
+    user: context.state.user,
+    loading: context.state.loading,
+    login: context.login,
+    googleLogin: context.googleLogin,
+    register: context.register,
+    logout: context.logout,
+    forgotPassword: context.forgotPassword,
+    refetchUser: context.refetchUser,
+    updateUserPreferences: context.updateUserPreferences,
   };
 };

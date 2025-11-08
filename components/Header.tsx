@@ -38,7 +38,8 @@ const UserMenu: React.FC = () => {
     }, []);
 
     const displayName = user?.profile?.display_name || user?.email;
-    const photoURL = user?.profile?.photo_url || user?.user_metadata?.avatar_url;
+    // FIX: Property 'user_metadata' does not exist on type 'UserData'. Fallback to 'photoURL' from Firebase User.
+    const photoURL = user?.profile?.photo_url || user?.photoURL;
 
     return (
         <div className="relative" ref={dropdownRef}>
@@ -96,7 +97,8 @@ const Header: React.FC = () => {
   };
   
   const displayName = user?.profile?.display_name || user?.email;
-  const photoURL = user?.profile?.photo_url || user?.user_metadata?.avatar_url;
+  // FIX: Property 'user_metadata' does not exist on type 'UserData'. Fallback to 'photoURL' from Firebase User.
+  const photoURL = user?.profile?.photo_url || user?.photoURL;
 
   const navLinkClasses = ({ isActive }: { isActive: boolean }): string =>
     `relative py-2 text-sm font-medium transition-colors duration-300 ${

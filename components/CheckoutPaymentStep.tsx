@@ -24,7 +24,11 @@ const CheckoutPaymentStep: React.FC<CheckoutPaymentStepProps> = ({ onBack, onPay
         <div className="p-4 border rounded-lg bg-surface">
             <h3 className="font-semibold mb-2">{t('checkout.cardInfo')}</h3>
             <div className="space-y-4">
-                <Input id="cardholderName" name="cardholderName" label={t('checkout.cardholderName')} required />
+                {/* FIX: Removed 'label' prop from Input component and added an explicit <label> element. */}
+                <div>
+                    <label htmlFor="cardholderName" className="block text-sm font-medium text-gray-700 mb-1">{t('checkout.cardholderName')}</label>
+                    <Input id="cardholderName" name="cardholderName" required />
+                </div>
                 {/* Campos simulando Stripe Elements */}
                 <div className="p-3 border rounded-md bg-white">
                     <label className="text-sm font-medium text-gray-700">{t('checkout.cardNumber')}</label>

@@ -58,15 +58,40 @@ const AddressModal: React.FC<AddressModalProps> = ({ isOpen, onClose, onSave, ad
           {addressToEdit ? t('dashboard.editAddress') : t('dashboard.addAddress')}
         </h2>
         <form onSubmit={handleSubmit}>
+            {/* FIX: Removed 'label' prop from Input components and added explicit <label> elements. */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Input id="recipientName" name="recipientName" label={t('dashboard.recipientName')} value={address.recipientName} onChange={handleChange} required />
-                <Input id="company" name="company" label={t('dashboard.company')} value={address.company || ''} onChange={handleChange} />
-                <Input id="addressLine1" name="addressLine1" label={t('dashboard.addressLine1')} value={address.addressLine1} onChange={handleChange} required className="md:col-span-2" />
-                <Input id="addressLine2" name="addressLine2" label={t('dashboard.addressLine2')} value={address.addressLine2 || ''} onChange={handleChange} className="md:col-span-2" />
-                <Input id="postalCode" name="postalCode" label={t('dashboard.postalCode')} value={address.postalCode} onChange={handleChange} required />
-                <Input id="city" name="city" label={t('dashboard.city')} value={address.city} onChange={handleChange} required />
-                <Input id="country" name="country" label={t('dashboard.country')} value={address.country} onChange={handleChange} required />
-                <Input id="phone" name="phone" label={t('dashboard.phone')} value={address.phone} onChange={handleChange} required />
+                <div>
+                    <label htmlFor="recipientName" className="block text-sm font-medium text-gray-700 mb-1">{t('dashboard.recipientName')}</label>
+                    <Input id="recipientName" name="recipientName" value={address.recipientName} onChange={handleChange} required />
+                </div>
+                <div>
+                    <label htmlFor="company" className="block text-sm font-medium text-gray-700 mb-1">{t('dashboard.company')}</label>
+                    <Input id="company" name="company" value={address.company || ''} onChange={handleChange} />
+                </div>
+                <div className="md:col-span-2">
+                    <label htmlFor="addressLine1" className="block text-sm font-medium text-gray-700 mb-1">{t('dashboard.addressLine1')}</label>
+                    <Input id="addressLine1" name="addressLine1" value={address.addressLine1} onChange={handleChange} required />
+                </div>
+                <div className="md:col-span-2">
+                    <label htmlFor="addressLine2" className="block text-sm font-medium text-gray-700 mb-1">{t('dashboard.addressLine2')}</label>
+                    <Input id="addressLine2" name="addressLine2" value={address.addressLine2 || ''} onChange={handleChange} />
+                </div>
+                <div>
+                    <label htmlFor="postalCode" className="block text-sm font-medium text-gray-700 mb-1">{t('dashboard.postalCode')}</label>
+                    <Input id="postalCode" name="postalCode" value={address.postalCode} onChange={handleChange} required />
+                </div>
+                <div>
+                    <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">{t('dashboard.city')}</label>
+                    <Input id="city" name="city" value={address.city} onChange={handleChange} required />
+                </div>
+                <div>
+                    <label htmlFor="country" className="block text-sm font-medium text-gray-700 mb-1">{t('dashboard.country')}</label>
+                    <Input id="country" name="country" value={address.country} onChange={handleChange} required />
+                </div>
+                <div>
+                    <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">{t('dashboard.phone')}</label>
+                    <Input id="phone" name="phone" value={address.phone} onChange={handleChange} required />
+                </div>
             </div>
             <div className="mt-4">
                 <label className="flex items-center">
