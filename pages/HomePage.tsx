@@ -1,110 +1,78 @@
-import React, { useEffect, useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from '../hooks/useTranslation';
 import { Product } from '../types';
-import { getFeaturedProducts } from '../services/firestoreService';
+import { getFeaturedProducts } from '../services/api';
 import ProductCard from '../components/ProductCard';
-import Spinner from '../components/Spinner';
+import { ProductGridSkeleton } from '../components/SkeletonLoader';
+import { ROUTES } from '../constants';
 
+// Esta é a Página Inicial (HomePage). É a primeira coisa que o visitante vê.
 const HomePage: React.FC = () => {
   const { t } = useTranslation();
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
+  // useEffect para buscar os produtos em destaque quando a página carregar.
   useEffect(() => {
     const fetchProducts = async () => {
-      setLoading(true);
-      const featuredProducts = await getFeaturedProducts();
-      setProducts(featuredProducts);
-      setLoading(false);
+      try {
+        setIsLoading(true);
+        const products = await getFeaturedProducts();
+        setFeaturedProducts(products);
+      } catch (error) {
+        console.error("Failed to fetch featured products:", error);
+      } finally {
+        setIsLoading(false);
+      }
     };
+
     fetchProducts();
   }, []);
 
-  const categories = [
-    { name: 'paintings', img: 'https://picsum.photos/seed/paint/600/400' },
-    { name: 'jewelry', img: 'https://picsum.photos/seed/jewel/600/400' },
-    { name: 'digital_art', img: 'https://picsum.photos/seed/digital/600/400' },
-    { name: 'prints', img: 'https://picsum.photos/seed/print/600/400' },
-  ];
-
   return (
     <div>
-      {/* Hero Section */}
-      <section className="relative h-[60vh] bg-cover bg-center" style={{ backgroundImage: "url('https://picsum.photos/seed/hero/1920/1080')" }}>
+      {/* 1. Seção Hero: A grande imagem de impacto no topo */}
+      <section className="relative h-[60vh] md:h-[80vh] bg-cover bg-center" style={{ backgroundImage: `url('https://picsum.photos/id/10/1800/1000')` }}>
         <div className="absolute inset-0 bg-black bg-opacity-40"></div>
-        <div className="relative z-10 flex flex-col items-center justify-center h-full text-center text-white px-4">
-          <h1 className="text-4xl md:text-6xl font-serif font-bold tracking-tight animate-fade-in-down">{t('artist_tagline')}</h1>
-          <p className="mt-4 max-w-2xl text-lg md:text-xl animate-fade-in-up">
-            Discover unique artworks that bridge traditional and digital mediums, capturing the essence of modern European aesthetics.
-          </p>
-          <Link to="/catalog" className="mt-8 bg-secondary text-primary font-bold py-3 px-8 rounded-md hover:bg-opacity-90 transition-all duration-300 transform hover:scale-105">
-            {t('explore_catalog')}
-          </Link>
+        <div className="relative z-10 flex flex-col items-center justify-center h-full text-center text-white p-4">
+          <h1 className="text-4xl md:text-6xl font-heading font-bold animate-fade-in-down">{t('home.heroTagline')}</h1>
         </div>
       </section>
 
-      {/* Featured Gallery */}
-      <section className="py-16 sm:py-24">
+      {/* 2. Seção de Introdução */}
+      <section className="py-16 lg:py-24 bg-white">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center max-w-3xl">
+          <p className="text-lg text-text-secondary leading-relaxed">
+            {t('home.artistIntro')}
+          </p>
+        </div>
+      </section>
+
+      {/* 3. Seção da Galeria em Destaque */}
+      <section className="py-16 lg:py-24 bg-surface">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl md:text-4xl font-serif font-bold text-center text-primary mb-12">
-            {t('featured_gallery')}
-          </h2>
-          {loading ? (
-            <Spinner />
+          <h2 className="text-3xl md:text-4xl font-heading font-bold text-center mb-12">{t('home.featuredGallery')}</h2>
+          
+          {/* Mostra o esqueleto de carregamento ou os produtos */}
+          {isLoading ? (
+            <ProductGridSkeleton count={6} />
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {products.map(product => (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              {featuredProducts.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
             </div>
           )}
+
+          {/* 4. Botão de Call-to-Action */}
+          <div className="text-center mt-16">
+            <Link to={ROUTES.CATALOG} className="inline-block bg-primary text-white font-bold py-3 px-8 rounded-lg text-lg hover:bg-opacity-80 transition-colors duration-300">
+              {t('home.exploreCatalog')}
+            </Link>
+          </div>
         </div>
-      </section>
-
-      {/* About the Artist Section */}
-      <section className="bg-surface py-16 sm:py-24">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-                  <div className="order-2 md:order-1">
-                      <h2 className="text-3xl md:text-4xl font-serif font-bold text-primary mb-4">{t('about_artist_home_title')}</h2>
-                      <p className="text-text-secondary mb-6 leading-relaxed">{t('about_artist_home_text')}</p>
-                      <Link to="/about" className="text-secondary font-semibold hover:underline">{t('read_more')} &rarr;</Link>
-                  </div>
-                  <div className="order-1 md:order-2">
-                      <img src="https://picsum.photos/seed/meeh/800/800" alt="Melissa Pelussi" className="rounded-lg shadow-lg aspect-square object-cover" />
-                  </div>
-              </div>
-          </div>
-      </section>
-
-      {/* Art Categories Section */}
-      <section className="py-16 sm:py-24">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-              <h2 className="text-3xl md:text-4xl font-serif font-bold text-center text-primary mb-12">{t('art_categories')}</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                  {categories.map(cat => (
-                      <Link to="/catalog" state={{ category: cat.name }} key={cat.name} className="group relative block rounded-lg overflow-hidden shadow-lg">
-                          <img src={cat.img} alt={t(cat.name)} className="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-110" />
-                          <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
-                              <h3 className="text-white text-2xl font-serif font-bold">{t(cat.name)}</h3>
-                          </div>
-                      </Link>
-                  ))}
-              </div>
-          </div>
-      </section>
-
-      {/* Newsletter Signup Section */}
-       <section className="bg-primary py-16 text-white">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
-              <h2 className="text-3xl font-serif font-bold mb-2">{t('newsletter_title')}</h2>
-              <p className="max-w-xl mx-auto mb-6 text-gray-300">{t('newsletter_text')}</p>
-              <form className="max-w-md mx-auto flex">
-                  <input type="email" placeholder={t('email_placeholder')} className="w-full px-4 py-3 rounded-l-md text-text-primary focus:outline-none focus:ring-2 focus:ring-secondary" />
-                  <button type="submit" className="bg-secondary text-primary font-bold px-6 py-3 rounded-r-md hover:bg-opacity-90 transition-colors">{t('subscribe')}</button>
-              </form>
-          </div>
       </section>
     </div>
   );

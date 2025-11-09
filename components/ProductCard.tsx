@@ -1,86 +1,69 @@
-import React, { useContext } from 'react';
+
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { Product } from '../types';
 import { useTranslation } from '../hooks/useTranslation';
-import { WishlistContext } from '../context/WishlistContext';
-import toast from 'react-hot-toast';
-import { useAuth } from '../context/AuthContext';
 
 interface ProductCardProps {
   product: Product;
 }
 
+// Este componente representa um único "card" de produto na vitrine (página inicial ou catálogo).
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
-  const { getTranslated, t } = useTranslation();
-  const { user } = useAuth();
-  const wishlistContext = useContext(WishlistContext);
+  const { language, t } = useTranslation();
+  // FIX: Add fallback to 'fr' language if current language translation is not available
+  const productTranslation = product.translations[language] || product.translations['fr'];
 
-  if (!wishlistContext) {
-    return null; // or a fallback UI
+  // Return null or a placeholder if no translation is found
+  if (!productTranslation) {
+    return null;
   }
 
-  const { isInWishlist, addToWishlist, removeFromWishlist } = wishlistContext;
-  const inWishlist = isInWishlist(product.id);
-
-  const handleWishlistClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (!user) {
-        toast.error("Please log in to use the wishlist.");
-        return;
-    }
-    if (inWishlist) {
-      removeFromWishlist(product.id);
-      toast.success(t('removed_from_wishlist'));
-    } else {
-      addToWishlist(product.id);
-      toast.success(t('added_to_wishlist'));
-    }
-  };
+  // Formata o preço para o padrão europeu (ex: 1.200,00 €)
+  // FIX: Use priceCents and currency from the product object
+  const formattedPrice = new Intl.NumberFormat(language + '-LU', {
+    style: 'currency',
+    currency: product.currency,
+  }).format(product.priceCents / 100);
 
   return (
-    <div className="group relative border border-border-color rounded-lg overflow-hidden transition-all duration-300 hover:shadow-lg">
-       {user && (
-         <button
-            onClick={handleWishlistClick}
-            className="absolute top-3 right-3 z-10 p-2 bg-white/70 rounded-full backdrop-blur-sm hover:bg-white transition-colors"
-            aria-label={inWishlist ? t('remove_from_wishlist') : t('add_to_wishlist')}
-        >
-            <svg
-            className={`w-5 h-5 transition-all ${inWishlist ? 'text-red-500 fill-current' : 'text-gray-500'}`}
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-            >
-            <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4.318 6.318a4.5 4.5 0 016.364 0L12 7.636l1.318-1.318a4.5 4.5 0 016.364 6.364L12 20.364l-7.682-7.682a4.5 4.5 0 010-6.364z"
+    // O Link faz com que o card inteiro seja clicável, levando para a página de detalhes do produto.
+    <Link to={`/product/${product.slug}`} className="group block overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-shadow duration-400">
+      <div className="relative">
+        {/* A imagem do produto */}
+        <div className="overflow-hidden">
+             <img
+                // FIX: Use cover_thumb and alt text from gallery
+                src={product.cover_thumb}
+                alt={product.gallery?.[0]?.alt || productTranslation.title}
+                className="w-full h-72 object-cover transition-transform duration-400 ease-in-out group-hover:scale-105"
             />
-            </svg>
-        </button>
-       )}
-      <Link to={`/product/${product.slug}`} className="block">
-        <div className="overflow-hidden aspect-square">
-          <img
-            src={product.cover_thumb}
-            alt={getTranslated(product.translations.fr, 'title')}
-            className="w-full h-full object-cover transition-transform duration-500 ease-in-out group-hover:scale-105"
-          />
         </div>
-        <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-500 flex items-center justify-center">
-            <div className="text-center text-white p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                <h3 className="font-serif text-2xl font-semibold">{getTranslated(product.translations.fr, 'title')}</h3>
-                <p className="mt-1 text-lg">€{(product.priceCents / 100).toFixed(2)}</p>
-                <span className="mt-4 inline-block bg-secondary text-primary py-2 px-4 rounded-md text-sm font-semibold">
-                    {t('view_details')}
+
+        {/* Overlay que aparece no hover */}
+        <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-400 flex flex-col justify-end p-4">
+             <div className="transform translate-y-8 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-400">
+                <h3 className="text-white text-xl font-heading font-semibold">{productTranslation.title}</h3>
+                <p className="text-gray-200 mt-1">{formattedPrice}</p>
+                <span className="mt-4 inline-block bg-secondary text-white text-xs font-bold py-2 px-4 rounded-md">
+                    {t('home.viewDetails')}
                 </span>
             </div>
         </div>
-      </Link>
-    </div>
+         {product.status === 'sold' && (
+            <div className="absolute top-3 right-3 bg-red-600 text-white text-xs font-bold py-1 px-3 rounded-full uppercase">
+                {t('product.sold')}
+            </div>
+        )}
+      </div>
+      
+      {/* Informações visíveis permanentemente abaixo do card */}
+      <div className="p-4 bg-white">
+          <h3 className="text-base font-semibold text-text-primary truncate">{productTranslation.title}</h3>
+          <p className="text-sm text-text-secondary mt-1">{productTranslation.materials}</p>
+          <p className="text-base font-bold text-primary mt-2">{formattedPrice}</p>
+      </div>
+    </Link>
   );
 };
 

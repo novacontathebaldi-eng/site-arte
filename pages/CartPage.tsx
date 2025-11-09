@@ -1,93 +1,122 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
-import { CartContext } from '../context/CartContext';
+import { useCart } from '../hooks/useCart';
 import { useTranslation } from '../hooks/useTranslation';
+import { useToast } from '../hooks/useToast';
 import { CartItem } from '../types';
+import { ROUTES } from '../constants';
+import { TrashIcon, PlusIcon, MinusIcon, VisaIcon, MastercardIcon, PaypalIcon } from '../components/ui/icons';
 
+// Componente para um único item na lista do carrinho.
 const CartItemRow: React.FC<{ item: CartItem }> = ({ item }) => {
-    const { getTranslated, t } = useTranslation();
-    const { updateQuantity, removeFromCart } = useContext(CartContext)!;
-    const currentTranslation = item.translations[t('home') === 'Accueil' ? 'fr' : 'en'];
+  const { language, t } = useTranslation();
+  const { updateItemQuantity, removeItem } = useCart();
+  const { showToast } = useToast();
 
-    return (
-        <div className="flex items-center py-4 border-b border-border-color">
-            <Link to={`/product/${item.slug}`} className="w-24 h-24 mr-4">
-                <img src={item.cover_thumb} alt={currentTranslation.title} className="w-full h-full object-cover rounded-md" />
-            </Link>
-            <div className="flex-grow">
-                <Link to={`/product/${item.slug}`} className="font-semibold text-primary hover:text-secondary">{currentTranslation.title}</Link>
-                <p className="text-sm text-text-secondary">€{(item.priceCents / 100).toFixed(2)}</p>
-                <button onClick={() => removeFromCart(item.id)} className="text-xs text-red-500 hover:text-red-700 mt-1">{t('remove_item')}</button>
-            </div>
-            <div className="flex items-center space-x-2">
-                 <input
-                    type="number"
-                    min="1"
-                    value={item.quantity}
-                    onChange={(e) => updateQuantity(item.id, parseInt(e.target.value, 10))}
-                    className="w-16 text-center border border-border-color rounded-md"
-                    aria-label={t('quantity')}
-                 />
-            </div>
-             <div className="w-20 text-right font-semibold">
-                €{((item.priceCents * item.quantity) / 100).toFixed(2)}
-            </div>
+  const handleRemove = () => {
+    removeItem(item.id);
+    showToast(t('toast.itemRemoved'), 'info');
+  };
+  
+  const handleQuantityChange = (newQuantity: number) => {
+    if (newQuantity < 1) {
+      handleRemove();
+      return;
+    }
+    const quantity = Math.min(newQuantity, item.stock);
+    updateItemQuantity(item.id, quantity);
+  };
+
+  const formattedPrice = new Intl.NumberFormat(language + '-LU', { style: 'currency', currency: 'EUR' }).format(item.price);
+  const formattedSubtotal = new Intl.NumberFormat(language + '-LU', { style: 'currency', currency: 'EUR' }).format(item.price * item.quantity);
+
+  return (
+    <div className="flex items-center py-4 border-b">
+      <Link to={`/product/${item.slug}`}>
+        <img src={item.image} alt={item.title} className="w-24 h-24 object-cover rounded-md" />
+      </Link>
+      <div className="flex-grow ml-4">
+        <Link to={`/product/${item.slug}`} className="font-semibold hover:text-secondary">{item.title}</Link>
+        <p className="text-sm text-text-secondary">{formattedPrice}</p>
+      </div>
+      <div className="flex items-center space-x-3">
+        <div className="flex items-center border rounded-md">
+          <button onClick={() => handleQuantityChange(item.quantity - 1)} className="px-2 py-1"><MinusIcon className="w-4 h-4" /></button>
+          <input type="text" value={item.quantity} readOnly className="w-10 text-center border-l border-r" />
+          <button onClick={() => handleQuantityChange(item.quantity + 1)} className="px-2 py-1"><PlusIcon className="w-4 h-4" /></button>
         </div>
-    );
+      </div>
+      <div className="w-24 text-right font-semibold">{formattedSubtotal}</div>
+      <div className="w-16 text-right">
+        <button onClick={handleRemove} className="text-red-500 hover:text-red-700">
+          <TrashIcon className="w-5 h-5" />
+        </button>
+      </div>
+    </div>
+  );
 };
 
-
+// Componente principal da Página do Carrinho.
 const CartPage: React.FC = () => {
-    const { t } = useTranslation();
-    const { cart, itemCount, totalPriceCents } = useContext(CartContext)!;
+  const { state } = useCart();
+  const { language, t } = useTranslation();
 
-    if (itemCount === 0) {
-        return (
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
-                <h1 className="text-4xl font-serif font-bold text-primary mb-4">{t('shopping_cart')}</h1>
-                <p className="text-lg text-text-secondary mb-8">{t('your_cart_is_empty')}</p>
-                <Link to="/catalog" className="bg-primary text-white font-bold py-3 px-8 rounded-md hover:bg-opacity-90 transition-colors">
-                    {t('browse_catalog')}
-                </Link>
+  const subtotal = state.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  // Lógica de frete e impostos será adicionada depois.
+  const shipping = 0;
+  const total = subtotal + shipping;
+
+  const formattedSubtotal = new Intl.NumberFormat(language + '-LU', { style: 'currency', currency: 'EUR' }).format(subtotal);
+  const formattedShipping = new Intl.NumberFormat(language + '-LU', { style: 'currency', currency: 'EUR' }).format(shipping);
+  const formattedTotal = new Intl.NumberFormat(language + '-LU', { style: 'currency', currency: 'EUR' }).format(total);
+
+  return (
+    <div className="bg-surface">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <h1 className="text-3xl font-heading font-bold mb-8">{t('cart.title')}</h1>
+
+        {state.items.length === 0 ? (
+          <div className="text-center py-20 bg-white rounded-lg shadow-md">
+            <p className="text-xl text-text-secondary mb-6">{t('cart.emptyMessage')}</p>
+            <Link to={ROUTES.CATALOG} className="bg-primary text-white font-bold py-3 px-6 rounded-lg hover:bg-opacity-80 transition-colors">
+              {t('cart.browseCatalog')}
+            </Link>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2 bg-white p-6 rounded-lg shadow-md">
+              {state.items.map(item => <CartItemRow key={item.id} item={item} />)}
             </div>
-        );
-    }
-
-    return (
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
-            <h1 className="text-4xl font-serif font-bold text-primary mb-8">{t('shopping_cart')}</h1>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div className="lg:col-span-2">
-                    {cart.map(item => (
-                        <CartItemRow key={item.id} item={item} />
-                    ))}
-                </div>
-                <aside>
-                    <div className="sticky top-24 bg-surface p-6 rounded-lg shadow-sm">
-                        <h2 className="text-2xl font-serif font-semibold text-primary mb-4">{t('order_summary')}</h2>
-                        <div className="space-y-2">
-                            <div className="flex justify-between">
-                                <span>{t('subtotal')}</span>
-                                <span>€{(totalPriceCents / 100).toFixed(2)}</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span>{t('shipping')}</span>
-                                <span className="text-sm text-text-secondary">{t('calculate_shipping')}</span>
-                            </div>
-                        </div>
-                        <div className="border-t border-border-color my-4"></div>
-                        <div className="flex justify-between font-bold text-lg">
-                            <span>{t('total')}</span>
-                            <span>€{(totalPriceCents / 100).toFixed(2)}</span>
-                        </div>
-                        <Link to="/checkout" className="block text-center mt-6 w-full bg-primary text-white font-bold py-3 rounded-md hover:bg-opacity-90 transition-colors">
-                            {t('proceed_to_checkout')}
-                        </Link>
+            
+            <aside className="lg:col-span-1">
+                <div className="bg-white p-6 rounded-lg shadow-md">
+                    <h2 className="text-xl font-bold mb-4">{t('cart.summary')}</h2>
+                    <div className="space-y-2">
+                        <div className="flex justify-between"><span>{t('cart.subtotal')}</span><span>{formattedSubtotal}</span></div>
+                        <div className="flex justify-between"><span>{t('cart.shipping')}</span><span>{formattedShipping}</span></div>
+                        <div className="flex justify-between font-bold text-lg border-t pt-2 mt-2"><span>{t('cart.total')}</span><span>{formattedTotal}</span></div>
                     </div>
-                </aside>
-            </div>
-        </div>
-    );
+                    <Link to={ROUTES.CHECKOUT} className="mt-6 w-full block text-center bg-secondary text-white font-bold py-3 px-6 rounded-lg hover:bg-opacity-90 transition-colors">
+                        {t('cart.proceedToCheckout')}
+                    </Link>
+                    <Link to={ROUTES.CATALOG} className="mt-4 w-full block text-center text-primary font-semibold py-2">
+                        {t('cart.continueShopping')}
+                    </Link>
+                     <div className="mt-6 border-t pt-4">
+                        <p className="text-sm text-center text-text-secondary mb-2">Pagamentos seguros com:</p>
+                        <div className="flex justify-center items-center space-x-2">
+                            <VisaIcon className="h-10 w-10" />
+                            <MastercardIcon className="h-10 w-10" />
+                            <PaypalIcon className="h-10 w-10" />
+                        </div>
+                    </div>
+                </div>
+            </aside>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 };
 
 export default CartPage;

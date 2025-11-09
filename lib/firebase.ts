@@ -1,27 +1,22 @@
-import { initializeApp } from 'firebase/app';
-import { getFirestore } from 'firebase/firestore';
-import { getAuth } from 'firebase/auth';
-// import { getStorage } from 'firebase/storage';
 
-// Vercel environment variables are exposed via `process.env` in this environment.
-// Using the exact names from your Vercel settings screenshots.
+import { initializeApp } from "firebase/app";
+import { getAuth, GoogleAuthProvider } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
+
+// Your web app's Firebase configuration from user prompt
 const firebaseConfig = {
-  apiKey: process.env.FIREBASE_API_KEY,
-  authDomain: process.env.FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.FIREBASE_PROJECT_ID,
-  storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.FIREBASE_APP_ID,
+  apiKey: "AIzaSyAWVI9VHvxARMSM3JV-bXs_73UjKh25mn4",
+  authDomain: "thebaldi-me.firebaseapp.com",
+  projectId: "thebaldi-me",
+  storageBucket: "thebaldi-me.firebasestorage.app",
+  messagingSenderId: "794996190135",
+  appId: "1:794996190135:web:ec7ac21c07fc58847d5632"
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// Initialize services
-const db = getFirestore(app);
-const auth = getAuth(app);
-// const storage = getStorage(app); // Supabase is used for storage in this project.
-
-
-// NOTE: Supabase is used for storage in this project.
-export { db, auth };
+// Export Firebase services
+export const auth = getAuth(app);
+export const firestore = getFirestore(app);
+export const googleProvider = new GoogleAuthProvider();
