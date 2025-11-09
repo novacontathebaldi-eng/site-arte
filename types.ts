@@ -1,4 +1,3 @@
-
 import { User } from 'firebase/auth';
 
 export type Language = 'fr' | 'en' | 'de' | 'pt';
@@ -47,6 +46,15 @@ export interface Product {
   createdAt: { seconds: number, nanoseconds: number };
   updatedAt: { seconds: number, nanoseconds: number };
   featured?: boolean;
+}
+
+export interface Category {
+    id: string;
+    translations: {
+        [key in Language]?: {
+            name: string;
+        }
+    };
 }
 
 
@@ -169,7 +177,7 @@ export interface Order {
   };
   status: OrderStatus;
   timeline: {
-    status: OrderStatus;
+    status: OrderStatus | string;
     note?: string;
     at: any; // Firestore Timestamp
   }[];

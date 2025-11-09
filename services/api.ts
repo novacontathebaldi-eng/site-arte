@@ -1,6 +1,5 @@
-
 import { firestore } from '../lib/firebase';
-import { collection, getDocs, getDoc, doc, query, where, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, getDocs, getDoc, doc, query, where, addDoc, serverTimestamp, updateDoc, deleteDoc, setDoc } from 'firebase/firestore';
 import { Product, Order, Address, AddressWithId, Wishlist, DashboardStats, CartItem } from '../types';
 
 const API_DELAY = 0; // No more artificial delay
@@ -77,15 +76,14 @@ export const addAddress = async (userId: string, address: Address): Promise<Addr
   return { ...address, id: docRef.id };
 };
 
-export const updateAddress = async (userId: string, addressId: string, address: Address): Promise<void> => {
-    // This is a simplified version. A real implementation should not update the entire doc.
+export const updateAddress = async (userId: string, addressId: string, address: Partial<Address>): Promise<void> => {
     const addressDoc = doc(firestore, `users/${userId}/addresses`, addressId);
-    await addDoc(addressDoc, { ...address, updatedAt: serverTimestamp() }, { merge: true });
+    await updateDoc(addressDoc, { ...address, updatedAt: serverTimestamp() });
 };
 
 export const deleteAddress = async (userId: string, addressId: string): Promise<void> => {
     const addressDoc = doc(firestore, `users/${userId}/addresses`, addressId);
-    // await deleteDoc(addressDoc);
+    await deleteDoc(addressDoc);
 };
 
 // --- Funções da API para Wishlist ---
@@ -99,7 +97,7 @@ export const getWishlist = async (userId: string): Promise<Wishlist> => {
 
 export const updateWishlist = async (userId: string, wishlist: Wishlist): Promise<void> => {
     const wishlistDoc = doc(firestore, "wishlists", userId);
-    // await setDoc(wishlistDoc, wishlist);
+    await setDoc(wishlistDoc, wishlist);
 };
 
 
@@ -119,12 +117,47 @@ export const getUserDashboardStats = async (userId: string): Promise<DashboardSt
 }
 
 // --- Funções da API para Checkout ---
-export const placeOrder = async (userId: string, items: CartItem[], shippingAddress: Address): Promise<{ orderId: string }> => {
-    // This is a simplified mock of creating an order. A real implementation would be more complex.
-    const newOrderRef = await addDoc(collection(firestore, "orders"), {
+export const placeOrder = async (userId: string, cartItems: CartItem[], shippingAddress: Address, billingAddress: Address): Promise<{ orderId: string, orderNumber: string }> => {
+    const subtotalCents = cartItems.reduce((sum, item) => sum + item.price * 100 * item.quantity, 0);
+    // TODO: Implement actual shipping, tax, discount logic
+    const shippingCents = 1500; // Mock shipping
+    const taxCents = 0;
+    const discountCents = 0;
+    const totalCents = subtotalCents + shippingCents + taxCents - discountCents;
+
+    const newOrder: Omit<Order, 'id'> = {
+        orderNumber: `ART-${Date.now().toString().slice(-6)}`,
         userId,
-        // ... more order data
-        createdAt: serverTimestamp()
-    });
-    return { orderId: newOrderRef.id };
+        items: cartItems.map(item => ({
+            productId: item.id,
+            title: item.title,
+            qty: item.quantity,
+            priceCents: item.price * 100,
+            currency: 'EUR', // Assuming EUR for now
+            image_thumb: item.image,
+        })),
+        totals: {
+            subtotalCents,
+            shippingCents,
+            taxCents,
+            discountCents,
+            totalCents,
+            currency: 'EUR',
+        },
+        status: 'created',
+        timeline: [
+            {
+                status: 'created',
+                at: serverTimestamp(),
+            }
+        ],
+        shippingAddress: shippingAddress,
+        billingAddress: billingAddress,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+    };
+
+    const newOrderRef = await addDoc(collection(firestore, "orders"), newOrder);
+
+    return { orderId: newOrderRef.id, orderNumber: newOrder.orderNumber };
 };

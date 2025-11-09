@@ -41,13 +41,19 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-            if (firebaseUser) {
-                const userData = await fetchUserProfile(firebaseUser);
-                setUser(userData);
-            } else {
+            try {
+                if (firebaseUser) {
+                    const userData = await fetchUserProfile(firebaseUser);
+                    setUser(userData);
+                } else {
+                    setUser(null);
+                }
+            } catch (error) {
+                console.error("Auth state change error:", error);
                 setUser(null);
+            } finally {
+                setLoading(false);
             }
-            setLoading(false);
         });
 
         return () => unsubscribe();
@@ -57,9 +63,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         const firebaseUser = auth.currentUser;
         if (firebaseUser) {
             setLoading(true);
-            const userData = await fetchUserProfile(firebaseUser);
-            setUser(userData);
-            setLoading(false);
+            try {
+                const userData = await fetchUserProfile(firebaseUser);
+                setUser(userData);
+            } catch (error) {
+                console.error("Error refetching user:", error);
+            } finally {
+                setLoading(false);
+            }
         }
     }, [fetchUserProfile]);
 

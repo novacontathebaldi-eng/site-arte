@@ -32,7 +32,7 @@ const CheckoutReviewStep: React.FC<CheckoutReviewStepProps> = ({ selectedAddress
       if (!user) return;
       setIsPlacingOrder(true);
       try {
-          const { orderId } = await placeOrder(user.uid, state.items, selectedAddress);
+          const { orderId } = await placeOrder(user.uid, state.items, selectedAddress, selectedAddress);
           clearCart();
           navigate(`${ROUTES.ORDER_CONFIRMATION}/${orderId}`);
       } catch (error) {

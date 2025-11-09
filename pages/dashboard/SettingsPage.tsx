@@ -1,14 +1,17 @@
 import React, { useState } from 'react';
 import { useTranslation } from '../../hooks/useTranslation';
-import { LockClosedIcon, BellIcon, ShieldCheckIcon } from '../../components/ui/icons';
+import { LockClosedIcon, BellIcon, ShieldCheckIcon, WrenchScrewdriverIcon } from '../../components/ui/icons';
 import SecuritySettingsTab from './SecuritySettingsTab';
 import NotificationsSettingsTab from './NotificationsSettingsTab';
 import PrivacySettingsTab from './PrivacySettingsTab';
+import { useAuth } from '../../hooks/useAuth';
+import AdminSettingsTab from './AdminSettingsTab';
 
-type Tab = 'security' | 'notifications' | 'privacy';
+type Tab = 'security' | 'notifications' | 'privacy' | 'admin';
 
 const SettingsPage: React.FC = () => {
   const { t } = useTranslation();
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<Tab>('security');
 
   const tabs = [
@@ -16,6 +19,10 @@ const SettingsPage: React.FC = () => {
     { id: 'notifications', label: t('dashboard.settingsNotifications'), icon: BellIcon },
     { id: 'privacy', label: t('dashboard.settingsPrivacy'), icon: ShieldCheckIcon },
   ];
+
+  if (user?.profile?.role === 'admin') {
+      tabs.push({ id: 'admin', label: 'Admin Tools', icon: WrenchScrewdriverIcon });
+  }
 
   return (
     <div className="bg-white p-8 rounded-lg shadow-md">
@@ -42,6 +49,7 @@ const SettingsPage: React.FC = () => {
         {activeTab === 'security' && <SecuritySettingsTab />}
         {activeTab === 'notifications' && <NotificationsSettingsTab />}
         {activeTab === 'privacy' && <PrivacySettingsTab />}
+        {activeTab === 'admin' && <AdminSettingsTab />}
       </div>
     </div>
   );

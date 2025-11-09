@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useTranslation } from '../../hooks/useTranslation';
 import { useToast } from '../../hooks/useToast';
-import { supabase } from '../../lib/supabase';
+import { updatePassword } from 'firebase/auth';
+import { auth } from '../../lib/firebase';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
 
@@ -28,9 +29,14 @@ const SecuritySettingsTab: React.FC = () => {
       return;
     }
 
+    if (!auth.currentUser) {
+        showToast('You must be logged in to change your password.', 'error');
+        setIsLoading(false);
+        return;
+    }
+
     try {
-      const { error } = await supabase.auth.updateUser({ password: newPassword });
-      if (error) throw error;
+      await updatePassword(auth.currentUser, newPassword);
       
       showToast(t('toast.passwordUpdated'), 'success');
       setNewPassword('');
