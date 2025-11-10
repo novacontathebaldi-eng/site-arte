@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from '../hooks/useTranslation';
 import { useAuth } from '../hooks/useAuth';
@@ -26,19 +27,25 @@ const CheckoutAddressStep: React.FC<CheckoutAddressStepProps> = ({ onAddressSele
         const defaultAddress = userAddresses.find(a => a.isDefault);
         if (defaultAddress) {
           setSelectedAddressId(defaultAddress.id);
+          onAddressSelect(defaultAddress);
         } else if (userAddresses.length > 0) {
           setSelectedAddressId(userAddresses[0].id);
+           onAddressSelect(userAddresses[0]);
         }
       }
     };
     fetchAddresses();
-  }, [user]);
+  }, [user, onAddressSelect]);
 
-  const handleSaveNewAddress = async (addressData: Address) => {
+  const handleSaveNewAddress = async (addressData: Partial<Address>) => {
     if (!user) return;
-    const newAddress = await addAddress(user.uid, addressData);
+    // FIX: The `addAddress` function expects a full `Address` object.
+    // We construct a valid object by adding the required `userId` from the current user
+    // and casting, as other required fields are guaranteed by the form.
+    const newAddress = await addAddress(user.uid, { ...addressData, userId: user.uid } as Address);
     setAddresses(prev => [...prev, newAddress]);
     setSelectedAddressId(newAddress.id);
+    onAddressSelect(newAddress);
     setIsModalOpen(false);
   };
 
@@ -48,6 +55,11 @@ const CheckoutAddressStep: React.FC<CheckoutAddressStepProps> = ({ onAddressSele
       onAddressSelect(selected);
     }
   };
+  
+  const handleSelectAddress = (address: AddressWithId) => {
+    setSelectedAddressId(address.id);
+    onAddressSelect(address);
+  }
 
   return (
     <div>
@@ -60,7 +72,7 @@ const CheckoutAddressStep: React.FC<CheckoutAddressStepProps> = ({ onAddressSele
               name="address"
               value={addr.id}
               checked={selectedAddressId === addr.id}
-              onChange={(e) => setSelectedAddressId(e.target.value)}
+              onChange={() => handleSelectAddress(addr)}
               className="mt-1"
             />
             <div className="ml-4 text-sm">

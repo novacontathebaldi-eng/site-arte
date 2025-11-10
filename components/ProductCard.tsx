@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Product } from '../types';
@@ -11,7 +12,6 @@ interface ProductCardProps {
 // Este componente representa um único "card" de produto na vitrine (página inicial ou catálogo).
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { language, t } = useTranslation();
-  // FIX: Add fallback to 'fr' language if current language translation is not available
   const productTranslation = product.translations[language] || product.translations['fr'];
 
   // Return null or a placeholder if no translation is found
@@ -20,7 +20,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   }
 
   // Formata o preço para o padrão europeu (ex: 1.200,00 €)
-  // FIX: Use priceCents and currency from the product object
   const formattedPrice = new Intl.NumberFormat(language + '-LU', {
     style: 'currency',
     currency: product.currency,
@@ -33,7 +32,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         {/* A imagem do produto */}
         <div className="overflow-hidden">
              <img
-                // FIX: Use cover_thumb and alt text from gallery
                 src={product.cover_thumb}
                 alt={product.gallery?.[0]?.alt || productTranslation.title}
                 className="w-full h-72 object-cover transition-transform duration-400 ease-in-out group-hover:scale-105"

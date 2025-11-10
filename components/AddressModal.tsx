@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect, ChangeEvent } from 'react';
 import { useTranslation } from '../hooks/useTranslation';
 import { Address, AddressWithId } from '../types';
@@ -8,7 +9,7 @@ import Button from './ui/Button';
 interface AddressModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (address: Address) => void;
+  onSave: (address: Partial<Address>) => void;
   addressToEdit: AddressWithId | null;
 }
 
@@ -25,7 +26,7 @@ const initialAddressState: Omit<Address, 'id' | 'userId'> = {
 
 const AddressModal: React.FC<AddressModalProps> = ({ isOpen, onClose, onSave, addressToEdit }) => {
   const { t } = useTranslation();
-  const [address, setAddress] = useState<Omit<Address, 'id' | 'userId'>>(initialAddressState);
+  const [address, setAddress] = useState<Partial<Address>>(initialAddressState);
 
   useEffect(() => {
     if (addressToEdit) {
@@ -46,7 +47,7 @@ const AddressModal: React.FC<AddressModalProps> = ({ isOpen, onClose, onSave, ad
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSave(address as Address);
+    onSave(address);
   };
 
   if (!isOpen) return null;
@@ -60,7 +61,6 @@ const AddressModal: React.FC<AddressModalProps> = ({ isOpen, onClose, onSave, ad
         <form onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Input id="name" name="name" label={t('dashboard.recipientName')} value={address.name} onChange={handleChange} required />
-                {/* FIX: 'company' is optional, check for existence before accessing */}
                 <Input id="company" name="company" label={t('dashboard.company')} value={address.company || ''} onChange={handleChange} />
                 <Input id="line1" name="line1" label={t('dashboard.addressLine1')} value={address.line1} onChange={handleChange} required className="md:col-span-2" />
                 <Input id="line2" name="line2" label={t('dashboard.addressLine2')} value={address.line2 || ''} onChange={handleChange} className="md:col-span-2" />

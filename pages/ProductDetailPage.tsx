@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useTranslation } from '../hooks/useTranslation';
@@ -55,9 +56,7 @@ const ProductDetailPage: React.FC = () => {
       id: product.id,
       slug: product.slug,
       title: product.translations[language]!.title,
-      // FIX: Use cover_thumb for image
       image: product.cover_thumb || '',
-      // FIX: Use priceCents
       price: product.priceCents / 100,
       quantity: quantity,
       stock: product.stock,
@@ -87,7 +86,6 @@ const ProductDetailPage: React.FC = () => {
     return <NotFoundPage />;
   }
   
-  // FIX: Added a fallback to the 'fr' translation and a check for productTranslation
   const productTranslation = product.translations[language] || product.translations['fr'];
   if (!productTranslation) {
     return <NotFoundPage />;
@@ -95,9 +93,7 @@ const ProductDetailPage: React.FC = () => {
 
   const formattedPrice = new Intl.NumberFormat(language + '-LU', {
     style: 'currency',
-    // FIX: Use product currency
     currency: product.currency,
-    // FIX: Use priceCents
   }).format(product.priceCents / 100);
 
   const statusInfo = {
@@ -116,9 +112,8 @@ const ProductDetailPage: React.FC = () => {
           {/* Coluna da Esquerda: Galeria de Imagens */}
           <div>
             <img 
-              // FIX: use cover_original and gallery
               src={product.cover_original} 
-              alt={product.gallery?.[0]?.alt}
+              alt={product.gallery?.[0]?.alt || productTranslation.title}
               className="w-full rounded-lg shadow-lg"
             />
             {/* Thumbnails podem ser adicionados aqui */}
@@ -140,11 +135,9 @@ const ProductDetailPage: React.FC = () => {
             </div>
             
             <ul className="mt-8 space-y-2 text-sm text-text-secondary border-t pt-6">
-              {/* FIX: Use createdAt from timestamp and categories array */}
               <li><strong>{t('product.year')}:</strong> {new Date(product.createdAt.seconds * 1000).getFullYear()}</li>
               <li><strong>{t('product.category')}:</strong> {product.categories?.map(c => t(`catalog.${c}`)).join(', ')}</li>
               <li><strong>{t('product.technique')}:</strong> {productTranslation.materials}</li>
-              {/* FIX: Use dimensions with Cm */}
               <li><strong>{t('product.dimensions')}:</strong> {product.dimensions?.heightCm} x {product.dimensions?.widthCm} {product.dimensions?.depthCm ? `x ${product.dimensions.depthCm}` : ''} cm</li>
             </ul>
 
