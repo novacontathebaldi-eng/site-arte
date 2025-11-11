@@ -1,24 +1,22 @@
 {
-  "name": "melissa-pelussi-art-gallery",
+  "name": "pelussi-art-monorepo",
+  "version": "1.0.0",
   "private": true,
-  "version": "0.0.0",
-  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "shared"
+  ],
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
-  },
-  "dependencies": {
-    "react-router-dom": "^7.9.5",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
-    "@supabase/supabase-js": "^2.80.0",
-    "firebase": "^12.5.0"
+    "dev": "turbo run dev",
+    "dev:cliente": "turbo run dev --filter=cliente",
+    "dev:controle": "turbo run dev --filter=controle",
+    "build": "turbo run build",
+    "build:cliente": "turbo run build --filter=cliente",
+    "build:controle": "turbo run build --filter=controle",
+    "lint": "turbo run lint"
   },
   "devDependencies": {
-    "@types/node": "^22.14.0",
-    "@vitejs/plugin-react": "^5.0.0",
-    "typescript": "~5.8.2",
-    "vite": "^6.2.0"
+    "turbo": "^1.13.0",
+    "typescript": "^5.4.0"
   }
 }
