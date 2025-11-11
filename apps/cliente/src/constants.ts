@@ -1,4 +1,4 @@
-import { Language } from '@shared/types';
+import { Language } from 'shared/types';
 import { FR, GB, DE, PT } from './components/icons/FlagIcons';
 import React from 'react';
 

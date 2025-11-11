@@ -1,8 +1,8 @@
 import React, { useState, useEffect, ChangeEvent } from 'react';
 import { useTranslation } from '../hooks/useTranslation';
-import { Address, AddressWithId } from '@shared/types';
-import Input from '@shared/components/ui/Input';
-import Button from '@shared/components/ui/Button';
+import { Address, AddressWithId } from 'shared/types';
+import Input from 'shared/components/ui/Input';
+import Button from 'shared/components/ui/Button';
 
 interface AddressModalProps {
   isOpen: boolean;

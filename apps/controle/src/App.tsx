@@ -17,18 +17,25 @@ function App() {
         <Routes>
           <Route path="/login" element={<AdminLoginPage />} />
 
-          {/* FIX: Use layout route for protected routes */}
-          <Route element={<ProtectedAdminRoute />}>
-            <Route path="/" element={<AdminLayout />}>
-              <Route index element={<Navigate to="/dashboard" replace />} />
-              <Route path="dashboard" element={<AdminDashboard />} />
-              <Route path="pedidos" element={<AdminOrdersPage />} />
-              <Route path="produtos" element={<AdminProductsPage />} />
-              <Route path="usuarios" element={<AdminUsersPage />} />
-              <Route path="configuracoes" element={<AdminSettingsPage />} />
-              <Route path="analytics" element={<AdminAnalyticsPage />} />
-              <Route path="*" element={<Navigate to="/dashboard" replace />} />
-            </Route>
+          {/* FIX: The original nested Route structure caused a TypeScript error.
+              Refactoring to use ProtectedAdminRoute as a wrapper for AdminLayout resolves the issue
+              by explicitly providing children to the protected route component. */}
+          <Route
+            path="/"
+            element={
+              <ProtectedAdminRoute>
+                <AdminLayout />
+              </ProtectedAdminRoute>
+            }
+          >
+            <Route index element={<Navigate to="/dashboard" replace />} />
+            <Route path="dashboard" element={<AdminDashboard />} />
+            <Route path="pedidos" element={<AdminOrdersPage />} />
+            <Route path="produtos" element={<AdminProductsPage />} />
+            <Route path="usuarios" element={<AdminUsersPage />} />
+            <Route path="configuracoes" element={<AdminSettingsPage />} />
+            <Route path="analytics" element={<AdminAnalyticsPage />} />
+            <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Route>
         </Routes>
       </AdminAuthProvider>

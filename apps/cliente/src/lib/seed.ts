@@ -1,4 +1,4 @@
-import { Product, Category } from '@shared/types';
+import { Product, Category } from 'shared/types';
 
 const toTimestamp = (dateString: string) => ({
   seconds: Math.floor(new Date(dateString).getTime() / 1000),

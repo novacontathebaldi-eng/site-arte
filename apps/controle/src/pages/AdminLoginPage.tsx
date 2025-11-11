@@ -1,8 +1,7 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '@shared/lib/firebase';
+import { auth } from 'shared/lib/firebase';
 import { Shield, Mail, Lock } from 'lucide-react';
 
 export default function AdminLoginPage() {

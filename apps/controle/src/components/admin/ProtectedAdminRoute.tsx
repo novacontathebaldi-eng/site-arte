@@ -1,9 +1,8 @@
-
 import React from 'react';
-import { Navigate, Outlet } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { useAdminAuth } from '../../context/AdminAuthContext';
 
-export default function ProtectedAdminRoute() {
+export default function ProtectedAdminRoute({ children }: { children: React.ReactNode }) {
   const { user, isAdmin, loading } = useAdminAuth();
 
   if (loading) {
@@ -18,5 +17,5 @@ export default function ProtectedAdminRoute() {
     return <Navigate to="/login" replace />;
   }
 
-  return <Outlet />;
+  return <>{children}</>;
 }

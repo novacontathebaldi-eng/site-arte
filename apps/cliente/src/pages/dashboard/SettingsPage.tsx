@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from '../../hooks/useTranslation';
-import { LockClosedIcon, BellIcon, ShieldCheckIcon } from '@shared/components/ui/icons';
+import { LockClosedIcon, BellIcon, ShieldCheckIcon } from 'shared/components/ui/icons';
 import SecuritySettingsTab from './SecuritySettingsTab';
 import NotificationsSettingsTab from './NotificationsSettingsTab';
 import PrivacySettingsTab from './PrivacySettingsTab';

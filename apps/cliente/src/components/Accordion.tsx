@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronDownIcon } from '@shared/components/ui/icons';
+import { ChevronDownIcon } from 'shared/components/ui/icons';
 
 interface AccordionProps {
   title: string;

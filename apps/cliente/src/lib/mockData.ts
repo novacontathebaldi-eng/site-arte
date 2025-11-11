@@ -1,4 +1,4 @@
-import { Product, Order, AddressWithId, Wishlist } from '@shared/types';
+import { Product, Order, AddressWithId, Wishlist } from 'shared/types';
 
 // Este arquivo simula seu banco de dados (Firestore).
 // Criamos uma lista de produtos de exemplo com todos os detalhes, incluindo as traduções.

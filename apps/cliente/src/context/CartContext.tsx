@@ -1,5 +1,5 @@
 import React, { createContext, useReducer, useEffect } from 'react';
-import { CartItem, CartState } from '@shared/types';
+import { CartItem, CartState } from 'shared/types';
 
 // Este arquivo é o coração do nosso sistema de carrinho de compras.
 // Ele gerencia todos os itens, quantidades e lógicas relacionadas.

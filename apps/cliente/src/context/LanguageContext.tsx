@@ -1,7 +1,6 @@
-
 import React, { createContext, useState, useEffect, useMemo } from 'react';
-import { Language } from '@shared/types';
-import { translations } from '@shared/lib/translations';
+import { Language } from 'shared/types';
+import { translations } from 'shared/lib/translations';
 import { LANGUAGES } from '../constants';
 
 // Este arquivo é o cérebro do sistema de múltiplos idiomas.

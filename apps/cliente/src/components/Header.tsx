@@ -1,14 +1,13 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useTranslation } from '../hooks/useTranslation';
 import { ROUTES } from '../constants';
 import CartIcon from './CartIcon';
 import { useAuth } from '../hooks/useAuth';
-import { auth } from '@shared/lib/firebase';
+import { auth } from 'shared/lib/firebase';
 import { signOut } from 'firebase/auth';
 import { useToast } from '../hooks/useToast';
-import { MenuIcon, UserCircleIcon, XIcon } from '@shared/components/ui/icons';
+import { MenuIcon, UserCircleIcon, XIcon } from 'shared/components/ui/icons';
 
 // Menu do Usuário para Desktop
 const UserMenu: React.FC = () => {

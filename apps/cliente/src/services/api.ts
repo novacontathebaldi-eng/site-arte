@@ -1,6 +1,6 @@
-import { firestore } from '@shared/lib/firebase';
+import { firestore } from 'shared/lib/firebase';
 import { collection, getDocs, getDoc, doc, query, where, addDoc, serverTimestamp, updateDoc, deleteDoc, setDoc } from 'firebase/firestore';
-import { Product, Order, Address, AddressWithId, Wishlist, DashboardStats, CartItem } from '@shared/types';
+import { Product, Order, Address, AddressWithId, Wishlist, DashboardStats, CartItem } from 'shared/types';
 
 const API_DELAY = 0; // No more artificial delay
 

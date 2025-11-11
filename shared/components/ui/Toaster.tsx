@@ -1,6 +1,6 @@
 import React from 'react';
-import { useToast } from '../../../apps/cliente/src/hooks/useToast';
-import { ToastType } from '@shared/types';
+import { useToast } from 'shared/hooks/useToast';
+import { ToastType } from 'shared/types';
 
 // Ícones para cada tipo de notificação.
 const icons: Record<ToastType, React.ReactNode> = {

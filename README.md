@@ -23,7 +23,7 @@ O monorepo é dividido em duas aplicações principais e um pacote compartilhado
 
 **Pré-requisitos:**
 -   Node.js (v18 ou superior)
--   npm ou pnpm
+-   npm (v7 ou superior) ou pnpm
 
 1.  **Instale as dependências** a partir da raiz do projeto:
     ```bash

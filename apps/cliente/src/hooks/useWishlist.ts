@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from './useAuth';
 import { useToast } from './useToast';
 import { useTranslation } from './useTranslation';
-import { Wishlist } from '@shared/types';
+import { Wishlist } from 'shared/types';
 import { getWishlist as apiGetWishlist, updateWishlist as apiUpdateWishlist } from '../services/api';
 
 export const useWishlist = () => {
