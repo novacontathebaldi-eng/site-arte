@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useTranslation } from '../hooks/useTranslation';
 import { Product, Filters } from '../types';
@@ -121,7 +122,8 @@ const CatalogPage: React.FC = () => {
                   <h3 className="font-semibold mb-2">{t('catalog.availability')}</h3>
                    {availabilities.map(avail => (
                        <label key={avail} className="flex items-center space-x-2">
-                           <input type="radio" name="availability" value={avail} checked={filters.availability === avail} // FIX: Explicitly type event to correctly infer target type
+                           <input type="radio" name="availability" value={avail} checked={filters.availability === avail}
+                            // FIX: Explicitly type event to correctly infer target type
                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleFilterChange('availability', e.target.value)} />
                            <span>{t(avail === 'all' ? 'catalog.all' : `product.${avail}`)}</span>
                        </label>

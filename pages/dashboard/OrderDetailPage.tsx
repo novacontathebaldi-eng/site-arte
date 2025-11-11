@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useTranslation } from '../../hooks/useTranslation';
@@ -71,7 +72,7 @@ const OrderDetailPage: React.FC = () => {
     
     // FIX: Use valid OrderStatus values for the stepper
     const stepperSteps: OrderStatus[] = ['paid', 'processing', 'shipped', 'delivered'];
-    const currentStepIndex = stepperSteps.indexOf(order.status);
+    const currentStepIndex = stepperSteps.findIndex(step => order.timeline.some(t => t.status === step));
 
     return (
         <div className="space-y-6">

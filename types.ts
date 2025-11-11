@@ -1,3 +1,4 @@
+
 import { User } from 'firebase/auth';
 
 export type Language = 'fr' | 'en' | 'de' | 'pt';

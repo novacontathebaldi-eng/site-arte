@@ -1,9 +1,10 @@
+
 import React, { useState } from 'react';
 import { useTranslation } from '../../hooks/useTranslation';
 import { useToast } from '../../hooks/useToast';
-import { firestore } from '@shared/lib/firebase';
-import { doc, setDoc, writeBatch } from 'firebase/firestore';
-import Button from '@shared/components/ui/Button';
+import { firestore } from 'shared/lib/firebase';
+import { doc, writeBatch } from 'firebase/firestore';
+import Button from 'shared/components/ui/Button';
 import { seedProducts, seedCategories } from '../../lib/seed';
 
 const AdminSettingsTab: React.FC = () => {

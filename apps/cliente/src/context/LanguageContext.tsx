@@ -1,3 +1,4 @@
+
 import React, { createContext, useState, useEffect, useMemo } from 'react';
 import { Language } from 'shared/types';
 import { translations } from 'shared/lib/translations';
@@ -41,7 +42,7 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   useEffect(() => {
     localStorage.setItem('language', language);
     // Também atualiza o atributo 'lang' na tag <html> para acessibilidade e SEO.
-    // FIX: Add a guard for `document` to prevent errors in non-browser environments.
+    // FIX: Add a guard for `document` to prevent errors in non-browser environments
     if (typeof document !== 'undefined') {
         document.documentElement.lang = language;
     }
@@ -64,7 +65,7 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   // 7. useMemo para otimização. Ele garante que o objeto 'value' só seja recriado
   // se o idioma mudar, evitando re-renderizações desnecessárias.
-  const value = useMemo(() => ({ language, setLanguage, t }), [language]);
+  const value = useMemo(() => ({ language, setLanguage, t }), [language, t]);
 
   // 8. Retorna o Provedor, disponibilizando o 'value' para todos os componentes filhos.
   return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;

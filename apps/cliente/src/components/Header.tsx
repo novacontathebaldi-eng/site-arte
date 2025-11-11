@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useTranslation } from '../hooks/useTranslation';
@@ -30,8 +31,8 @@ const UserMenu: React.FC = () => {
     
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
-            // FIX: Cast event.target to HTMLElement to handle DOM node types correctly.
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target as HTMLElement)) {
+            // FIX: Cast event.target to Node to handle DOM node types correctly.
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
                 setIsOpen(false);
             }
         };
@@ -88,8 +89,8 @@ const Header: React.FC = () => {
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      // FIX: Cast event.target to HTMLElement to handle DOM node types correctly.
-      if (mobileAuthRef.current && !mobileAuthRef.current.contains(event.target as HTMLElement)) {
+      // FIX: Cast event.target to Node to handle DOM node types correctly.
+      if (mobileAuthRef.current && !mobileAuthRef.current.contains(event.target as Node)) {
         setIsMobileAuthOpen(false);
       }
     };

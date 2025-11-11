@@ -32,8 +32,8 @@ const UserMenu: React.FC = () => {
     
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
-            // FIX: Cast event.target to HTMLElement and check for existence of dropdownRef.current
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target as HTMLElement)) {
+            // FIX: Cast event.target to Node and check for existence of dropdownRef.current
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
                 setIsOpen(false);
             }
         };
@@ -90,8 +90,8 @@ const Header: React.FC = () => {
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      // FIX: Cast event.target to HTMLElement and check for existence of mobileAuthRef.current
-      if (mobileAuthRef.current && !mobileAuthRef.current.contains(event.target as HTMLElement)) {
+      // FIX: Cast event.target to Node and check for existence of mobileAuthRef.current
+      if (mobileAuthRef.current && !mobileAuthRef.current.contains(event.target as Node)) {
         setIsMobileAuthOpen(false);
       }
     };

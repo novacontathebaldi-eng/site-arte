@@ -37,6 +37,7 @@ const AddressesPage: React.FC = () => {
 
   useEffect(() => {
     fetchAddresses();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const handleOpenModal = (address: AddressWithId | null = null) => {

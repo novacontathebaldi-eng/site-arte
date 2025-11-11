@@ -1,7 +1,6 @@
 
 
-
-import React, a, { useState, useEffect, ChangeEvent } from 'react';
+import React, { useState, useEffect, ChangeEvent } from 'react';
 import { useTranslation } from '../hooks/useTranslation';
 import { Address, AddressWithId } from '../types';
 import Input from './ui/Input';

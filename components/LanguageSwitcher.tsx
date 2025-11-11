@@ -22,8 +22,8 @@ const LanguageSwitcher: React.FC = () => {
   // Este useEffect fecha o dropdown se o usuário clicar fora dele.
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      // FIX: Cast event.target to HTMLElement and check for existence of dropdownRef.current
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as HTMLElement)) {
+      // FIX: Cast event.target to Node and check for existence of dropdownRef.current
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsOpen(false);
       }
     };
