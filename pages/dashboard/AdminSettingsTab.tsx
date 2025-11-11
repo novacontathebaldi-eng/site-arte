@@ -12,7 +12,8 @@ const AdminSettingsTab: React.FC = () => {
     const [isLoading, setIsLoading] = useState(false);
 
     const handlePopulateDatabase = async () => {
-        if (!window.confirm("Are you sure you want to populate the database? This should only be done once on a fresh installation.")) {
+        // FIX: Add a guard for `window` to prevent errors in non-browser environments.
+        if (typeof window !== 'undefined' && !window.confirm("Are you sure you want to populate the database? This should only be done once on a fresh installation.")) {
             return;
         }
 

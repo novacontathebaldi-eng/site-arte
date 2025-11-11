@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from '../../hooks/useTranslation';
 import { useAuth } from '../../hooks/useAuth';
@@ -66,7 +67,8 @@ const AddressesPage: React.FC = () => {
   };
 
   const handleDeleteAddress = async (addressId: string) => {
-    if (!user || !window.confirm(t('dashboard.confirmDelete'))) return;
+    // FIX: Add a guard for `window` to prevent errors in non-browser environments.
+    if (!user || (typeof window !== 'undefined' && !window.confirm(t('dashboard.confirmDelete')))) return;
     try {
       await deleteAddress(user.uid, addressId);
       showToast(t('toast.addressDeleted'), 'info');

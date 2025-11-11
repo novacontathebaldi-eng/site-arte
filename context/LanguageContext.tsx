@@ -1,4 +1,5 @@
 
+
 import React, { createContext, useState, useEffect, useMemo } from 'react';
 import { Language } from '../types';
 import { translations } from '../lib/translations';
@@ -42,7 +43,10 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   useEffect(() => {
     localStorage.setItem('language', language);
     // Também atualiza o atributo 'lang' na tag <html> para acessibilidade e SEO.
-    document.documentElement.lang = language;
+    // FIX: Add a guard for `document` to prevent errors in non-browser environments
+    if (typeof document !== 'undefined') {
+        document.documentElement.lang = language;
+    }
   }, [language]);
 
   // 6. A função de tradução `t`.

@@ -98,7 +98,8 @@ const CatalogPage: React.FC = () => {
                 type="text"
                 placeholder={t('catalog.searchPlaceholder')}
                 value={filters.query}
-                onChange={(e) => handleFilterChange('query', e.target.value)}
+                // FIX: Explicitly type event to correctly infer target type
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleFilterChange('query', e.target.value)}
                 className="w-full p-2 border rounded-md"
               />
               <div>
@@ -120,7 +121,8 @@ const CatalogPage: React.FC = () => {
                   <h3 className="font-semibold mb-2">{t('catalog.availability')}</h3>
                    {availabilities.map(avail => (
                        <label key={avail} className="flex items-center space-x-2">
-                           <input type="radio" name="availability" value={avail} checked={filters.availability === avail} onChange={(e) => handleFilterChange('availability', e.target.value)} />
+                           <input type="radio" name="availability" value={avail} checked={filters.availability === avail} // FIX: Explicitly type event to correctly infer target type
+                           onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleFilterChange('availability', e.target.value)} />
                            <span>{t(avail === 'all' ? 'catalog.all' : `product.${avail}`)}</span>
                        </label>
                    ))}
@@ -148,7 +150,7 @@ const CatalogPage: React.FC = () => {
                </div>
               <div className="flex items-center space-x-2 flex-shrink-0">
                 <label htmlFor="sort" className="text-sm">{t('catalog.sortBy')}:</label>
-                <select id="sort" value={sortOrder} onChange={(e) => setSortOrder(e.target.value)} className="p-2 border rounded-md">
+                <select id="sort" value={sortOrder} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSortOrder(e.target.value)} className="p-2 border rounded-md">
                   <option value="newest">{t('catalog.newest')}</option>
                   <option value="priceLowHigh">{t('catalog.priceLowHigh')}</option>
                   <option value="priceHighLow">{t('catalog.priceHighLow')}</option>

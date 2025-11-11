@@ -36,7 +36,8 @@ const AddressModal: React.FC<AddressModalProps> = ({ isOpen, onClose, onSave, ad
   }, [addressToEdit, isOpen]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target;
+    // FIX: Use `currentTarget` which is correctly typed for the element the event handler is attached to.
+    const { name, value, type, checked } = e.currentTarget;
     setAddress(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value,

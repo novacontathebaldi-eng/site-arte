@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
@@ -62,8 +63,8 @@ const LoginPage: React.FC = () => {
       <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
         <h1 className="text-2xl font-bold text-center">{t('auth.loginTitle')}</h1>
         <form onSubmit={handleLogin} className="space-y-6">
-          <Input id="email" type="email" label={t('auth.email')} value={email} onChange={(e) => setEmail(e.target.value)} required />
-          <Input id="password" type="password" label={t('auth.password')} value={password} onChange={(e) => setPassword(e.target.value)} required />
+          <Input id="email" type="email" label={t('auth.email')} value={email} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)} required />
+          <Input id="password" type="password" label={t('auth.password')} value={password} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)} required />
           {error && <p className="text-red-500 text-sm">{error}</p>}
           <div className="text-right">
             <Link to={ROUTES.FORGOT_PASSWORD} className="text-sm text-secondary hover:underline">{t('auth.forgotPassword')}</Link>

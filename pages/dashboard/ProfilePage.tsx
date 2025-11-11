@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { useTranslation } from '../../hooks/useTranslation';
@@ -58,7 +59,8 @@ const ProfilePage: React.FC = () => {
               id="displayName" 
               label={t('auth.fullName')} 
               value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
+              // FIX: Explicitly type event to correctly infer target type
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDisplayName(e.target.value)}
               required
             />
             <Input 

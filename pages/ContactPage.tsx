@@ -22,7 +22,8 @@ const ContactPage: React.FC = () => {
   const subjectOptionsData = t('contact.subjectOptions') as unknown as Record<string, string>;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    // FIX: Use `currentTarget` which is correctly typed for the element the event handler is attached to.
+    setFormData({ ...formData, [e.currentTarget.name]: e.currentTarget.value });
   };
   
   const isFormValid = formData.name.length > 1 && formData.email.includes('@') && formData.message.length > 19;

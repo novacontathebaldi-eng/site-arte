@@ -63,7 +63,8 @@ const SecuritySettingsTab: React.FC = () => {
           type="password"
           label={t('dashboard.currentPassword')}
           value={currentPassword}
-          onChange={(e) => setCurrentPassword(e.target.value)}
+          // FIX: Explicitly type event to correctly infer target type
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCurrentPassword(e.target.value)}
           required
         />
         <Input
@@ -71,7 +72,8 @@ const SecuritySettingsTab: React.FC = () => {
           type="password"
           label={t('dashboard.newPassword')}
           value={newPassword}
-          onChange={(e) => setNewPassword(e.target.value)}
+          // FIX: Explicitly type event to correctly infer target type
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewPassword(e.target.value)}
           required
         />
         <Input
@@ -79,7 +81,8 @@ const SecuritySettingsTab: React.FC = () => {
           type="password"
           label={t('dashboard.confirmNewPassword')}
           value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
+          // FIX: Explicitly type event to correctly infer target type
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setConfirmPassword(e.target.value)}
           required
         />
         <div className="pt-2">

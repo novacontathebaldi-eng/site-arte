@@ -20,12 +20,16 @@ const LanguageSwitcher: React.FC = () => {
   // Este useEffect fecha o dropdown se o usuário clicar fora dele.
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      // FIX: Cast event.target to HTMLElement to handle DOM node types correctly.
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as HTMLElement)) {
         setIsOpen(false);
       }
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    // FIX: Add guard for document to avoid errors in non-browser environments.
+    if (typeof document !== 'undefined') {
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
   }, []);
 
   const handleLanguageChange = (langCode: typeof language) => {

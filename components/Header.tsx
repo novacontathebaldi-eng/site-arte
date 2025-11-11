@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useTranslation } from '../hooks/useTranslation';
@@ -31,12 +32,16 @@ const UserMenu: React.FC = () => {
     
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+            // FIX: Cast event.target to HTMLElement and check for existence of dropdownRef.current
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as HTMLElement)) {
                 setIsOpen(false);
             }
         };
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
+        // FIX: Add a guard for `document` to prevent errors in non-browser environments
+        if (typeof document !== 'undefined') {
+            document.addEventListener('mousedown', handleClickOutside);
+            return () => document.removeEventListener('mousedown', handleClickOutside);
+        }
     }, []);
 
     const displayName = user?.profile?.displayName || user?.email;
@@ -75,19 +80,26 @@ const Header: React.FC = () => {
   const { showToast } = useToast();
 
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 10);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    // FIX: Add a guard for `window` to prevent errors in non-browser environments
+    if (typeof window !== 'undefined') {
+        const handleScroll = () => setIsScrolled(window.scrollY > 10);
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }
   }, []);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (mobileAuthRef.current && !mobileAuthRef.current.contains(event.target as Node)) {
+      // FIX: Cast event.target to HTMLElement and check for existence of mobileAuthRef.current
+      if (mobileAuthRef.current && !mobileAuthRef.current.contains(event.target as HTMLElement)) {
         setIsMobileAuthOpen(false);
       }
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    // FIX: Add a guard for `document` to prevent errors in non-browser environments
+    if (typeof document !== 'undefined') {
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
   }, []);
 
   const handleLogout = async () => {

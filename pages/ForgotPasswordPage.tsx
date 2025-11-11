@@ -1,4 +1,5 @@
 
+
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { sendPasswordResetEmail } from 'firebase/auth';
@@ -35,7 +36,7 @@ const ForgotPasswordPage: React.FC = () => {
         <h1 className="text-2xl font-bold text-center">{t('auth.resetPasswordTitle')}</h1>
         <p className="text-center text-sm text-text-secondary">{t('auth.resetPasswordInstructions')}</p>
         <form onSubmit={handleResetPassword} className="space-y-6">
-          <Input id="email" type="email" label={t('auth.email')} value={email} onChange={(e) => setEmail(e.target.value)} required />
+          <Input id="email" type="email" label={t('auth.email')} value={email} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)} required />
           <Button type="submit" variant="primary" className="w-full" disabled={isLoading}>
             {isLoading ? `${t('auth.loading')}...` : t('auth.sendResetLink')}
           </Button>

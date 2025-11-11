@@ -23,7 +23,8 @@ const ToggleSwitch: React.FC<ToggleSwitchProps> = ({ id, checked, onChange, labe
           name={id}
           id={id}
           checked={checked}
-          onChange={(e) => onChange(e.target.checked)}
+          // FIX: Explicitly type the event to ensure `e.target.checked` is available.
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChange(e.target.checked)}
           className="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"
         />
         <label

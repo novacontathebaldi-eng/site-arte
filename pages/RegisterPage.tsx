@@ -1,4 +1,5 @@
 
+
 import React, { useState, useMemo, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { createUserWithEmailAndPassword, sendEmailVerification, signInWithPopup } from 'firebase/auth';
@@ -107,10 +108,10 @@ const RegisterPage: React.FC = () => {
       <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
         <h1 className="text-2xl font-bold text-center">{t('auth.registerTitle')}</h1>
         <form onSubmit={handleRegister} className="space-y-6">
-          <Input id="fullName" type="text" label={t('auth.fullName')} value={fullName} onChange={(e) => setFullName(e.target.value)} required />
-          <Input id="email" type="email" label={t('auth.email')} value={email} onChange={(e) => setEmail(e.target.value)} required />
+          <Input id="fullName" type="text" label={t('auth.fullName')} value={fullName} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFullName(e.target.value)} required />
+          <Input id="email" type="email" label={t('auth.email')} value={email} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)} required />
           <div>
-            <Input id="password" type="password" label={t('auth.password')} value={password} onChange={(e) => setPassword(e.target.value)} required />
+            <Input id="password" type="password" label={t('auth.password')} value={password} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)} required />
             <PasswordStrengthMeter password={password} />
           </div>
           {error && <p className="text-red-500 text-sm">{error}</p>}
