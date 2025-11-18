@@ -6,7 +6,7 @@ export const fetchProducts = async (): Promise<Product[]> => {
   const { data, error } = await supabase
     .from('products')
     .select('*')
-    .order('created_at', { ascending: false });
+    .order('createdAt', { ascending: false });
 
   if (error) {
     console.error('Error fetching products:', error);
@@ -21,7 +21,7 @@ export const fetchFeaturedProducts = async (limit = 4): Promise<Product[]> => {
         .from('products')
         .select('*')
         .eq('featured', true)
-        .order('created_at', { ascending: false })
+        .order('createdAt', { ascending: false })
         .limit(limit);
 
     if (error) {

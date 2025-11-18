@@ -2,8 +2,8 @@
 import { GoogleGenAI } from "@google/genai";
 import { Message, UserProfile } from '../types';
 
-// FIX: API key is now sourced from NEXT_PUBLIC_GEMINI_API_KEY environment variable.
-const ai = new GoogleGenAI({ apiKey: process.env.NEXT_PUBLIC_GEMINI_API_KEY });
+// FIX: API key is hardcoded as requested to fix the environment issue.
+const ai = new GoogleGenAI({ apiKey: "AIzaSyAIoPE0x2aafoV6aHCw-btQoHVIhkj6dtY" });
 
 // Mock data that would typically be fetched from a database (Firestore).
 const mockProducts = [

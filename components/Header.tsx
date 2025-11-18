@@ -4,7 +4,7 @@ import { useAuth } from '../hooks/useAuth';
 import { useI18n } from '../hooks/useI18n';
 
 interface HeaderProps {
-  onNavigate: (view: 'home' | 'catalog') => void;
+  onNavigate: (view: 'home' | 'catalog' | 'admin') => void;
   onAuthClick: () => void;
 }
 
@@ -25,6 +25,9 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, onAuthClick }) => {
           <nav className="hidden md:flex items-center space-x-8">
             <button onClick={() => onNavigate('home')} className="text-sm font-medium text-gray-600 hover:text-primary transition-colors">Home</button>
             <button onClick={() => onNavigate('catalog')} className="text-sm font-medium text-gray-600 hover:text-primary transition-colors">{t('footer.catalog')}</button>
+            {user?.role === 'admin' && (
+               <button onClick={() => onNavigate('admin')} className="text-sm font-medium text-accent hover:text-primary transition-colors">Admin Panel</button>
+            )}
           </nav>
           <div className="flex items-center space-x-4">
             <LanguageSelector />
@@ -38,6 +41,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, onAuthClick }) => {
                         <p className="text-sm font-semibold truncate">{user.displayName}</p>
                         <p className="text-xs text-gray-500 truncate">{user.email}</p>
                     </div>
+                    <a href="#admin" onClick={(e) => { e.preventDefault(); if(user.role === 'admin') onNavigate('admin'); }} className={`w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 ${user.role !== 'admin' && 'hidden'}`}>Admin Panel</a>
                     <button onClick={logOut} className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50">
                         {t('header.logout')}
                     </button>

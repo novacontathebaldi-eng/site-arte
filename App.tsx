@@ -4,16 +4,20 @@ import { Product } from './types';
 import HomePage from './pages/HomePage';
 import CatalogPage from './pages/CatalogPage';
 import ProductDetailPage from './pages/ProductDetailPage';
+import AdminPage from './pages/AdminPage';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import AuthModal from './components/AuthModal';
+import { useAuth } from './hooks/useAuth';
+import AdminLayout from './components/admin/AdminLayout'; // Import the Admin Layout
 
-type View = 'home' | 'catalog' | 'productDetail';
+export type View = 'home' | 'catalog' | 'productDetail' | 'admin';
 
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<View>('home');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isAuthModalOpen, setAuthModalOpen] = useState(false);
+  const { user } = useAuth();
 
   const handleProductSelect = (product: Product) => {
     setSelectedProduct(product);
@@ -33,31 +37,46 @@ const App: React.FC = () => {
   }
 
   const renderView = () => {
+    if (currentView === 'admin' && user?.role === 'admin') {
+      return (
+        <AdminLayout onNavigate={navigateTo}>
+          <AdminPage />
+        </AdminLayout>
+      );
+    }
+
+    // Default public view
+    let pageComponent;
     switch (currentView) {
       case 'catalog':
-        return <CatalogPage onProductSelect={handleProductSelect} />;
+        pageComponent = <CatalogPage onProductSelect={handleProductSelect} />;
+        break;
       case 'productDetail':
-        return <ProductDetailPage product={selectedProduct!} onBackToCatalog={handleBackToCatalog} />;
+        pageComponent = <ProductDetailPage product={selectedProduct!} onBackToCatalog={handleBackToCatalog} />;
+        break;
       case 'home':
       default:
-        return <HomePage onNavigateToCatalog={() => navigateTo('catalog')} onProductSelect={handleProductSelect} />;
+        pageComponent = <HomePage onNavigateToCatalog={() => navigateTo('catalog')} onProductSelect={handleProductSelect} />;
+        break;
     }
+
+    return (
+      <div className="min-h-screen bg-base-100 text-base-text font-sans flex flex-col">
+        <Header 
+          onNavigate={navigateTo} 
+          onAuthClick={() => setAuthModalOpen(true)}
+        />
+        <main className="flex-grow">
+          {pageComponent}
+        </main>
+        <Footer onNavigate={navigateTo} />
+        <Chatbot />
+        <AuthModal isOpen={isAuthModalOpen} onClose={() => setAuthModalOpen(false)} />
+      </div>
+    );
   };
 
-  return (
-    <div className="min-h-screen bg-base-100 text-base-text font-sans flex flex-col">
-      <Header 
-        onNavigate={navigateTo} 
-        onAuthClick={() => setAuthModalOpen(true)}
-      />
-      <main className="flex-grow">
-        {renderView()}
-      </main>
-      <Footer onNavigate={navigateTo} />
-      <Chatbot />
-      <AuthModal isOpen={isAuthModalOpen} onClose={() => setAuthModalOpen(false)} />
-    </div>
-  );
+  return <>{renderView()}</>;
 };
 
 export default App;
