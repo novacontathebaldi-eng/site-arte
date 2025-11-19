@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
 import { db } from '../../../lib/firebase';
@@ -17,16 +16,10 @@ const CustomersPage: React.FC = () => {
     useEffect(() => {
         const fetchCustomers = async () => {
             setLoading(true);
-            try {
-                const q = query(collection(db, "users"), where("role", "==", "customer"));
-                const querySnapshot = await getDocs(q);
-                const customersData = querySnapshot.docs.map(doc => ({ uid: doc.id, ...doc.data() } as UserDocument));
-                // Sort client-side to avoid composite index requirement
-                customersData.sort((a, b) => b.createdAt.seconds - a.createdAt.seconds);
-                setCustomers(customersData);
-            } catch (error) {
-                console.error("Error fetching customers:", error);
-            }
+            const q = query(collection(db, "users"), where("role", "==", "customer"), orderBy("createdAt", "desc"));
+            const querySnapshot = await getDocs(q);
+            const customersData = querySnapshot.docs.map(doc => ({ uid: doc.id, ...doc.data() } as UserDocument));
+            setCustomers(customersData);
             setLoading(false);
         };
         fetchCustomers();

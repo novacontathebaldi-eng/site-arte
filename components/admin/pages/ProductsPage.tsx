@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { collection, getDocs, deleteDoc, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../../lib/firebase';
@@ -41,29 +40,19 @@ const ProductsPage: React.FC = () => {
         }
     };
 
-    const toggleField = async (product: ProductDocument, field: 'publishedAt' | 'featured') => {
+    const togglePublished = async (product: ProductDocument) => {
         const docRef = doc(db, "products", product.id);
-        let updateData: { [key: string]: any };
-        let successMsg = '';
-
-        if (field === 'publishedAt') {
-            updateData = { publishedAt: product.publishedAt ? null : serverTimestamp() };
-            successMsg = product.publishedAt ? 'Product unpublished' : 'Product published';
-        } else {
-            updateData = { featured: !product.featured };
-            successMsg = product.featured ? 'Removed from featured' : 'Added to featured';
-        }
-
+        const newPublishedAt = product.publishedAt ? null : serverTimestamp();
         try {
-            await updateDoc(docRef, updateData);
+            await updateDoc(docRef, { publishedAt: newPublishedAt });
             setProducts(prev => 
                 prev.map(p => 
-                    p.id === product.id ? { ...p, ...updateData, publishedAt: updateData.publishedAt === null ? null : new Date() as any } : p
+                    p.id === product.id ? { ...p, publishedAt: newPublishedAt ? new Date() as any : null } : p
                 )
             );
-            addToast(successMsg, 'success');
+            addToast(product.publishedAt ? 'Product unpublished' : 'Product published', 'success');
         } catch (error) {
-            addToast('Failed to update product', 'error');
+            addToast('Failed to update status', 'error');
         }
     }
 
@@ -84,7 +73,8 @@ const ProductsPage: React.FC = () => {
                             <th className="p-3">{t('admin.products.table.image')}</th>
                             <th className="p-3">{t('admin.products.table.name')}</th>
                             <th className="p-3">{t('admin.products.table.sku')}</th>
-                            <th className="p-3">Featured</th>
+                            <th className="p-3">{t('admin.products.table.price')}</th>
+                            <th className="p-3">{t('admin.products.table.stock')}</th>
                             <th className="p-3">{t('admin.products.table.published')}</th>
                             <th className="p-3 text-right">{t('admin.products.table.actions')}</th>
                         </tr>
@@ -97,15 +87,11 @@ const ProductsPage: React.FC = () => {
                                 </td>
                                 <td className="p-3 font-medium">{product.translations?.en?.title || 'No Title'}</td>
                                 <td className="p-3">{product.sku}</td>
+                                <td className="p-3">€{((product.price?.amount || 0) / 100).toFixed(2)}</td>
+                                <td className="p-3">{product.stock}</td>
                                 <td className="p-3">
                                     <label className="relative inline-flex items-center cursor-pointer">
-                                        <input type="checkbox" checked={!!product.featured} onChange={() => toggleField(product, 'featured')} className="sr-only peer" />
-                                        <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-2 peer-focus:ring-brand-gold/50 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-gold"></div>
-                                    </label>
-                                </td>
-                                <td className="p-3">
-                                    <label className="relative inline-flex items-center cursor-pointer">
-                                        <input type="checkbox" checked={!!product.publishedAt} onChange={() => toggleField(product, 'publishedAt')} className="sr-only peer" />
+                                        <input type="checkbox" checked={!!product.publishedAt} onChange={() => togglePublished(product)} className="sr-only peer" />
                                         <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-2 peer-focus:ring-brand-gold/50 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-gold"></div>
                                     </label>
                                 </td>

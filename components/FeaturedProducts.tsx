@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { collection, query, where, getDocs, limit, orderBy, Timestamp } from 'firebase/firestore';
+import { collection, query, where, getDocs, limit } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { ProductDocument } from '../firebase-types';
+import ProductCard from './ProductCard';
 import { useI18n } from '../hooks/useI18n';
 import ProductGrid from './ProductGrid';
 
@@ -15,19 +16,9 @@ const FeaturedProducts: React.FC = () => {
       setLoading(true);
       try {
         const productsRef = collection(db, 'products');
-        // This query avoids composite index errors by filtering on one field and handling the rest client-side.
-        const q = query(productsRef, 
-            where('featured', '==', true),
-            limit(10) // Fetch up to 10 featured items
-        );
+        const q = query(productsRef, where('featured', '==', true), where('status', '==', 'available'), limit(4));
         const querySnapshot = await getDocs(q);
-        
-        const featuredProducts = querySnapshot.docs
-            .map(doc => ({ id: doc.id, ...doc.data() } as ProductDocument))
-            .filter(p => p.publishedAt) // Ensure they are published
-            .sort((a, b) => (b.publishedAt as Timestamp).seconds - (a.publishedAt as Timestamp).seconds) // Sort by most recent
-            .slice(0, 4); // Take the top 4
-
+        const featuredProducts = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ProductDocument));
         setProducts(featuredProducts);
       } catch (error) {
         console.error("Error fetching featured products:", error);

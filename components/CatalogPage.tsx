@@ -1,11 +1,10 @@
-
 import React, { useEffect, useState } from 'react';
 import { useProducts, Filters } from '../hooks/useProducts';
 import { useRouter } from '../hooks/useRouter';
 import ProductGrid from './ProductGrid';
 import FilterSidebar from './catalog/FilterSidebar';
+import Button from './common/Button';
 import Spinner from './common/Spinner';
-import InfiniteScrollTrigger from './catalog/InfiniteScrollTrigger';
 
 const CatalogPage: React.FC = () => {
     const { queryParams } = useRouter();
@@ -40,15 +39,17 @@ const CatalogPage: React.FC = () => {
                     <div className="lg:col-span-3 mt-8 lg:mt-0">
                         <ProductGrid products={products} loading={loading && products.length === 0} gridClass="grid grid-cols-1 gap-y-10 gap-x-6 sm:grid-cols-2 xl:grid-cols-3 xl:gap-x-8" />
                         
-                        <div className="h-20 flex justify-center items-center">
-                            {loading && <Spinner />}
-                            {!hasMore && products.length > 0 && (
-                                <p className="text-brand-black/60">You've reached the end of the collection.</p>
-                            )}
-                        </div>
-                        
+                        {loading && products.length > 0 && <div className="flex justify-center my-8"><Spinner /></div>}
+
                         {hasMore && !loading && (
-                           <InfiniteScrollTrigger onIntersect={loadMore} />
+                            <div className="mt-12 text-center">
+                                <Button variant="tertiary" size="lg" onClick={loadMore}>Load More Artworks</Button>
+                            </div>
+                        )}
+                         {!hasMore && !loading && products.length > 0 && (
+                            <div className="mt-12 text-center text-brand-black/60">
+                                <p>You've reached the end of the collection.</p>
+                            </div>
                         )}
                     </div>
                 </div>

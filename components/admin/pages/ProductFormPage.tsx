@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { doc, getDoc, setDoc, addDoc, collection, serverTimestamp, updateDoc } from 'firebase/firestore';
 import { db } from '../../../lib/firebase';
@@ -142,8 +141,10 @@ const ProductFormPage: React.FC<{ id?: string }> = ({ id }) => {
             }
             addToast(t('admin.productForm.uploadSuccess'), "success");
         } catch (error) {
-            // FIX: Safely access the error message by first checking if the caught object is an instance of Error.
-            const errorMessage = (error instanceof Error) ? error.message : String(error);
+            let errorMessage = 'An unknown error occurred';
+            if (error instanceof Error) {
+                errorMessage = error.message;
+            }
             addToast(`${t('admin.productForm.uploadError')}: ${errorMessage}`, "error");
         } finally {
             setUploading(false);
@@ -182,6 +183,7 @@ const ProductFormPage: React.FC<{ id?: string }> = ({ id }) => {
                 navigate(`/admin/products/edit/${newDocRef.id}`);
             }
         } catch (error) {
+            // FIX: Safely handle the 'unknown' type in a catch block by checking if the caught object is an Error instance before accessing its properties.
             const errorMessage = (error instanceof Error) ? error.message : String(error);
             addToast(`${t('admin.productForm.saveError')}: ${errorMessage}`, "error");
         } finally {
@@ -254,23 +256,13 @@ const ProductFormPage: React.FC<{ id?: string }> = ({ id }) => {
             <div className="lg:col-span-1 space-y-8">
                  <div className="bg-brand-white p-6 rounded-lg shadow-sm">
                     <h3 className="font-bold font-serif mb-4">Organization</h3>
-                     <label className="flex items-center justify-between cursor-pointer py-2">
+                     <label className="flex items-center justify-between cursor-pointer">
                         <div>
                             <p className="font-medium">{t('admin.productForm.publish')}</p>
                             <p className="text-sm text-brand-black/60">{t('admin.productForm.publishHelp')}</p>
                         </div>
                         <div className="relative inline-flex items-center">
                             <input type="checkbox" name="published" checked={!!product.publishedAt} onChange={handleCheckboxChange} className="sr-only peer" />
-                            <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-2 peer-focus:ring-brand-gold/50 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-gold"></div>
-                        </div>
-                    </label>
-                    <label className="flex items-center justify-between cursor-pointer py-2 border-t mt-2">
-                        <div>
-                            <p className="font-medium">Featured</p>
-                            <p className="text-sm text-brand-black/60">Display on homepage.</p>
-                        </div>
-                        <div className="relative inline-flex items-center">
-                            <input type="checkbox" name="featured" checked={!!product.featured} onChange={handleCheckboxChange} className="sr-only peer" />
                             <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-2 peer-focus:ring-brand-gold/50 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-gold"></div>
                         </div>
                     </label>
