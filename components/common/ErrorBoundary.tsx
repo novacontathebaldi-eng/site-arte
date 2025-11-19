@@ -9,7 +9,6 @@ interface State {
 }
 
 class ErrorBoundary extends React.Component<Props, State> {
-  // FIX: Changed to class property for state initialization to resolve type errors.
   public state: State = { hasError: false };
 
   static getDerivedStateFromError(_: Error): State {
@@ -25,11 +24,18 @@ class ErrorBoundary extends React.Component<Props, State> {
       return (
         <div className="flex flex-col items-center justify-center min-h-screen text-center p-4">
             <h1 className="text-2xl font-serif font-bold text-red-600">Something went wrong.</h1>
-            <p className="mt-2 text-brand-black/70">We're sorry for the inconvenience. Please try refreshing the page.</p>
+            <p className="mt-2 text-brand-black/70">We're sorry for the inconvenience. Please try refreshing the page or go back home.</p>
+            <div className="mt-6">
+                {/* FIX: Changed href to be compatible with the hash-based router. */}
+                <a href="#/" className="inline-flex items-center justify-center gap-2 font-semibold rounded-sm transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-gold disabled:opacity-50 disabled:cursor-not-allowed bg-brand-black text-brand-white hover:bg-black/80 px-5 py-2.5 text-sm">
+                    Go to Homepage
+                </a>
+            </div>
         </div>
       );
     }
 
+    // FIX: Destructured props to potentially help with TypeScript type inference issues.
     return this.props.children;
   }
 }

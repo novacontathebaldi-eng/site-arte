@@ -10,6 +10,7 @@ import { useI18n } from '../hooks/useI18n';
 import { useCart } from '../hooks/useCart';
 import { useWishlist } from '../hooks/useWishlist';
 import { useToast } from '../hooks/useToast';
+import NotFoundPage from './NotFoundPage';
 
 interface ProductDetailPageProps {
     productId: string;
@@ -19,6 +20,7 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ productId }) => {
     const [product, setProduct] = useState<ProductDocument | null>(null);
     const [relatedProducts, setRelatedProducts] = useState<ProductDocument[]>([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const { t, language } = useI18n();
     const { addToCart } = useCart();
     const { addToWishlist, isInWishlist } = useWishlist();
@@ -27,12 +29,14 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ productId }) => {
     useEffect(() => {
         const fetchProduct = async () => {
             if (!productId) {
+                setError('Product not found.');
                 setLoading(false);
                 return;
             };
             setLoading(true);
             setProduct(null);
             setRelatedProducts([]);
+            setError(null);
 
             try {
                 const docRef = doc(db, 'products', productId);
@@ -40,24 +44,34 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ productId }) => {
 
                 if (docSnap.exists()) {
                     const productData = { id: docSnap.id, ...docSnap.data() } as ProductDocument;
-                    setProduct(productData);
+                    
+                    // Validate essential product data
+                    if (!productData.price || !productData.images || !productData.category) {
+                        console.error("Fetched product is missing essential data:", productData);
+                        setError('Product data is incomplete.');
+                        setProduct(null);
+                    } else {
+                        setProduct(productData);
 
-                    // Fetch related products
-                    const relatedQuery = query(
-                        collection(db, 'products'),
-                        where('category', '==', productData.category),
-                        where('__name__', '!=', productId), // Exclude the current product
-                        limit(4)
-                    );
-                    const relatedSnapshot = await getDocs(relatedQuery);
-                    const related = relatedSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ProductDocument));
-                    setRelatedProducts(related);
+                        // Fetch related products
+                        const relatedQuery = query(
+                            collection(db, 'products'),
+                            where('category', '==', productData.category),
+                            where('__name__', '!=', productId), // Exclude the current product
+                            limit(4)
+                        );
+                        const relatedSnapshot = await getDocs(relatedQuery);
+                        const related = relatedSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ProductDocument));
+                        setRelatedProducts(related);
+                    }
 
                 } else {
+                    setError('Product not found.');
                     console.log("No such document!");
                 }
-            } catch (error) {
-                console.error("Error fetching product details:", error);
+            } catch (err) {
+                console.error("Error fetching product details:", err);
+                setError('Failed to load product.');
             } finally {
                 setLoading(false);
             }
@@ -69,8 +83,8 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ productId }) => {
         return <div className="flex justify-center items-center h-96"><Spinner size="lg" /></div>;
     }
 
-    if (!product) {
-        return <div className="text-center py-20">Product not found.</div>;
+    if (error || !product) {
+        return <NotFoundPage />;
     }
     
     const handleAddToCart = () => {

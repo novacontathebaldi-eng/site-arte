@@ -46,6 +46,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     // Add local items to remote cart
     localCart.forEach(item => {
+        if (!item.price) return; // Do not sync items without a price
         const docRef = doc(cartCollectionRef, item.id);
         const cartItemData: CartItemDocument = {
             productId: item.id,
@@ -122,6 +123,12 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const toggleCart = () => setIsCartOpen(prev => !prev);
 
   const addToCart = (product: ProductDocument, quantity: number) => {
+    // Data validation guard
+    if (!product.price || typeof product.price.amount !== 'number') {
+        addToast('This product is currently unavailable for purchase.', 'error');
+        return;
+    }
+
     // Check if the item is unique and already in cart
     if (product.stock === 1 && cartItems.some(item => item.id === product.id)) {
         addToast(t('cart.uniqueItemError'), 'info');
@@ -188,7 +195,12 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const totalItems = cartItems.reduce((total, item) => total + item.quantity, 0);
-  const subtotal = cartItems.reduce((total, item) => total + (item.price.amount * item.quantity), 0);
+  const subtotal = cartItems.reduce((total, item) => {
+    if (item.price && typeof item.price.amount === 'number') {
+      return total + item.price.amount * item.quantity;
+    }
+    return total;
+  }, 0);
   
   const value = {
     cartItems,

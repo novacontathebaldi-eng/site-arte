@@ -49,7 +49,7 @@ export const WishlistProvider: React.FC<{ children: ReactNode }> = ({ children }
         productSnapshot: {
           translations: product.translations,
           price: product.price,
-          images: product.images.slice(0,1), // Just save the first image
+          images: product.images ? product.images.slice(0,1) : [], // Just save the first image safely
           category: product.category,
         }
       }
