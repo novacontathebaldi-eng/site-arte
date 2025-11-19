@@ -3,7 +3,7 @@ import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '../../../lib/firebase';
 import { DiscountCodeDocument } from '../../../firebase-types';
 import Button from '../../common/Button';
-import { useToast } from '../../hooks/useToast';
+import { useToast } from '../../../hooks/useToast';
 import Spinner from '../../common/Spinner';
 import { useI18n } from '../../../hooks/useI18n';
 import Modal from '../../common/Modal';

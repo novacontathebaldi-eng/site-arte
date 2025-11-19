@@ -183,7 +183,7 @@ const ProductFormPage: React.FC<{ id?: string }> = ({ id }) => {
                 navigate(`/admin/products/edit/${newDocRef.id}`);
             }
         } catch (error) {
-            // FIX: Safely handle the 'unknown' type in a catch block to prevent accessing properties on a non-Error object.
+            // FIX: Safely handle the 'unknown' type in a catch block by checking if the caught object is an Error instance before accessing its properties.
             const errorMessage = (error instanceof Error) ? error.message : String(error);
             addToast(`${t('admin.productForm.saveError')}: ${errorMessage}`, "error");
         } finally {
