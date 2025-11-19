@@ -203,7 +203,12 @@ export const translations: Record<Language, Record<string, any>> = {
           status: 'Statut',
           published: 'Publié',
           actions: 'Actions',
-        }
+        },
+        deleteSelected: 'Supprimer la sélection',
+        selectedCount: '{{count}} sélectionné(s)',
+        bulkDeleteConfirm: 'Êtes-vous sûr de vouloir supprimer les {{count}} produits sélectionnés ? Cette action est irréversible.',
+        bulkDeletedSuccess: '{{count}} produits supprimés avec succès.',
+        bulkDeletedError: 'Erreur lors de la suppression des produits.',
       },
       orders: {
         title: 'Gérer les Commandes',
@@ -510,7 +515,12 @@ export const translations: Record<Language, Record<string, any>> = {
           status: 'Status',
           published: 'Published',
           actions: 'Actions',
-        }
+        },
+        deleteSelected: 'Delete Selected',
+        selectedCount: '{{count}} selected',
+        bulkDeleteConfirm: 'Are you sure you want to delete {{count}} selected products? This action cannot be undone.',
+        bulkDeletedSuccess: '{{count}} products deleted successfully.',
+        bulkDeletedError: 'Error deleting products.',
       },
       orders: {
         title: 'Manage Orders',
@@ -793,7 +803,7 @@ export const translations: Record<Language, Record<string, any>> = {
         totalOrders: 'Gesamtbestellungen',
         totalCustomers: 'Gesamtkunden',
         salesOverview: 'Verkaufsübersicht',
-        recentActivity: 'Letzte Aktivitäten',
+        letzteAktivitäten: 'Letzte Aktivitäten',
         recentOrders: 'Letzte Bestellungen',
         lowStock: 'Niedriger Lagerbestand',
         unreadMessages: 'Ungelesene Nachrichten',
@@ -817,7 +827,12 @@ export const translations: Record<Language, Record<string, any>> = {
           status: 'Status',
           published: 'Veröffentlicht',
           actions: 'Aktionen',
-        }
+        },
+        deleteSelected: 'Auswahl löschen',
+        selectedCount: '{{count}} ausgewählt',
+        bulkDeleteConfirm: 'Möchten Sie wirklich {{count}} ausgewählte Produkte löschen? Diese Aktion kann nicht rückgängig gemacht werden.',
+        bulkDeletedSuccess: '{{count}} Produkte erfolgreich gelöscht.',
+        bulkDeletedError: 'Fehler beim Löschen der Produkte.',
       },
       productForm: {
         createTitle: 'Neues Produkt erstellen',
@@ -1067,7 +1082,12 @@ export const translations: Record<Language, Record<string, any>> = {
           status: 'Status',
           published: 'Publicado',
           actions: 'Ações',
-        }
+        },
+        deleteSelected: 'Excluir Selecionados',
+        selectedCount: '{{count}} selecionado(s)',
+        bulkDeleteConfirm: 'Tem certeza de que deseja excluir os {{count}} produtos selecionados? Esta ação não pode ser desfeita.',
+        bulkDeletedSuccess: '{{count}} produtos excluídos com sucesso.',
+        bulkDeletedError: 'Erro ao excluir os produtos.',
       },
       orders: {
         title: 'Gerenciar Pedidos',

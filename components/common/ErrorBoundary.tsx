@@ -35,9 +35,8 @@ class ErrorBoundary extends React.Component<Props, State> {
       );
     }
 
-    // FIX: Destructured props to resolve a potential TypeScript type inference issue.
-    const { children } = this.props;
-    return children;
+    // FIX: Acessando props diretamente para resolver um potencial problema de inferência de tipo do TypeScript.
+    return this.props.children;
   }
 }
 

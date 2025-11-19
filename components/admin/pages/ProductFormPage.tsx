@@ -141,10 +141,8 @@ const ProductFormPage: React.FC<{ id?: string }> = ({ id }) => {
             }
             addToast(t('admin.productForm.uploadSuccess'), "success");
         } catch (error) {
-            let errorMessage = 'An unknown error occurred';
-            if (error instanceof Error) {
-                errorMessage = error.message;
-            }
+            // FIX: Safely handle the 'unknown' error type by checking if it's an Error instance before accessing its message.
+            const errorMessage = error instanceof Error ? error.message : String(error);
             addToast(`${t('admin.productForm.uploadError')}: ${errorMessage}`, "error");
         } finally {
             setUploading(false);
