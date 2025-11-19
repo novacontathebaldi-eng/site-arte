@@ -4,9 +4,10 @@ import { useCart } from '../../../hooks/useCart';
 import { useI18n } from '../../../hooks/useI18n';
 import Button from '../../common/Button';
 import { useToast } from '../../../hooks/useToast';
+import Spinner from '../../common/Spinner';
 
 const WishlistPage: React.FC = () => {
-  const { wishlistItems, removeFromWishlist } = useWishlist();
+  const { wishlistItems, removeFromWishlist, loading } = useWishlist();
   const { addToCart } = useCart();
   const { addToast } = useToast();
   const { t, language } = useI18n();
@@ -16,6 +17,10 @@ const WishlistPage: React.FC = () => {
     removeFromWishlist(product.id);
     addToast(t('cart.added'), 'success');
   };
+
+  if (loading) {
+      return <div className="flex justify-center"><Spinner /></div>;
+  }
 
   return (
     <div>

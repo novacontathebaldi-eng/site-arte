@@ -2,6 +2,7 @@ import React, { Fragment } from 'react';
 import { useCart } from '../hooks/useCart';
 import { useI18n } from '../hooks/useI18n';
 import Button from './common/Button';
+import Spinner from './common/Spinner';
 
 const XIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
@@ -16,7 +17,7 @@ const TrashIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
 
 
 const CartSidebar: React.FC = () => {
-  const { isCartOpen, toggleCart, cartItems, removeFromCart, updateQuantity, subtotal } = useCart();
+  const { isCartOpen, toggleCart, cartItems, removeFromCart, updateQuantity, subtotal, loading } = useCart();
   const { t, language } = useI18n();
 
   return (
@@ -36,7 +37,11 @@ const CartSidebar: React.FC = () => {
           </div>
 
           {/* Items */}
-          {cartItems.length > 0 ? (
+          {loading ? (
+            <div className="flex-grow flex items-center justify-center">
+                <Spinner />
+            </div>
+          ) : cartItems.length > 0 ? (
             <div className="flex-grow overflow-y-auto p-6">
               <ul className="divide-y divide-black/10">
                 {cartItems.map(item => (
@@ -92,7 +97,7 @@ const CartSidebar: React.FC = () => {
           )}
 
           {/* Footer */}
-          {cartItems.length > 0 && (
+          {!loading && cartItems.length > 0 && (
             <div className="border-t border-gray-200 py-6 px-6">
               <div className="flex justify-between text-base font-medium text-gray-900">
                 <p>{t('cart.subtotal')}</p>

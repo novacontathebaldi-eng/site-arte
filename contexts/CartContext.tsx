@@ -21,6 +21,7 @@ interface CartContextType {
   totalItems: number;
   subtotal: number;
   itemAddedCount: number;
+  loading: boolean;
 }
 
 export const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -31,6 +32,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [itemAddedCount, setItemAddedCount] = useState(0);
+  const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   const { addToast } = useToast();
   const { t } = useI18n();
@@ -87,24 +89,23 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   
   // Effect to handle user login/logout and cart synchronization
   useEffect(() => {
+    setLoading(true);
     const localCartRaw = localStorage.getItem(GUEST_CART_KEY);
     const localCart: CartItem[] = localCartRaw ? JSON.parse(localCartRaw) : [];
 
     if (user) {
-      // User is logged in
-      if (localCart.length > 0) {
-        // Guest cart exists, merge it with Firestore cart
-        syncCartWithFirestore(localCart).then(() => {
-          localStorage.removeItem(GUEST_CART_KEY);
-          loadCartFromFirestore();
-        });
-      } else {
-        // No guest cart, just load from Firestore
-        loadCartFromFirestore();
-      }
+        const processUserCart = async () => {
+            if (localCart.length > 0) {
+                await syncCartWithFirestore(localCart);
+                localStorage.removeItem(GUEST_CART_KEY);
+            }
+            await loadCartFromFirestore();
+            setLoading(false);
+        };
+        processUserCart();
     } else {
-      // User is logged out, load from local storage
-      setCartItems(localCart);
+        setCartItems(localCart);
+        setLoading(false);
     }
   }, [user, loadCartFromFirestore, syncCartWithFirestore]);
 
@@ -213,6 +214,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     totalItems,
     subtotal,
     itemAddedCount,
+    loading,
   };
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

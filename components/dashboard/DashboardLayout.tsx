@@ -10,7 +10,7 @@ import WishlistPage from './pages/WishlistPage';
 import AddressesPage from './pages/AddressesPage';
 
 const DashboardLayout: React.FC = () => {
-    const { user, loading } = useAuth();
+    const { user, loading: authLoading } = useAuth();
     const { path, navigate } = useRouter();
     const { t } = useI18n();
 
@@ -21,11 +21,7 @@ const DashboardLayout: React.FC = () => {
         { href: '/dashboard/addresses', labelKey: 'dashboard.nav.addresses' },
     ];
 
-    if (loading) {
-        return <div className="flex justify-center items-center h-screen"><Spinner size="lg" /></div>;
-    }
-    
-    if (!user) {
+    if (!authLoading && !user) {
         navigate('/');
         return null; // or a login prompt
     }
@@ -71,7 +67,13 @@ const DashboardLayout: React.FC = () => {
                     </aside>
                     <div className="lg:col-span-3 mt-8 lg:mt-0">
                         <div className="bg-white p-8 rounded-lg shadow-md min-h-[400px]">
-                            {renderPage()}
+                            {authLoading ? (
+                                <div className="flex justify-center items-center h-full">
+                                    <Spinner />
+                                </div>
+                            ) : (
+                                renderPage()
+                            )}
                         </div>
                     </div>
                 </div>

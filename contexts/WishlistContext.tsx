@@ -10,17 +10,20 @@ interface WishlistContextType {
   addToWishlist: (product: ProductDocument) => Promise<void>;
   removeFromWishlist: (productId: string) => Promise<void>;
   isInWishlist: (productId: string) => boolean;
+  loading: boolean;
 }
 
 export const WishlistContext = createContext<WishlistContextType | undefined>(undefined);
 
 export const WishlistProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [wishlistItems, setWishlistItems] = useState<ProductDocument[]>([]);
+  const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   const { addToast } = useToast();
   
   useEffect(() => {
     let unsubscribe: Unsubscribe | undefined;
+    setLoading(true);
     if (user) {
       const wishlistColRef = collection(db, 'users', user.uid, 'wishlist');
       unsubscribe = onSnapshot(wishlistColRef, (snapshot) => {
@@ -29,9 +32,14 @@ export const WishlistProvider: React.FC<{ children: ReactNode }> = ({ children }
             ...(doc.data() as WishlistItemDocument).productSnapshot,
         } as ProductDocument));
         setWishlistItems(items);
+        setLoading(false);
+      }, (error) => {
+          console.error("Wishlist snapshot error:", error);
+          setLoading(false);
       });
     } else {
       setWishlistItems([]);
+      setLoading(false);
     }
     return () => unsubscribe && unsubscribe();
   }, [user]);
@@ -80,6 +88,7 @@ export const WishlistProvider: React.FC<{ children: ReactNode }> = ({ children }
     addToWishlist,
     removeFromWishlist,
     isInWishlist,
+    loading,
   };
 
   return <WishlistContext.Provider value={value}>{children}</WishlistContext.Provider>;
