@@ -21,19 +21,28 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children }) => {
 
   return (
     <div
-      className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center"
+      className="fixed inset-0 bg-brand-black bg-opacity-60 z-50 flex justify-center items-center p-4 transition-opacity duration-300 animate-fade-in"
       aria-labelledby="modal-title"
       role="dialog"
       aria-modal="true"
       onClick={onClose}
     >
+      <style>{`
+        @keyframes fade-in {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        .animate-fade-in {
+          animation: fade-in 0.3s ease-out forwards;
+        }
+      `}</style>
       <div
-        className="relative bg-white rounded-lg shadow-xl p-8 max-w-md w-full m-4"
+        className="relative bg-brand-white rounded-lg shadow-xl p-8 max-w-md w-full"
         onClick={(e) => e.stopPropagation()}
       >
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-stone-400 hover:text-stone-600"
+          className="absolute top-4 right-4 text-brand-black/40 hover:text-brand-black"
           aria-label="Close modal"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

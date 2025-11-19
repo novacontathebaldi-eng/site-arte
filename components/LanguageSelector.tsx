@@ -15,24 +15,19 @@ const flagMap = {
   pt: <PtFlagIcon />,
 };
 
-
-interface LanguageSelectorProps {
-  isFooter?: boolean;
-}
-
-const LanguageSelector: React.FC<LanguageSelectorProps> = ({ isFooter = false }) => {
+const LanguageSelector: React.FC = () => {
   const { language, setLanguage } = useI18n();
 
   return (
-    <div className={`flex items-center space-x-1 ${isFooter ? '' : 'p-1 bg-stone-200/50 rounded-md'}`}>
+    <div className="flex items-center space-x-1 p-1 bg-white/10 rounded-md">
       {LANGUAGES.map((lang) => (
         <button
           key={lang.code}
           onClick={() => setLanguage(lang.code)}
           className={`flex items-center justify-center w-9 h-8 text-xs font-semibold rounded-md transition-colors
             ${language === lang.code
-              ? 'bg-white ring-1 ring-stone-300 shadow-sm'
-              : 'text-stone-500 hover:bg-stone-100'
+              ? 'bg-brand-white ring-1 ring-white/20 shadow-sm'
+              : 'hover:bg-white/10'
             }`}
           aria-label={`Switch to ${lang.name}`}
         >

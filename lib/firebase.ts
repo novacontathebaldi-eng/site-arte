@@ -1,5 +1,5 @@
-// FIX: Changed to a namespace import to resolve module resolution errors with 'firebase/app'.
-import * as firebaseApp from 'firebase/app';
+// FIX: Changed to named imports to resolve module resolution errors with 'firebase/app'.
+import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
@@ -13,7 +13,7 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const app = !firebaseApp.getApps().length ? firebaseApp.initializeApp(firebaseConfig) : firebaseApp.getApp();
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const auth = getAuth(app);
 const db = getFirestore(app);
 

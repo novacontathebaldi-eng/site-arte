@@ -16,6 +16,12 @@ export const translations: Record<Language, Record<string, any>> = {
     productGrid: {
       title: 'Nos Œuvres',
     },
+    newsletter: {
+        title: "Rejoignez notre univers",
+        subtitle: "Abonnez-vous à notre newsletter pour recevoir les dernières nouvelles, les nouvelles sorties et des offres exclusives.",
+        placeholder: "Votre adresse e-mail",
+        button: "S'abonner",
+    },
     footer: {
       shop: 'Boutique',
       info: 'Info',
@@ -26,11 +32,13 @@ export const translations: Record<Language, Record<string, any>> = {
       follow: "Suivez-nous",
       language: "Langue",
       rights: "Tous droits réservés.",
+      contactInfo: "Infos de contact",
     },
     header: {
       signedInAs: "Connecté en tant que",
       dashboard: "Tableau de bord",
       logout: "Déconnexion",
+      search: "Rechercher...",
     },
     auth: {
       login: "Connexion",
@@ -86,6 +94,12 @@ export const translations: Record<Language, Record<string, any>> = {
     productGrid: {
       title: 'Our Artworks',
     },
+    newsletter: {
+        title: "Join our world",
+        subtitle: "Subscribe to our newsletter for the latest news, releases and exclusive offers.",
+        placeholder: "Your email address",
+        button: "Subscribe",
+    },
     footer: {
       shop: 'Shop',
       info: 'Info',
@@ -96,11 +110,13 @@ export const translations: Record<Language, Record<string, any>> = {
       follow: "Follow Us",
       language: "Language",
       rights: "All rights reserved.",
+      contactInfo: "Contact Info",
     },
     header: {
       signedInAs: "Signed in as",
       dashboard: "Dashboard",
       logout: "Logout",
+      search: "Search...",
     },
     auth: {
       login: "Login",
@@ -156,6 +172,12 @@ export const translations: Record<Language, Record<string, any>> = {
     productGrid: {
       title: 'Unsere Kunstwerke',
     },
+    newsletter: {
+        title: "Treten Sie unserer Welt bei",
+        subtitle: "Abonnieren Sie unseren Newsletter für die neuesten Nachrichten, Veröffentlichungen und exklusiven Angebote.",
+        placeholder: "Ihre E-Mail-Adresse",
+        button: "Abonnieren",
+    },
     footer: {
       shop: 'Shop',
       info: 'Info',
@@ -166,11 +188,13 @@ export const translations: Record<Language, Record<string, any>> = {
       follow: "Folgen Sie uns",
       language: "Sprache",
       rights: "Alle Rechte vorbehalten.",
+      contactInfo: "Kontaktinformationen",
     },
     header: {
       signedInAs: "Angemeldet als",
       dashboard: "Dashboard",
       logout: "Abmelden",
+      search: "Suchen...",
     },
      auth: {
       login: "Anmelden",
@@ -226,6 +250,12 @@ export const translations: Record<Language, Record<string, any>> = {
     productGrid: {
       title: 'Nossas Obras de Arte',
     },
+    newsletter: {
+        title: "Junte-se ao nosso mundo",
+        subtitle: "Subscreva a nossa newsletter para receber as últimas notícias, lançamentos e ofertas exclusivas.",
+        placeholder: "O seu endereço de e-mail",
+        button: "Subscrever",
+    },
     footer: {
       shop: 'Loja',
       info: 'Info',
@@ -236,11 +266,13 @@ export const translations: Record<Language, Record<string, any>> = {
       follow: "Siga-nos",
       language: "Idioma",
       rights: "Todos os direitos reservados.",
+      contactInfo: "Informações de Contato",
     },
     header: {
       signedInAs: "Conectado como",
       dashboard: "Painel",
       logout: "Sair",
+      search: "Pesquisar...",
     },
     auth: {
       login: "Entrar",

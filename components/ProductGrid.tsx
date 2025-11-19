@@ -11,9 +11,9 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products }) => {
   const { t } = useI18n();
 
   return (
-    <div id="products" className="bg-stone-50">
+    <div id="products" className="bg-brand-white">
       <div className="mx-auto max-w-2xl py-16 px-4 sm:py-24 sm:px-6 lg:max-w-7xl lg:px-8">
-        <h2 className="text-3xl font-serif font-bold tracking-tight text-stone-900 text-center mb-12">
+        <h2 className="text-3xl font-serif font-bold tracking-tight text-brand-black text-center mb-12">
           {t('productGrid.title')}
         </h2>
 

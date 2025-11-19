@@ -26,7 +26,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
   return (
     <div className="group relative">
-      <div className="aspect-w-3 aspect-h-4 w-full overflow-hidden bg-stone-200">
+      <div className="aspect-w-3 aspect-h-4 w-full overflow-hidden bg-black/5">
         <img
           src={product.imageUrl}
           alt={productName}
@@ -34,23 +34,23 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         />
         <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
         <div className="absolute top-3 right-3 flex flex-col space-y-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <button className="p-2 bg-white/80 rounded-full text-stone-700 hover:bg-white hover:text-stone-900 backdrop-blur-sm">
+            <button className="p-2 bg-brand-white/80 rounded-full text-brand-black/70 hover:bg-brand-white hover:text-brand-black backdrop-blur-sm">
                 <HeartIcon className="w-5 h-5"/>
             </button>
-            <button className="p-2 bg-white/80 rounded-full text-stone-700 hover:bg-white hover:text-stone-900 backdrop-blur-sm">
+            <button className="p-2 bg-brand-white/80 rounded-full text-brand-black/70 hover:bg-brand-white hover:text-brand-black backdrop-blur-sm">
                 <PlusIcon className="w-5 h-5"/>
             </button>
         </div>
       </div>
       <div className="mt-4 text-center">
-        <h3 className="text-lg font-serif text-stone-800">
-          <a href="#">
+        <h3 className="text-lg font-serif text-brand-black">
+          <a href="#" className="hover:text-brand-gold transition-colors">
             <span aria-hidden="true" className="absolute inset-0" />
             {productName}
           </a>
         </h3>
-        <p className="mt-1 text-sm text-stone-500">{t(product.categoryKey)}</p>
-        <p className="mt-2 text-md font-medium text-stone-900">€{product.price.toFixed(2)}</p>
+        <p className="mt-1 text-sm text-brand-black/60">{t(product.categoryKey)}</p>
+        <p className="mt-2 text-md font-medium text-brand-black">€{product.price.toFixed(2)}</p>
       </div>
     </div>
   );

@@ -2,49 +2,56 @@ import React from 'react';
 import LanguageSelector from './LanguageSelector';
 import { NAV_LINKS } from '../constants';
 import { useI18n } from '../hooks/useI18n';
+import InstagramIcon from './icons/InstagramIcon';
+import FacebookIcon from './icons/FacebookIcon';
 
 const Footer: React.FC = () => {
     const { t } = useI18n();
     
   return (
-    <footer className="bg-stone-100 text-stone-600 border-t border-stone-200">
+    <footer className="bg-brand-black text-brand-white/70">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
+          <div className="col-span-2 md:col-span-1">
+             <a href="#" className="text-2xl font-serif font-bold text-brand-white">Meeh</a>
+          </div>
           <div>
-            <h3 className="font-semibold text-stone-800 tracking-wider uppercase">{t('footer.shop')}</h3>
+            <h3 className="font-semibold text-brand-white tracking-wider uppercase">{t('footer.shop')}</h3>
             <ul className="mt-4 space-y-2">
               {NAV_LINKS.map(link => (
-                <li key={link.href}><a href={link.href} className="hover:text-stone-900">{t(link.labelKey)}</a></li>
+                <li key={link.href}><a href={link.href} className="hover:text-brand-gold">{t(link.labelKey)}</a></li>
               ))}
             </ul>
           </div>
           <div>
-            <h3 className="font-semibold text-stone-800 tracking-wider uppercase">{t('footer.info')}</h3>
+            <h3 className="font-semibold text-brand-white tracking-wider uppercase">{t('footer.info')}</h3>
             <ul className="mt-4 space-y-2">
-              <li><a href="#" className="hover:text-stone-900">{t('footer.about')}</a></li>
-              <li><a href="#" className="hover:text-stone-900">{t('footer.contact')}</a></li>
-              <li><a href="#" className="hover:text-stone-900">{t('footer.terms')}</a></li>
-              <li><a href="#" className="hover:text-stone-900">{t('footer.privacy')}</a></li>
+              <li><a href="#" className="hover:text-brand-gold">{t('footer.about')}</a></li>
+              <li><a href="#" className="hover:text-brand-gold">{t('footer.contact')}</a></li>
+              <li><a href="#" className="hover:text-brand-gold">{t('footer.terms')}</a></li>
+              <li><a href="#" className="hover:text-brand-gold">{t('footer.privacy')}</a></li>
             </ul>
           </div>
           <div>
-             <h3 className="font-semibold text-stone-800 tracking-wider uppercase">{t('footer.follow')}</h3>
+             <h3 className="font-semibold text-brand-white tracking-wider uppercase">{t('footer.contactInfo')}</h3>
+             <ul className="mt-4 space-y-2">
+                 <li><a href="mailto:hello@meeh.lu" className="hover:text-brand-gold">hello@meeh.lu</a></li>
+                 <li>Luxembourg</li>
+             </ul>
              <div className="mt-4 flex space-x-4">
-                 {/* Replace with actual social links */}
-                 <a href="#" className="hover:text-stone-900">Instagram</a>
-                 <a href="#" className="hover:text-stone-900">Facebook</a>
+                 <a href="#" className="hover:text-brand-gold"><InstagramIcon className="w-6 h-6"/></a>
+                 <a href="#" className="hover:text-brand-gold"><FacebookIcon className="w-6 h-6"/></a>
              </div>
           </div>
           <div>
-            <h3 className="font-semibold text-stone-800 tracking-wider uppercase">{t('footer.language')}</h3>
+            <h3 className="font-semibold text-brand-white tracking-wider uppercase">{t('footer.language')}</h3>
             <div className="mt-4">
-                <LanguageSelector isFooter={true} />
+                <LanguageSelector />
             </div>
           </div>
         </div>
 
-        <div className="mt-12 border-t border-stone-200 pt-8 text-center text-sm">
-          {/* FIX: Corrected the function call to get the current year. */}
+        <div className="mt-12 border-t border-white/10 pt-8 text-center text-sm">
           <p>&copy; {new Date().getFullYear()} Melissa "Meeh" Pelussi. {t('footer.rights')}</p>
         </div>
       </div>
