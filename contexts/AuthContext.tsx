@@ -1,15 +1,19 @@
-
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
-// FIX: Switched to firebase compat imports for auth to resolve module errors.
-import firebase from 'firebase/compat/app';
-import 'firebase/compat/auth';
+import { 
+  onAuthStateChanged, 
+  signOut, 
+  createUserWithEmailAndPassword, 
+  signInWithEmailAndPassword, 
+  signInWithPopup, 
+  GoogleAuthProvider, 
+  sendPasswordResetEmail,
+  updateProfile,
+  User
+} from 'firebase/auth';
 import { doc, setDoc, serverTimestamp, getDoc, updateDoc } from 'firebase/firestore';
 import { auth, db } from '../lib/firebase';
 import { UserDocument } from '../firebase-types';
 import { LanguageCode } from '../firebase-types';
-
-// FIX: Use types from firebase v8 compat
-type User = firebase.User;
 
 interface AuthContextType {
   user: User | null;
@@ -77,8 +81,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   useEffect(() => {
-    // FIX: Use v8 namespaced onAuthStateChanged
-    const unsubscribe = auth.onAuthStateChanged(async (userAuth) => {
+    const unsubscribe = onAuthStateChanged(auth, async (userAuth) => {
       if (userAuth) {
         await createUserProfileDocument(userAuth);
         const userRef = doc(db, 'users', userAuth.uid);
@@ -96,17 +99,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, []);
   
   const logout = async () => {
-    // FIX: Use v8 namespaced signOut
-    await auth.signOut();
+    await signOut(auth);
   };
 
   const signupWithEmail = async (name: string, email: string, pass: string): Promise<User> => {
-    // FIX: Use v8 namespaced createUserWithEmailAndPassword and user.updateProfile
-    const { user } = await auth.createUserWithEmailAndPassword(email, pass);
-    if (!user) {
-      throw new Error("User creation failed.");
-    }
-    await user.updateProfile({ displayName: name });
+    const { user } = await createUserWithEmailAndPassword(auth, email, pass);
+    await updateProfile(user, { displayName: name });
     await createUserProfileDocument(user, { displayName: name });
     const userSnap = await getDoc(doc(db, 'users', user.uid));
     setUserDoc(userSnap.exists() ? userSnap.data() as UserDocument : null);
@@ -114,21 +112,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
   
   const loginWithEmail = async (email: string, pass: string): Promise<User> => {
-     // FIX: Use v8 namespaced signInWithEmailAndPassword
-     const { user } = await auth.signInWithEmailAndPassword(email, pass);
-     if (!user) {
-        throw new Error("Login failed.");
-     }
+     const { user } = await signInWithEmailAndPassword(auth, email, pass);
      return user;
   };
   
   const loginWithGoogle = async (): Promise<User> => {
-      // FIX: Use v8 namespaced GoogleAuthProvider and signInWithPopup
-      const provider = new firebase.auth.GoogleAuthProvider();
-      const { user } = await auth.signInWithPopup(provider);
-      if (!user) {
-        throw new Error("Google sign in failed.");
-      }
+      const provider = new GoogleAuthProvider();
+      const { user } = await signInWithPopup(auth, provider);
       await createUserProfileDocument(user);
       const userSnap = await getDoc(doc(db, 'users', user.uid));
       setUserDoc(userSnap.exists() ? userSnap.data() as UserDocument : null);
@@ -136,8 +126,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const sendPasswordReset = async(email: string): Promise<void> => {
-    // FIX: Use v8 namespaced sendPasswordResetEmail
-    await auth.sendPasswordResetEmail(email);
+    await sendPasswordResetEmail(auth, email);
   }
 
   const value = { user, userDoc, loading, logout, signupWithEmail, loginWithEmail, loginWithGoogle, sendPasswordReset };

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { collection, query, where, getDocs, limit, orderBy, Timestamp } from 'firebase/firestore';
 import { db } from '../lib/firebase';
@@ -16,19 +15,18 @@ const FeaturedProducts: React.FC = () => {
       setLoading(true);
       try {
         const productsRef = collection(db, 'products');
-        // This query is more robust and avoids composite index errors.
-        // It fetches the most recent published products and then filters for "featured" on the client.
+        // This query avoids composite index errors by filtering on one field and handling the rest client-side.
         const q = query(productsRef, 
-            where('publishedAt', '!=', null),
-            orderBy('publishedAt', 'desc'),
-            limit(20) // Fetch a reasonable number of recent items
+            where('featured', '==', true),
+            limit(10) // Fetch up to 10 featured items
         );
         const querySnapshot = await getDocs(q);
         
         const featuredProducts = querySnapshot.docs
             .map(doc => ({ id: doc.id, ...doc.data() } as ProductDocument))
-            .filter(p => p.featured) // Now, filter for the featured ones
-            .slice(0, 4); // And take the top 4
+            .filter(p => p.publishedAt) // Ensure they are published
+            .sort((a, b) => (b.publishedAt as Timestamp).seconds - (a.publishedAt as Timestamp).seconds) // Sort by most recent
+            .slice(0, 4); // Take the top 4
 
         setProducts(featuredProducts);
       } catch (error) {

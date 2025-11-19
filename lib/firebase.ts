@@ -1,7 +1,5 @@
-
-// FIX: Using firebase v8 compat libraries for app and auth to resolve module errors, while keeping v9 for firestore.
-import firebase from 'firebase/compat/app';
-import 'firebase/compat/auth';
+import { initializeApp } from 'firebase/app';
+import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
 const firebaseConfig = {
@@ -14,8 +12,8 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const app = !firebase.apps.length ? firebase.initializeApp(firebaseConfig) : firebase.app();
-const auth = firebase.auth();
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 const db = getFirestore(app);
 
 export { app, auth, db };
