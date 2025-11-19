@@ -1,5 +1,6 @@
 import React from 'react';
 import { useRouter } from '../../hooks/useRouter';
+import { useI18n } from '../../hooks/useI18n';
 
 const iconClasses = "h-5 w-5 mr-3";
 
@@ -10,16 +11,17 @@ const OrderIcon = () => <svg className={iconClasses} viewBox="0 0 24 24" fill="n
 const CustomerIcon = () => <svg className={iconClasses} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 00-3-3.87"></path><path d="M16 3.13a4 4 0 010 7.75"></path></svg>;
 const SettingsIcon = () => <svg className={iconClasses} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"></path></svg>;
 
-const navLinks = [
-    { href: '/admin/dashboard', label: 'Dashboard', icon: <DashboardIcon /> },
-    { href: '/admin/products', label: 'Products', icon: <ProductIcon /> },
-    { href: '/admin/orders', label: 'Orders', icon: <OrderIcon /> },
-    { href: '/admin/customers', label: 'Customers', icon: <CustomerIcon /> },
-    { href: '/admin/settings', label: 'Settings', icon: <SettingsIcon /> },
-];
-
 const Sidebar: React.FC = () => {
     const { path } = useRouter();
+    const { t } = useI18n();
+    
+    const navLinks = [
+        { href: '/admin/dashboard', labelKey: 'admin.sidebar.dashboard', icon: <DashboardIcon /> },
+        { href: '/admin/products', labelKey: 'admin.sidebar.products', icon: <ProductIcon /> },
+        { href: '/admin/orders', labelKey: 'admin.sidebar.orders', icon: <OrderIcon /> },
+        { href: '/admin/customers', labelKey: 'admin.sidebar.customers', icon: <CustomerIcon /> },
+        { href: '/admin/settings', labelKey: 'admin.sidebar.settings', icon: <SettingsIcon /> },
+    ];
 
     const isActive = (href: string) => {
         if (href === '/admin/dashboard' && (path === '/admin' || path === '/admin/dashboard')) return true;
@@ -44,7 +46,7 @@ const Sidebar: React.FC = () => {
                                 }`}
                             >
                                 {link.icon}
-                                {link.label}
+                                {t(link.labelKey)}
                             </a>
                         </li>
                     ))}

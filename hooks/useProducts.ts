@@ -34,7 +34,11 @@ export const useProducts = (initialFilters: Filters = {}) => {
             if (currentFilters.status) {
                 constraints.push(where('status', '==', currentFilters.status));
             }
-             if (currentFilters.priceRange && currentFilters.priceRange.max > currentFilters.priceRange.min) {
+            
+            // FIXME: Temporarily disabled due to Firestore query limitations requiring specific composite indexes.
+            // A production solution would involve creating these indexes in Firebase Console or using a dedicated search service.
+            /*
+            if (currentFilters.priceRange && currentFilters.priceRange.max > currentFilters.priceRange.min) {
                 constraints.push(where('price.amount', '>=', currentFilters.priceRange.min * 100));
                 constraints.push(where('price.amount', '<=', currentFilters.priceRange.max * 100));
             }
@@ -43,7 +47,8 @@ export const useProducts = (initialFilters: Filters = {}) => {
             if(currentFilters.search && currentFilters.search.trim() !== '') {
                 constraints.push(where('tags', 'array-contains', currentFilters.search.toLowerCase().trim()));
             }
-
+            */
+            
             constraints.push(orderBy('createdAt', 'desc'));
             constraints.push(limit(PRODUCTS_PER_PAGE));
             

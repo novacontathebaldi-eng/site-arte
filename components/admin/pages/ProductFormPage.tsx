@@ -8,6 +8,7 @@ import { useToast } from '../../../hooks/useToast';
 import Button from '../../common/Button';
 import Input from '../../common/Input';
 import Spinner from '../../common/Spinner';
+import { useI18n } from '../../../hooks/useI18n';
 
 type ProductFormData = Omit<ProductDocument, 'id' | 'createdAt' | 'updatedAt' | 'publishedAt'>;
 
@@ -44,6 +45,7 @@ const ProductFormPage: React.FC<{ id?: string }> = ({ id }) => {
 
     const { navigate } = useRouter();
     const { addToast } = useToast();
+    const { t } = useI18n();
 
     const fetchProduct = useCallback(async (productId: string) => {
         setLoading(true);
@@ -51,7 +53,6 @@ const ProductFormPage: React.FC<{ id?: string }> = ({ id }) => {
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
             const data = docSnap.data() as Partial<ProductFormData>;
-            // Deep merge with emptyProduct to ensure all fields, especially nested ones like 'price', exist.
             const productData = {
                 ...emptyProduct,
                 ...data,
@@ -127,9 +128,14 @@ const ProductFormPage: React.FC<{ id?: string }> = ({ id }) => {
                     images: [...prev.images, { url: publicUrl, thumbnailUrl: publicUrl, alt: '', order: prev.images.length }]
                 }));
             }
-            addToast("Images uploaded successfully", "success");
-        } catch (error: any) {
-            addToast(`Image upload failed: ${error.message}`, "error");
+            addToast(t('admin.productForm.uploadSuccess'), "success");
+        } catch (error) {
+            // FIX: Safely access message property from unknown error type.
+            let errorMessage = 'An unknown error occurred';
+            if (error instanceof Error) {
+                errorMessage = error.message;
+            }
+            addToast(`${t('admin.productForm.uploadError')}: ${errorMessage}`, "error");
         } finally {
             setUploading(false);
         }
@@ -157,18 +163,23 @@ const ProductFormPage: React.FC<{ id?: string }> = ({ id }) => {
 
             if (id) {
                 await setDoc(doc(db, "products", id), dataToSave, { merge: true });
-                addToast("Product updated successfully", "success");
+                addToast(t('admin.productForm.updateSuccess'), "success");
             } else {
                 const newDocRef = await addDoc(collection(db, "products"), {
                     ...dataToSave,
                     createdAt: serverTimestamp(),
                     publishedAt: null,
                 });
-                addToast("Product created successfully", "success");
+                addToast(t('admin.productForm.createSuccess'), "success");
                 navigate(`/admin/products/edit/${newDocRef.id}`);
             }
-        } catch (error: any) {
-            addToast(`Error saving product: ${error.message}`, "error");
+        } catch (error) {
+            // FIX: Safely access message property from unknown error type.
+            let errorMessage = 'An unknown error occurred';
+            if (error instanceof Error) {
+                errorMessage = error.message;
+            }
+            addToast(`${t('admin.productForm.saveError')}: ${errorMessage}`, "error");
         } finally {
             setIsSubmitting(false);
         }
@@ -179,18 +190,18 @@ const ProductFormPage: React.FC<{ id?: string }> = ({ id }) => {
     return (
         <form onSubmit={handleSubmit} className="space-y-8">
             <div className="flex justify-between items-center">
-                <h2 className="text-xl font-bold font-serif">{id ? 'Edit Product' : 'Create New Product'}</h2>
+                <h2 className="text-xl font-bold font-serif">{id ? t('admin.productForm.editTitle') : t('admin.productForm.createTitle')}</h2>
                 <div className="flex gap-2">
-                    <Button type="button" variant="tertiary" onClick={() => navigate('/admin/products')}>Cancel</Button>
-                    <Button type="submit" disabled={isSubmitting}>{isSubmitting ? 'Saving...' : 'Save Product'}</Button>
+                    <Button type="button" variant="tertiary" onClick={() => navigate('/admin/products')}>{t('admin.productForm.cancel')}</Button>
+                    <Button type="submit" disabled={isSubmitting}>{isSubmitting ? t('admin.productForm.saving') : t('admin.productForm.save')}</Button>
                 </div>
             </div>
 
             {/* Main Details */}
             <div className="bg-brand-white p-6 rounded-lg shadow grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Input id="sku" name="sku" label="SKU" value={product.sku} onChange={handleChange} />
+                <Input id="sku" name="sku" label={t('admin.productForm.sku')} value={product.sku} onChange={handleChange} />
                 <div>
-                  <label className="block text-sm font-medium text-brand-black/80 mb-1">Category</label>
+                  <label className="block text-sm font-medium text-brand-black/80 mb-1">{t('admin.productForm.category')}</label>
                   <select name="category" value={product.category} onChange={handleChange} className="w-full px-3 py-2 border border-brand-black/20 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-gold/50 focus:border-brand-gold/50 transition-shadow">
                       <option value="paintings">Paintings</option>
                       <option value="jewelry">Jewelry</option>
@@ -198,12 +209,13 @@ const ProductFormPage: React.FC<{ id?: string }> = ({ id }) => {
                       <option value="prints">Prints</option>
                   </select>
                 </div>
-                <Input id="price" name="price.amount" label="Price (in cents)" type="number" value={product.price?.amount || 0} onChange={handleChange} />
-                <Input id="stock" name="stock" label="Stock" type="number" value={product.stock} onChange={handleChange} />
+                <Input id="price" name="price.amount" label={t('admin.productForm.price')} type="number" value={product.price?.amount || 0} onChange={handleChange} />
+                <Input id="stock" name="stock" label={t('admin.productForm.stock')} type="number" value={product.stock} onChange={handleChange} />
             </div>
 
             {/* Translations */}
             <div className="bg-brand-white p-6 rounded-lg shadow">
+                <h3 className="font-bold font-serif mb-2">{t('admin.productForm.translations')}</h3>
                 <div className="border-b border-black/10 mb-4">
                     <nav className="-mb-px flex space-x-6">
                         {languages.map(lang => (
@@ -214,9 +226,9 @@ const ProductFormPage: React.FC<{ id?: string }> = ({ id }) => {
                     </nav>
                 </div>
                 <div>
-                    <Input id={`title-${activeLang}`} name="title" label="Title" value={product.translations?.[activeLang]?.title || ''} onChange={handleTranslationChange} />
+                    <Input id={`title-${activeLang}`} name="title" label={t('admin.productForm.title')} value={product.translations?.[activeLang]?.title || ''} onChange={handleTranslationChange} />
                     <div className="mt-4">
-                        <label className="block text-sm font-medium text-brand-black/80 mb-1">Description</label>
+                        <label className="block text-sm font-medium text-brand-black/80 mb-1">{t('admin.productForm.description')}</label>
                         <textarea name="description" value={product.translations?.[activeLang]?.description || ''} onChange={handleTranslationChange} rows={5} className="w-full px-3 py-2 border border-brand-black/20 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-gold/50 focus:border-brand-gold/50 transition-shadow"></textarea>
                     </div>
                 </div>
@@ -224,7 +236,7 @@ const ProductFormPage: React.FC<{ id?: string }> = ({ id }) => {
             
             {/* Images */}
             <div className="bg-brand-white p-6 rounded-lg shadow">
-                 <h3 className="font-bold font-serif mb-4">Images</h3>
+                 <h3 className="font-bold font-serif mb-4">{t('admin.productForm.images')}</h3>
                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                      {product.images.map((img, index) => (
                          <div key={index} className="relative group">
@@ -233,7 +245,7 @@ const ProductFormPage: React.FC<{ id?: string }> = ({ id }) => {
                          </div>
                      ))}
                      <label className="w-full h-32 border-2 border-dashed rounded-md flex flex-col items-center justify-center cursor-pointer hover:bg-black/5">
-                         {uploading ? <Spinner/> : <span>+ Add Image</span>}
+                         {uploading ? <Spinner/> : <span>+ {t('admin.productForm.addImage')}</span>}
                          <input type="file" multiple onChange={handleImageUpload} className="hidden" disabled={uploading} />
                      </label>
                  </div>

@@ -1,4 +1,4 @@
-import { collection, writeBatch, serverTimestamp } from 'firebase/firestore';
+import { collection, writeBatch, serverTimestamp, doc } from 'firebase/firestore';
 import { db } from './firebase';
 import { ProductDocument, LanguageCode } from '../firebase-types';
 
@@ -103,7 +103,7 @@ export const seedDatabase = async () => {
     const batch = writeBatch(db);
 
     sampleProducts.forEach((product) => {
-        const docRef = collection(productsCollection).doc(); // Auto-generate ID
+        const docRef = doc(productsCollection); // Auto-generate ID
         const dataWithTimestamps = {
             ...product,
             views: 0,

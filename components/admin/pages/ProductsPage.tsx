@@ -6,12 +6,14 @@ import Button from '../../common/Button';
 import { useRouter } from '../../../hooks/useRouter';
 import { useToast } from '../../../hooks/useToast';
 import Spinner from '../../common/Spinner';
+import { useI18n } from '../../../hooks/useI18n';
 
 const ProductsPage: React.FC = () => {
     const [products, setProducts] = useState<ProductDocument[]>([]);
     const [loading, setLoading] = useState(true);
     const { navigate } = useRouter();
     const { addToast } = useToast();
+    const { t } = useI18n();
 
     const fetchProducts = async () => {
         setLoading(true);
@@ -26,13 +28,13 @@ const ProductsPage: React.FC = () => {
     }, []);
 
     const handleDelete = async (id: string) => {
-        if (window.confirm("Are you sure you want to delete this product?")) {
+        if (window.confirm(t('admin.products.deleteConfirm'))) {
             try {
                 await deleteDoc(doc(db, "products", id));
-                addToast("Product deleted successfully", "success");
+                addToast(t('admin.products.deletedSuccess'), "success");
                 fetchProducts(); // Refresh list
             } catch (error) {
-                addToast("Error deleting product", "error");
+                addToast(t('admin.products.deletedError'), "error");
                 console.error("Error removing document: ", error);
             }
         }
@@ -45,20 +47,20 @@ const ProductsPage: React.FC = () => {
     return (
         <div className="bg-brand-white p-6 rounded-lg shadow">
             <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-bold font-serif">Manage Products</h2>
-                <Button onClick={() => navigate('/admin/products/new')}>Add New Product</Button>
+                <h2 className="text-xl font-bold font-serif">{t('admin.products.title')}</h2>
+                <Button onClick={() => navigate('/admin/products/new')}>{t('admin.products.addNew')}</Button>
             </div>
             <div className="overflow-x-auto">
                 <table className="w-full text-sm text-left">
                     <thead className="bg-black/5">
                         <tr>
-                            <th className="p-3">Image</th>
-                            <th className="p-3">Name (EN)</th>
-                            <th className="p-3">SKU</th>
-                            <th className="p-3">Price</th>
-                            <th className="p-3">Stock</th>
-                            <th className="p-3">Status</th>
-                            <th className="p-3">Actions</th>
+                            <th className="p-3">{t('admin.products.table.image')}</th>
+                            <th className="p-3">{t('admin.products.table.name')}</th>
+                            <th className="p-3">{t('admin.products.table.sku')}</th>
+                            <th className="p-3">{t('admin.products.table.price')}</th>
+                            <th className="p-3">{t('admin.products.table.stock')}</th>
+                            <th className="p-3">{t('admin.products.table.status')}</th>
+                            <th className="p-3">{t('admin.products.table.actions')}</th>
                         </tr>
                     </thead>
                     <tbody>

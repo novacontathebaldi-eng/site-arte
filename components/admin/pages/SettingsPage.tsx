@@ -3,20 +3,21 @@ import Button from '../../common/Button';
 import Input from '../../common/Input';
 import { seedDatabase } from '../../../lib/seed';
 import { useToast } from '../../../hooks/useToast';
-
+import { useI18n } from '../../../hooks/useI18n';
 
 const SettingsPage: React.FC = () => {
     const { addToast } = useToast();
+    const { t } = useI18n();
     const [isSeeding, setIsSeeding] = useState(false);
 
     const handleSeed = async () => {
-        if (window.confirm("Are you sure you want to seed the database? This will add sample products and may create duplicates if run multiple times.")) {
+        if (window.confirm(t('admin.settings.seedConfirm'))) {
             setIsSeeding(true);
             try {
                 await seedDatabase();
-                addToast("Database seeded successfully!", "success");
+                addToast(t('admin.settings.seedSuccess'), "success");
             } catch (error: any) {
-                addToast(`Seeding failed: ${error.message}`, "error");
+                addToast(`${t('admin.settings.seedError')}: ${error.message}`, "error");
             } finally {
                 setIsSeeding(false);
             }
@@ -26,34 +27,34 @@ const SettingsPage: React.FC = () => {
     return (
         <div className="space-y-8">
             <div className="bg-brand-white p-6 rounded-lg shadow">
-                <h2 className="text-xl font-bold font-serif mb-4">General Settings</h2>
+                <h2 className="text-xl font-bold font-serif mb-4">{t('admin.settings.title')}</h2>
                 <div className="space-y-4">
-                    <Input id="site-title" label="Site Title" defaultValue="Meeh - Art by Melissa Pelussi" />
-                    <Input id="contact-email" label="Contact Email" type="email" defaultValue="hello@meeh.lu" />
+                    <Input id="site-title" label={t('admin.settings.siteTitle')} defaultValue="Meeh - Art by Melissa Pelussi" />
+                    <Input id="contact-email" label={t('admin.settings.contactEmail')} type="email" defaultValue="hello@meeh.lu" />
                     <div>
                         <label className="flex items-center space-x-2">
                             <input type="checkbox" className="rounded"/>
-                            <span>Enable Maintenance Mode</span>
+                            <span>{t('admin.settings.maintenance')}</span>
                         </label>
                     </div>
                 </div>
             </div>
 
             <div className="bg-brand-white p-6 rounded-lg shadow">
-                 <h2 className="text-xl font-bold font-serif mb-4">Discount Codes</h2>
+                 <h2 className="text-xl font-bold font-serif mb-4">{t('admin.settings.discounts')}</h2>
                  <p className="text-sm text-brand-black/70">Discount code management UI would be here.</p>
             </div>
 
             <div className="bg-brand-white p-6 rounded-lg shadow">
-                <h2 className="text-xl font-bold font-serif mb-4">Database Actions</h2>
-                <p className="text-sm text-brand-black/70 mb-4">Use with caution. This is for development purposes.</p>
+                <h2 className="text-xl font-bold font-serif mb-4">{t('admin.settings.database')}</h2>
+                <p className="text-sm text-brand-black/70 mb-4">{t('admin.settings.databaseWarning')}</p>
                 <Button onClick={handleSeed} disabled={isSeeding} variant="secondary">
-                    {isSeeding ? 'Seeding...' : 'Seed Sample Products'}
+                    {isSeeding ? t('admin.settings.seeding') : t('admin.settings.seedButton')}
                 </Button>
             </div>
             
             <div className="flex justify-end">
-                <Button>Save Settings</Button>
+                <Button>{t('admin.settings.save')}</Button>
             </div>
         </div>
     );
