@@ -200,6 +200,10 @@ export interface SettingsDocument {
     maintenanceMode: boolean;
     contactEmail: string;
     shippingRegions: ShippingRegion[];
+    socialLinks?: {
+        instagram?: string;
+        facebook?: string;
+    }
 }
 
 

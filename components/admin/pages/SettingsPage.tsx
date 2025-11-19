@@ -14,7 +14,7 @@ const SettingsPage: React.FC = () => {
     const { addToast } = useToast();
     const { t } = useI18n();
     const { navigate } = useRouter();
-    const [settings, setSettings] = useState<Partial<SettingsDocument>>({});
+    const [settings, setSettings] = useState<Partial<SettingsDocument>>({ socialLinks: { instagram: '', facebook: '' } });
     const [loading, setLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [isSeeding, setIsSeeding] = useState(false);
@@ -60,7 +60,18 @@ const SettingsPage: React.FC = () => {
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value, type, checked } = e.target;
-        setSettings(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+        if (name.includes('.')) {
+            const [parent, child] = name.split('.');
+            setSettings(prev => ({
+                ...prev,
+                [parent]: {
+                    ...((prev as any)[parent] || {}),
+                    [child]: value
+                }
+            }));
+        } else {
+            setSettings(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+        }
     }
 
     if(loading) return <div className="flex justify-center"><Spinner/></div>
@@ -78,6 +89,14 @@ const SettingsPage: React.FC = () => {
                             <span>{t('admin.settings.maintenance')}</span>
                         </label>
                     </div>
+                </div>
+            </div>
+
+             <div className="bg-brand-white p-6 rounded-lg shadow-sm">
+                <h2 className="text-xl font-bold font-serif mb-4">Social Media</h2>
+                <div className="space-y-4">
+                    <Input id="instagram" name="socialLinks.instagram" label="Instagram URL" value={settings.socialLinks?.instagram || ''} onChange={handleChange} />
+                    <Input id="facebook" name="socialLinks.facebook" label="Facebook URL" value={settings.socialLinks?.facebook || ''} onChange={handleChange}/>
                 </div>
             </div>
             

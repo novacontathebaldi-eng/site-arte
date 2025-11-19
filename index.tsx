@@ -8,6 +8,7 @@ import { ToastContainer } from './components/common/Toast';
 import ErrorBoundary from './components/common/ErrorBoundary';
 import { CartProvider } from './contexts/CartContext';
 import { WishlistProvider } from './contexts/WishlistContext';
+import { SettingsProvider } from './contexts/SettingsContext';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -21,12 +22,14 @@ root.render(
       <I18nProvider>
         <ToastProvider>
           <AuthProvider>
-            <WishlistProvider>
-              <CartProvider>
-                <App />
-                <ToastContainer />
-              </CartProvider>
-            </WishlistProvider>
+            <SettingsProvider>
+              <WishlistProvider>
+                <CartProvider>
+                  <App />
+                  <ToastContainer />
+                </CartProvider>
+              </WishlistProvider>
+            </SettingsProvider>
           </AuthProvider>
         </ToastProvider>
       </I18nProvider>

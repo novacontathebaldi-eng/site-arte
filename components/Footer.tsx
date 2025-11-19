@@ -4,9 +4,11 @@ import { NAV_LINKS } from '../constants';
 import { useI18n } from '../hooks/useI18n';
 import InstagramIcon from './icons/InstagramIcon';
 import FacebookIcon from './icons/FacebookIcon';
+import { useSettings } from '../hooks/useSettings';
 
 const Footer: React.FC = () => {
     const { t } = useI18n();
+    const { settings } = useSettings();
     
   return (
     <footer className="bg-brand-black text-brand-white/70">
@@ -35,12 +37,12 @@ const Footer: React.FC = () => {
           <div>
              <h3 className="font-semibold text-brand-white tracking-wider uppercase">{t('footer.contactInfo')}</h3>
              <ul className="mt-4 space-y-2">
-                 <li><a href="mailto:hello@meeh.lu" className="hover:text-brand-gold">hello@meeh.lu</a></li>
+                 <li><a href={`mailto:${settings?.contactEmail || 'hello@meeh.lu'}`} className="hover:text-brand-gold">{settings?.contactEmail || 'hello@meeh.lu'}</a></li>
                  <li>Luxembourg</li>
              </ul>
              <div className="mt-4 flex space-x-4">
-                 <a href="#" className="hover:text-brand-gold"><InstagramIcon className="w-6 h-6"/></a>
-                 <a href="#" className="hover:text-brand-gold"><FacebookIcon className="w-6 h-6"/></a>
+                 <a href={settings?.socialLinks?.instagram || '#'} target="_blank" rel="noopener noreferrer" className="hover:text-brand-gold"><InstagramIcon className="w-6 h-6"/></a>
+                 <a href={settings?.socialLinks?.facebook || '#'} target="_blank" rel="noopener noreferrer" className="hover:text-brand-gold"><FacebookIcon className="w-6 h-6"/></a>
              </div>
           </div>
           <div>
