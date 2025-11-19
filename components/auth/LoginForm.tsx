@@ -33,7 +33,6 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSignupLinkClick, onForgotPasswo
     try {
       await loginWithGoogle();
       onSuccess();
-// FIX: Added curly braces to the catch block to fix syntax error.
     } catch (err: any) {
       setError(err.message);
     }

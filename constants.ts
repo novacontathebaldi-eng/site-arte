@@ -8,12 +8,26 @@ export const LANGUAGES: LanguageOption[] = [
 ];
 
 export const NAV_LINKS: NavLink[] = [
-  { href: '#paintings', labelKey: 'nav.paintings' },
-  { href: '#jewelry', labelKey: 'nav.jewelry' },
-  { href: '#digital-art', labelKey: 'nav.digitalArt' },
-  { href: '#prints', labelKey: 'nav.prints' },
+  { href: '#/catalog?category=paintings', labelKey: 'nav.paintings' },
+  { href: '#/catalog?category=jewelry', labelKey: 'nav.jewelry' },
+  { href: '#/catalog?category=digital', labelKey: 'nav.digitalArt' },
+  { href: '#/catalog?category=prints', labelKey: 'nav.prints' },
 ];
 
+export const CATEGORIES = [
+  { id: 'paintings', nameKey: 'product.categories.painting' },
+  { id: 'jewelry', nameKey: 'product.categories.jewelry' },
+  { id: 'digital', nameKey: 'product.categories.digitalArt' },
+  { id: 'prints', nameKey: 'product.categories.print' },
+];
+
+export const STATUSES = [
+  { id: 'available', nameKey: 'product.statuses.available' },
+  { id: 'sold', nameKey: 'product.statuses.sold' },
+  { id: 'made-to-order', nameKey: 'product.statuses.madeToOrder' },
+];
+
+// This is kept for now, but should be phased out as we move to Firestore data.
 export const SAMPLE_PRODUCTS: Product[] = [
   {
     id: '1',
@@ -42,33 +56,5 @@ export const SAMPLE_PRODUCTS: Product[] = [
     categoryKey: 'product.categories.print',
     price: 50,
     imageUrl: 'https://picsum.photos/seed/art4/600/800',
-  },
-   {
-    id: '5',
-    nameKey: 'product.abstractCosmos.name',
-    categoryKey: 'product.categories.painting',
-    price: 680,
-    imageUrl: 'https://picsum.photos/seed/art5/600/800',
-  },
-  {
-    id: '6',
-    nameKey: 'product.sereneHorizon.name',
-    categoryKey: 'product.categories.print',
-    price: 45,
-    imageUrl: 'https://picsum.photos/seed/art6/600/800',
-  },
-  {
-    id: '7',
-    nameKey: 'product.solarEarrings.name',
-    categoryKey: 'product.categories.jewelry',
-    price: 95,
-    imageUrl: 'https://picsum.photos/seed/art7/600/800',
-  },
-  {
-    id: '8',
-    nameKey: 'product.digitalDreamscape.name',
-    categoryKey: 'product.categories.digitalArt',
-    price: 85,
-    imageUrl: 'https://picsum.photos/seed/art8/600/800',
   },
 ];

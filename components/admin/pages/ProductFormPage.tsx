@@ -28,7 +28,6 @@ const emptyProduct: ProductFormData = {
     views: 0,
 };
 
-// FIX: Used LanguageCode enum members instead of string literals to match the type.
 const languages: { code: LanguageCode, name: string }[] = [
     { code: LanguageCode.EN, name: 'English' },
     { code: LanguageCode.FR, name: 'Français' },
@@ -40,7 +39,6 @@ const ProductFormPage: React.FC<{ id?: string }> = ({ id }) => {
     const [product, setProduct] = useState<ProductFormData>(emptyProduct);
     const [loading, setLoading] = useState(!!id);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    // FIX: Used LanguageCode enum for the initial state to fix type error.
     const [activeLang, setActiveLang] = useState<LanguageCode>(LanguageCode.EN);
     const [uploading, setUploading] = useState(false);
 
@@ -52,7 +50,16 @@ const ProductFormPage: React.FC<{ id?: string }> = ({ id }) => {
         const docRef = doc(db, "products", productId);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
-            setProduct(docSnap.data() as ProductFormData);
+            const data = docSnap.data() as Partial<ProductFormData>;
+            // Deep merge with emptyProduct to ensure all fields, especially nested ones like 'price', exist.
+            const productData = {
+                ...emptyProduct,
+                ...data,
+                price: { ...emptyProduct.price, ...(data.price || {}) },
+                dimensions: data.dimensions ? { ...(emptyProduct.dimensions || { height: 0, width: 0, depth: 0 }), ...data.dimensions } : emptyProduct.dimensions,
+                translations: { ...emptyProduct.translations, ...(data.translations || {}) },
+            };
+            setProduct(productData);
         } else {
             addToast("Product not found", "error");
             navigate('/admin/products');
@@ -191,7 +198,7 @@ const ProductFormPage: React.FC<{ id?: string }> = ({ id }) => {
                       <option value="prints">Prints</option>
                   </select>
                 </div>
-                <Input id="price" name="price.amount" label="Price (in cents)" type="number" value={product.price.amount} onChange={handleChange} />
+                <Input id="price" name="price.amount" label="Price (in cents)" type="number" value={product.price?.amount || 0} onChange={handleChange} />
                 <Input id="stock" name="stock" label="Stock" type="number" value={product.stock} onChange={handleChange} />
             </div>
 

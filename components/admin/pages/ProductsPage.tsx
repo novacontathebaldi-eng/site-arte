@@ -69,7 +69,7 @@ const ProductsPage: React.FC = () => {
                                 </td>
                                 <td className="p-3 font-medium">{product.translations?.en?.title || 'No Title'}</td>
                                 <td className="p-3">{product.sku}</td>
-                                <td className="p-3">€{(product.price.amount / 100).toFixed(2)}</td>
+                                <td className="p-3">€{((product.price?.amount || 0) / 100).toFixed(2)}</td>
                                 <td className="p-3">{product.stock}</td>
                                 <td className="p-3">
                                     <span className={`px-2 py-1 text-xs rounded-full ${product.status === 'available' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>

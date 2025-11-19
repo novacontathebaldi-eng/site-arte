@@ -15,6 +15,7 @@ export const translations: Record<Language, Record<string, any>> = {
     },
     productGrid: {
       title: 'Nos Œuvres',
+      featuredTitle: 'En Vedette',
     },
     newsletter: {
         title: "Rejoignez notre univers",
@@ -68,6 +69,14 @@ export const translations: Record<Language, Record<string, any>> = {
         jewelry: 'Bijoux',
         digitalArt: 'Art Numérique',
         print: 'Impression',
+        paintings: 'Peinture',
+        prints: 'Impression',
+        digital: 'Art Numérique',
+      },
+      statuses: {
+        available: 'Disponible',
+        sold: 'Vendu',
+        madeToOrder: 'Sur commande',
       },
       etherealReverie: { name: 'Rêverie Éthérée' },
       lunarNecklace: { name: 'Collier Lunaire' },
@@ -93,6 +102,7 @@ export const translations: Record<Language, Record<string, any>> = {
     },
     productGrid: {
       title: 'Our Artworks',
+      featuredTitle: 'Featured Works',
     },
     newsletter: {
         title: "Join our world",
@@ -146,6 +156,14 @@ export const translations: Record<Language, Record<string, any>> = {
         jewelry: 'Jewelry',
         digitalArt: 'Digital Art',
         print: 'Print',
+        paintings: 'Painting',
+        prints: 'Print',
+        digital: 'Digital Art',
+      },
+      statuses: {
+        available: 'Available',
+        sold: 'Sold',
+        madeToOrder: 'Made-to-Order',
       },
       etherealReverie: { name: 'Ethereal Reverie' },
       lunarNecklace: { name: 'Lunar Necklace' },
@@ -171,6 +189,7 @@ export const translations: Record<Language, Record<string, any>> = {
     },
     productGrid: {
       title: 'Unsere Kunstwerke',
+      featuredTitle: 'Ausgewählte Werke',
     },
     newsletter: {
         title: "Treten Sie unserer Welt bei",
@@ -224,6 +243,14 @@ export const translations: Record<Language, Record<string, any>> = {
         jewelry: 'Schmuck',
         digitalArt: 'Digitale Kunst',
         print: 'Druck',
+        paintings: 'Gemälde',
+        prints: 'Druck',
+        digital: 'Digitale Kunst',
+      },
+      statuses: {
+        available: 'Verfügbar',
+        sold: 'Verkauft',
+        madeToOrder: 'Auf Bestellung',
       },
       etherealReverie: { name: 'Ätherische Träumerei' },
       lunarNecklace: { name: 'Mond-Halskette' },
@@ -249,6 +276,7 @@ export const translations: Record<Language, Record<string, any>> = {
     },
     productGrid: {
       title: 'Nossas Obras de Arte',
+      featuredTitle: 'Obras em Destaque',
     },
     newsletter: {
         title: "Junte-se ao nosso mundo",
@@ -302,6 +330,14 @@ export const translations: Record<Language, Record<string, any>> = {
         jewelry: 'Joia',
         digitalArt: 'Arte Digital',
         print: 'Impressão',
+        paintings: 'Pintura',
+        prints: 'Impressão',
+        digital: 'Arte Digital',
+      },
+      statuses: {
+        available: 'Disponível',
+        sold: 'Vendido',
+        madeToOrder: 'Sob encomenda',
       },
       etherealReverie: { name: 'Devaneio Etéreo' },
       lunarNecklace: { name: 'Colar Lunar' },
