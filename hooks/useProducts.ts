@@ -74,12 +74,12 @@ export const useProducts = (filters: ProductFilters, isSearch = false) => {
           q = query(q, where('keywords', 'array-contains', currentFilters.searchTerm.toLowerCase()));
       }
       
-      // We must order by the field used in the inequality filter.
+      // Conditional ordering to avoid composite index errors
       if (currentFilters.minPrice && currentFilters.minPrice > 0) {
           q = query(q, orderBy('price.amount', 'asc'));
+      } else {
+          q = query(q, orderBy('createdAt', 'desc'));
       }
-      
-      q = query(q, orderBy('createdAt', 'desc'));
 
       if (!isInitial && lastDoc) {
         q = query(q, startAfter(lastDoc));

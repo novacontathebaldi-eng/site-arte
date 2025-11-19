@@ -23,7 +23,6 @@ const CategoryTabs: React.FC<CategoryTabsProps> = ({ selectedCategory, onSelectC
                 for (const category of CATEGORIES) {
                     const categoryQuery = query(
                         collection(db, 'products'),
-                        where('publishedAt', '!=', null),
                         where('category', '==', category.id)
                     );
                     const snapshot = await getCountFromServer(categoryQuery);
