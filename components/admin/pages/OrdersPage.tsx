@@ -1,16 +1,61 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { collection, getDocs, orderBy, query } from 'firebase/firestore';
+import { db } from '../../../lib/firebase';
+import { OrderDocument } from '../../../firebase-types';
+import Button from '../../common/Button';
+import { useRouter } from '../../../hooks/useRouter';
+import { useToast } from '../../../hooks/useToast';
+import Spinner from '../../common/Spinner';
+import { useI18n } from '../../../hooks/useI18n';
 
 const OrdersPage: React.FC = () => {
-    // This would be fetched from Firestore
-    const sampleOrders = [
-        { id: '1092', customer: 'John Doe', date: '2024-07-28', status: 'shipped', total: '€450.00' },
-        { id: '1091', customer: 'Jane Smith', date: '2024-07-27', status: 'delivered', total: '€120.00' },
-        { id: '1090', customer: 'Mark Johnson', date: '2024-07-25', status: 'pending', total: '€75.00' },
-    ];
+    const [orders, setOrders] = useState<OrderDocument[]>([]);
+    const [loading, setLoading] = useState(true);
+    const { navigate } = useRouter();
+    const { addToast } = useToast();
+    const { t } = useI18n();
+
+    useEffect(() => {
+        const fetchOrders = async () => {
+            setLoading(true);
+            try {
+                const q = query(collection(db, "orders"), orderBy("createdAt", "desc"));
+                const querySnapshot = await getDocs(q);
+                const ordersData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as OrderDocument));
+                setOrders(ordersData);
+            } catch (error) {
+                console.error("Error fetching orders:", error);
+                addToast("Failed to fetch orders", "error");
+            }
+            setLoading(false);
+        };
+        fetchOrders();
+    }, [addToast]);
+    
+    const getStatusColor = (status: string) => {
+        switch(status) {
+            case 'shipped':
+            case 'delivered':
+                return 'bg-green-100 text-green-800';
+            case 'pending':
+            case 'confirmed':
+                return 'bg-yellow-100 text-yellow-800';
+            case 'cancelled':
+            case 'refunded':
+                return 'bg-red-100 text-red-800';
+            default:
+                return 'bg-blue-100 text-blue-800';
+        }
+    };
+
+
+    if (loading) {
+        return <div className="flex justify-center items-center h-full"><Spinner size="lg" /></div>;
+    }
 
     return (
         <div className="bg-brand-white p-6 rounded-lg shadow">
-            <h2 className="text-xl font-bold font-serif mb-6">Manage Orders</h2>
+            <h2 className="text-xl font-bold font-serif mb-6">{t('admin.orders.title')}</h2>
             <div className="overflow-x-auto">
                 <table className="w-full text-sm text-left">
                      <thead className="bg-black/5">
@@ -19,24 +64,24 @@ const OrdersPage: React.FC = () => {
                             <th className="p-3">Customer</th>
                             <th className="p-3">Date</th>
                             <th className="p-3">Status</th>
-                            <th className="p-3">Total</th>
-                            <th className="p-3">Actions</th>
+                            <th className="p-3 text-right">Total</th>
+                            <th className="p-3 text-right">Actions</th>
                         </tr>
                     </thead>
                      <tbody>
-                        {sampleOrders.map(order => (
-                            <tr key={order.id} className="border-b border-black/10">
-                                <td className="p-3 font-medium">#{order.id}</td>
-                                <td className="p-3">{order.customer}</td>
-                                <td className="p-3">{order.date}</td>
+                        {orders.map(order => (
+                            <tr key={order.id} className="border-b border-black/10 hover:bg-black/5 transition-colors">
+                                <td className="p-3 font-mono text-xs">#{order.id.slice(0, 8)}</td>
+                                <td className="p-3 font-medium">{order.shippingAddress.recipientName}</td>
+                                <td className="p-3">{new Date(order.createdAt.seconds * 1000).toLocaleDateString()}</td>
                                 <td className="p-3">
-                                    <span className={`px-2 py-1 text-xs rounded-full ${order.status === 'shipped' ? 'bg-blue-100 text-blue-800' : order.status === 'delivered' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                                    <span className={`px-2 py-1 text-xs rounded-full font-medium capitalize ${getStatusColor(order.status)}`}>
                                         {order.status}
                                     </span>
                                 </td>
-                                <td className="p-3">{order.total}</td>
-                                <td className="p-3">
-                                    <button className="text-brand-gold hover:underline">View</button>
+                                <td className="p-3 text-right font-medium">€{(order.pricing.total / 100).toFixed(2)}</td>
+                                <td className="p-3 text-right">
+                                    <Button size="sm" variant="tertiary" onClick={() => navigate(`/admin/orders/${order.id}`)}>View</Button>
                                 </td>
                             </tr>
                         ))}

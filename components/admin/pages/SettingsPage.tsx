@@ -1,14 +1,36 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { db } from '../../../lib/firebase';
 import Button from '../../common/Button';
 import Input from '../../common/Input';
 import { seedDatabase } from '../../../lib/seed';
 import { useToast } from '../../../hooks/useToast';
 import { useI18n } from '../../../hooks/useI18n';
+import { SettingsDocument } from '../../../firebase-types';
+import Spinner from '../../common/Spinner';
+import { useRouter } from '../../../hooks/useRouter';
 
 const SettingsPage: React.FC = () => {
     const { addToast } = useToast();
     const { t } = useI18n();
+    const { navigate } = useRouter();
+    const [settings, setSettings] = useState<Partial<SettingsDocument>>({});
+    const [loading, setLoading] = useState(true);
+    const [isSaving, setIsSaving] = useState(false);
     const [isSeeding, setIsSeeding] = useState(false);
+
+    useEffect(() => {
+        const fetchSettings = async () => {
+            setLoading(true);
+            const docRef = doc(db, 'settings', 'global');
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists()) {
+                setSettings(docSnap.data());
+            }
+            setLoading(false);
+        };
+        fetchSettings();
+    }, []);
 
     const handleSeed = async () => {
         if (window.confirm(t('admin.settings.seedConfirm'))) {
@@ -24,28 +46,56 @@ const SettingsPage: React.FC = () => {
         }
     };
 
+    const handleSave = async () => {
+        setIsSaving(true);
+        try {
+            const docRef = doc(db, 'settings', 'global');
+            await setDoc(docRef, settings, { merge: true });
+            addToast(t('admin.settings.settingsSaved'), "success");
+        } catch (error: any) {
+            addToast(error.message, "error");
+        }
+        setIsSaving(false);
+    };
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value, type, checked } = e.target;
+        setSettings(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+    }
+
+    if(loading) return <div className="flex justify-center"><Spinner/></div>
+
     return (
         <div className="space-y-8">
-            <div className="bg-brand-white p-6 rounded-lg shadow">
+            <div className="bg-brand-white p-6 rounded-lg shadow-sm">
                 <h2 className="text-xl font-bold font-serif mb-4">{t('admin.settings.title')}</h2>
                 <div className="space-y-4">
-                    <Input id="site-title" label={t('admin.settings.siteTitle')} defaultValue="Meeh - Art by Melissa Pelussi" />
-                    <Input id="contact-email" label={t('admin.settings.contactEmail')} type="email" defaultValue="hello@meeh.lu" />
+                    <Input id="site-title" name="siteTitle" label={t('admin.settings.siteTitle')} value={settings.siteTitle || ''} onChange={handleChange} />
+                    <Input id="contact-email" name="contactEmail" label={t('admin.settings.contactEmail')} type="email" value={settings.contactEmail || ''} onChange={handleChange}/>
                     <div>
                         <label className="flex items-center space-x-2">
-                            <input type="checkbox" className="rounded"/>
+                            <input type="checkbox" name="maintenanceMode" checked={settings.maintenanceMode || false} onChange={handleChange} className="rounded"/>
                             <span>{t('admin.settings.maintenance')}</span>
                         </label>
                     </div>
                 </div>
             </div>
-
-            <div className="bg-brand-white p-6 rounded-lg shadow">
-                 <h2 className="text-xl font-bold font-serif mb-4">{t('admin.settings.discounts')}</h2>
-                 <p className="text-sm text-brand-black/70">Discount code management UI would be here.</p>
+            
+             <div className="bg-brand-white p-6 rounded-lg shadow-sm">
+                 <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-xl font-bold font-serif">{t('admin.settings.discounts')}</h2>
+                    <Button variant="tertiary" onClick={() => navigate('/admin/settings/discounts')}>{t('admin.discounts.title')}</Button>
+                 </div>
+                 <p className="text-sm text-brand-black/70">Create and manage discount codes for promotions.</p>
             </div>
 
-            <div className="bg-brand-white p-6 rounded-lg shadow">
+             <div className="bg-brand-white p-6 rounded-lg shadow-sm">
+                 <h2 className="text-xl font-bold font-serif mb-4">{t('admin.settings.shipping')}</h2>
+                 <p className="text-sm text-brand-black/70">Shipping region and pricing management UI would be here.</p>
+            </div>
+
+
+            <div className="bg-brand-white p-6 rounded-lg shadow-sm">
                 <h2 className="text-xl font-bold font-serif mb-4">{t('admin.settings.database')}</h2>
                 <p className="text-sm text-brand-black/70 mb-4">{t('admin.settings.databaseWarning')}</p>
                 <Button onClick={handleSeed} disabled={isSeeding} variant="secondary">
@@ -54,7 +104,10 @@ const SettingsPage: React.FC = () => {
             </div>
             
             <div className="flex justify-end">
-                <Button>{t('admin.settings.save')}</Button>
+                <Button onClick={handleSave} disabled={isSaving}>
+                    {isSaving && <Spinner size="sm" color="border-white" />}
+                    {t('admin.settings.save')}
+                </Button>
             </div>
         </div>
     );

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
+import { collection, getDocs, deleteDoc, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../../lib/firebase';
 import { ProductDocument } from '../../../firebase-types';
 import Button from '../../common/Button';
@@ -19,7 +19,7 @@ const ProductsPage: React.FC = () => {
         setLoading(true);
         const querySnapshot = await getDocs(collection(db, "products"));
         const productsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ProductDocument));
-        setProducts(productsData);
+        setProducts(productsData.sort((a, b) => b.createdAt.seconds - a.createdAt.seconds));
         setLoading(false);
     };
     
@@ -40,6 +40,22 @@ const ProductsPage: React.FC = () => {
         }
     };
 
+    const togglePublished = async (product: ProductDocument) => {
+        const docRef = doc(db, "products", product.id);
+        const newPublishedAt = product.publishedAt ? null : serverTimestamp();
+        try {
+            await updateDoc(docRef, { publishedAt: newPublishedAt });
+            setProducts(prev => 
+                prev.map(p => 
+                    p.id === product.id ? { ...p, publishedAt: newPublishedAt ? new Date() as any : null } : p
+                )
+            );
+            addToast(product.publishedAt ? 'Product unpublished' : 'Product published', 'success');
+        } catch (error) {
+            addToast('Failed to update status', 'error');
+        }
+    }
+
     if (loading) {
         return <div className="flex justify-center items-center h-full"><Spinner size="lg" /></div>;
     }
@@ -59,13 +75,13 @@ const ProductsPage: React.FC = () => {
                             <th className="p-3">{t('admin.products.table.sku')}</th>
                             <th className="p-3">{t('admin.products.table.price')}</th>
                             <th className="p-3">{t('admin.products.table.stock')}</th>
-                            <th className="p-3">{t('admin.products.table.status')}</th>
-                            <th className="p-3">{t('admin.products.table.actions')}</th>
+                            <th className="p-3">{t('admin.products.table.published')}</th>
+                            <th className="p-3 text-right">{t('admin.products.table.actions')}</th>
                         </tr>
                     </thead>
                     <tbody>
                         {products.map(product => (
-                            <tr key={product.id} className="border-b border-black/10">
+                            <tr key={product.id} className="border-b border-black/10 hover:bg-black/5 transition-colors">
                                 <td className="p-3">
                                     <img src={product.images?.[0]?.thumbnailUrl || product.images?.[0]?.url || 'https://placehold.co/40'} alt={product.translations?.en?.title} className="w-10 h-10 object-cover rounded"/>
                                 </td>
@@ -74,12 +90,13 @@ const ProductsPage: React.FC = () => {
                                 <td className="p-3">€{((product.price?.amount || 0) / 100).toFixed(2)}</td>
                                 <td className="p-3">{product.stock}</td>
                                 <td className="p-3">
-                                    <span className={`px-2 py-1 text-xs rounded-full ${product.status === 'available' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                                        {product.status}
-                                    </span>
+                                    <label className="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" checked={!!product.publishedAt} onChange={() => togglePublished(product)} className="sr-only peer" />
+                                        <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-2 peer-focus:ring-brand-gold/50 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-gold"></div>
+                                    </label>
                                 </td>
                                 <td className="p-3">
-                                    <div className="flex items-center gap-2">
+                                    <div className="flex items-center justify-end gap-2">
                                         <Button size="sm" variant="tertiary" onClick={() => navigate(`/admin/products/edit/${product.id}`)}>Edit</Button>
                                         <Button size="sm" variant="tertiary" className="text-red-600" onClick={() => handleDelete(product.id)}>Delete</Button>
                                     </div>

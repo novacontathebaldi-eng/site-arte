@@ -8,12 +8,12 @@ interface State {
   hasError: boolean;
 }
 
-// FIX: Changed to React.Component to fix property 'props' does not exist error.
 class ErrorBoundary extends React.Component<Props, State> {
-  // Fix: Removed 'public' keyword for idiomatic class field declaration.
-  state: State = {
-    hasError: false
-  };
+  // FIX: Explicitly define constructor and initialize state to ensure `this.props` is correctly typed before render.
+  constructor(props: Props) {
+    super(props);
+    this.state = { hasError: false };
+  }
 
   static getDerivedStateFromError(_: Error): State {
     return { hasError: true };

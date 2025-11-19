@@ -35,6 +35,7 @@ export interface UserDocument {
   emailVerified: boolean;
   preferences: UserPreferences;
   stats: UserStats;
+  adminNotes?: string;
 }
 
 
@@ -135,6 +136,10 @@ export interface OrderDocument {
   id: string; // Firestore document ID
   orderNumber: string; // e.g., #1001
   userId: string;
+  user?: { // Denormalized for quick access
+      displayName: string;
+      email: string;
+  };
   status: OrderStatus;
   items: OrderItem[];
   pricing: OrderPricing;
@@ -184,11 +189,17 @@ export interface CartItemDocument {
 
 // --- SETTINGS Collection ---
 // Path: /settings/{settingId} (e.g., 'global')
+export interface ShippingRegion {
+    name: string;
+    countries: string[]; // ISO 3166-1 alpha-2 codes
+    cost: number; // in cents
+}
 export interface SettingsDocument {
+    id: string;
     siteTitle: string;
     maintenanceMode: boolean;
     contactEmail: string;
-    shippingRegions: object;
+    shippingRegions: ShippingRegion[];
 }
 
 
@@ -198,7 +209,7 @@ export interface DiscountCodeDocument {
     id: string;
     code: string;
     type: 'percentage' | 'fixed_amount';
-    value: number;
+    value: number; // percentage (e.g., 10 for 10%) or fixed amount in cents
     minPurchase: number; // in cents
     expiresAt: Timestamp | null;
     isActive: boolean;
