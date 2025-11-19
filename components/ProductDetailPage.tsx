@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { doc, getDoc, collection, query, where, limit, getDocs } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { ProductDocument } from '../firebase-types';
 import Spinner from './common/Spinner';
-import CatalogProductGrid from './catalog/CatalogProductGrid';
-import ImageGallery from './catalog/ImageGallery';
 import Button from './common/Button';
 import { useI18n } from '../hooks/useI18n';
 import { useCart } from '../hooks/useCart';
@@ -18,7 +16,6 @@ interface ProductDetailPageProps {
 
 const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ productId }) => {
     const [product, setProduct] = useState<ProductDocument | null>(null);
-    const [relatedProducts, setRelatedProducts] = useState<ProductDocument[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const { t, language } = useI18n();
@@ -35,7 +32,6 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ productId }) => {
             };
             setLoading(true);
             setProduct(null);
-            setRelatedProducts([]);
             setError(null);
 
             try {
@@ -45,24 +41,12 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ productId }) => {
                 if (docSnap.exists()) {
                     const productData = { id: docSnap.id, ...docSnap.data() } as ProductDocument;
                     
-                    // Validate essential product data
                     if (!productData.price || !productData.images || !productData.category) {
                         console.error("Fetched product is missing essential data:", productData);
                         setError('Product data is incomplete.');
                         setProduct(null);
                     } else {
                         setProduct(productData);
-
-                        // Fetch related products
-                        const relatedQuery = query(
-                            collection(db, 'products'),
-                            where('category', '==', productData.category),
-                            where('__name__', '!=', productId), // Exclude the current product
-                            limit(4)
-                        );
-                        const relatedSnapshot = await getDocs(relatedQuery);
-                        const related = relatedSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ProductDocument));
-                        setRelatedProducts(related);
                     }
 
                 } else {
@@ -104,7 +88,9 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ productId }) => {
         <div className="bg-brand-white">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 <div className="lg:grid lg:grid-cols-2 lg:gap-x-12">
-                    <ImageGallery images={product.images} />
+                    <div className="aspect-w-3 aspect-h-4 w-full overflow-hidden bg-black/5 rounded-md">
+                        <img src={product.images?.[0]?.url || 'https://placehold.co/800x1000'} alt={p?.title} className="w-full h-full object-cover" />
+                    </div>
                     <div className="mt-8 lg:mt-0">
                         <p className="text-sm uppercase tracking-widest text-brand-black/60">{t(`product.categories.${product.category}`)}</p>
                         <h1 className="text-3xl lg:text-4xl font-serif font-bold my-3">{p?.title}</h1>
@@ -135,13 +121,6 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ productId }) => {
                         </div>
                     </div>
                 </div>
-
-                {relatedProducts.length > 0 && (
-                    <div className="mt-24">
-                        <h2 className="text-2xl font-serif font-bold text-center mb-12">{t('product.related')}</h2>
-                         <CatalogProductGrid products={relatedProducts} />
-                    </div>
-                )}
             </div>
         </div>
     );

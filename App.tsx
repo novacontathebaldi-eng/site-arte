@@ -4,7 +4,6 @@ import AdminPanel from './components/admin/AdminPanel';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import HomePage from './components/HomePage';
-import CatalogPage from './components/CatalogPage';
 import ProductDetailPage from './components/ProductDetailPage';
 import CheckoutPage from './components/checkout/CheckoutPage';
 import CheckoutGuard from './components/checkout/CheckoutGuard';
@@ -21,10 +20,6 @@ const PageContent: React.FC = () => {
         return <ProductDetailPage productId={id} />;
     }
 
-    if (path === '/catalog' || path.startsWith('/catalog?')) {
-        return <CatalogPage />;
-    }
-    
     if (path.startsWith('/checkout')) {
       return <CheckoutGuard><CheckoutPage /></CheckoutGuard>;
     }

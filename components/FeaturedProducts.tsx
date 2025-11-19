@@ -3,8 +3,8 @@ import { collection, query, where, getDocs, limit } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { ProductDocument } from '../firebase-types';
 import { useI18n } from '../hooks/useI18n';
-import CatalogProductGrid from './catalog/CatalogProductGrid';
 import Skeleton from './common/Skeleton';
+import ProductCard from './ProductCard';
 
 const FeaturedProducts: React.FC = () => {
   const { t } = useI18n();
@@ -40,7 +40,11 @@ const FeaturedProducts: React.FC = () => {
                 {[...Array(4)].map((_, i) => <Skeleton key={i} className="aspect-[3/4]"/>)}
              </div>
         ) : (
-            <CatalogProductGrid products={products} />
+            <div className="grid grid-cols-1 gap-y-10 gap-x-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:gap-x-8">
+              {products.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
         )}
       </div>
     </div>
