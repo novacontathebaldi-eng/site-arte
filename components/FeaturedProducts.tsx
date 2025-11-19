@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { collection, query, where, getDocs, limit, orderBy } from 'firebase/firestore';
+import { collection, query, where, getDocs, limit, orderBy, Timestamp } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { ProductDocument } from '../firebase-types';
 import { useI18n } from '../hooks/useI18n';
@@ -16,15 +16,20 @@ const FeaturedProducts: React.FC = () => {
       setLoading(true);
       try {
         const productsRef = collection(db, 'products');
-        // This query avoids a composite index by filtering on one field and ordering by another
+        // This query is more robust and avoids composite index errors.
+        // It fetches the most recent published products and then filters for "featured" on the client.
         const q = query(productsRef, 
-            where('featured', '==', true), 
             where('publishedAt', '!=', null),
             orderBy('publishedAt', 'desc'),
-            limit(4)
+            limit(20) // Fetch a reasonable number of recent items
         );
         const querySnapshot = await getDocs(q);
-        const featuredProducts = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ProductDocument));
+        
+        const featuredProducts = querySnapshot.docs
+            .map(doc => ({ id: doc.id, ...doc.data() } as ProductDocument))
+            .filter(p => p.featured) // Now, filter for the featured ones
+            .slice(0, 4); // And take the top 4
+
         setProducts(featuredProducts);
       } catch (error) {
         console.error("Error fetching featured products:", error);

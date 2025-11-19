@@ -1,6 +1,7 @@
-// FIX: Changed to named imports to resolve module resolution errors with 'firebase/app'.
-import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
+
+// FIX: Using firebase v8 compat libraries for app and auth to resolve module errors, while keeping v9 for firestore.
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/auth';
 import { getFirestore } from 'firebase/firestore';
 
 const firebaseConfig = {
@@ -13,8 +14,8 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-const auth = getAuth(app);
+const app = !firebase.apps.length ? firebase.initializeApp(firebaseConfig) : firebase.app();
+const auth = firebase.auth();
 const db = getFirestore(app);
 
 export { app, auth, db };

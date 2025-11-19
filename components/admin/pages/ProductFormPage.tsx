@@ -142,7 +142,7 @@ const ProductFormPage: React.FC<{ id?: string }> = ({ id }) => {
             }
             addToast(t('admin.productForm.uploadSuccess'), "success");
         } catch (error) {
-            // FIX: Replaced custom error handling with a more robust check using `instanceof Error` to safely access the error message.
+            // FIX: Safely access the error message by first checking if the caught object is an instance of Error.
             const errorMessage = (error instanceof Error) ? error.message : String(error);
             addToast(`${t('admin.productForm.uploadError')}: ${errorMessage}`, "error");
         } finally {
