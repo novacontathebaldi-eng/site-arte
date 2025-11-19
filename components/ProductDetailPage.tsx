@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { doc, getDoc, collection, query, where, limit, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
@@ -47,6 +48,7 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ productId }) => {
                         collection(db, 'products'),
                         where('category', '==', productData.category),
                         where('__name__', '!=', productId), // Exclude the current product
+                        where('publishedAt', '!=', null),
                         limit(4)
                     );
                     const relatedSnapshot = await getDocs(relatedQuery);

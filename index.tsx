@@ -1,3 +1,4 @@
+
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
@@ -8,6 +9,7 @@ import { ToastContainer } from './components/common/Toast';
 import ErrorBoundary from './components/common/ErrorBoundary';
 import { CartProvider } from './contexts/CartContext';
 import { WishlistProvider } from './contexts/WishlistContext';
+import './index.css';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {

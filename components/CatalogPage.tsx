@@ -1,15 +1,15 @@
+
 import React, { useEffect, useState } from 'react';
 import { useProducts, Filters } from '../hooks/useProducts';
 import { useRouter } from '../hooks/useRouter';
 import ProductGrid from './ProductGrid';
 import FilterSidebar from './catalog/FilterSidebar';
-import Button from './common/Button';
 import Spinner from './common/Spinner';
+import InfiniteScrollTrigger from './catalog/InfiniteScrollTrigger';
 
 const CatalogPage: React.FC = () => {
     const { queryParams } = useRouter();
     
-    // Initialize filters from URL query parameters only on first render
     const [initialFilters] = useState<Filters>(() => {
       const category = queryParams.get('category');
       return {
@@ -20,7 +20,6 @@ const CatalogPage: React.FC = () => {
     const { products, loading, hasMore, loadMore, applyFilters } = useProducts(initialFilters);
 
     const handleFilterChange = (newFilters: Filters) => {
-        // Here you could also update URL params for shareable links
         applyFilters(newFilters);
     };
 
@@ -39,18 +38,13 @@ const CatalogPage: React.FC = () => {
                     <div className="lg:col-span-3 mt-8 lg:mt-0">
                         <ProductGrid products={products} loading={loading && products.length === 0} gridClass="grid grid-cols-1 gap-y-10 gap-x-6 sm:grid-cols-2 xl:grid-cols-3 xl:gap-x-8" />
                         
-                        {loading && products.length > 0 && <div className="flex justify-center my-8"><Spinner /></div>}
-
-                        {hasMore && !loading && (
-                            <div className="mt-12 text-center">
-                                <Button variant="tertiary" size="lg" onClick={loadMore}>Load More Artworks</Button>
-                            </div>
-                        )}
-                         {!hasMore && !loading && products.length > 0 && (
-                            <div className="mt-12 text-center text-brand-black/60">
-                                <p>You've reached the end of the collection.</p>
-                            </div>
-                        )}
+                        <div className="mt-12 text-center">
+                            {loading && <Spinner />}
+                            {hasMore && !loading && <InfiniteScrollTrigger onVisible={loadMore} />}
+                            {!hasMore && !loading && products.length > 0 && (
+                                <p className="text-brand-black/60">You've reached the end of the collection.</p>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
