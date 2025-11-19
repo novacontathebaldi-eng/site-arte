@@ -20,7 +20,7 @@ const ProductsPage: React.FC = () => {
         setLoading(true);
         const querySnapshot = await getDocs(collection(db, "products"));
         const productsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ProductDocument));
-        setProducts(productsData.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)));
+        setProducts(productsData.sort((a, b) => b.createdAt.seconds - a.createdAt.seconds));
         setLoading(false);
     };
     
@@ -41,29 +41,29 @@ const ProductsPage: React.FC = () => {
         }
     };
 
-    const toggleBoolean = async (id: string, field: 'publishedAt' | 'featured', currentValue: any) => {
-        const docRef = doc(db, "products", id);
-        let newValue;
+    const toggleField = async (product: ProductDocument, field: 'publishedAt' | 'featured') => {
+        const docRef = doc(db, "products", product.id);
         let updateData: { [key: string]: any };
+        let successMsg = '';
 
         if (field === 'publishedAt') {
-            newValue = currentValue ? null : serverTimestamp();
-            updateData = { publishedAt: newValue };
+            updateData = { publishedAt: product.publishedAt ? null : serverTimestamp() };
+            successMsg = product.publishedAt ? 'Product unpublished' : 'Product published';
         } else {
-            newValue = !currentValue;
-            updateData = { featured: newValue };
+            updateData = { featured: !product.featured };
+            successMsg = product.featured ? 'Removed from featured' : 'Added to featured';
         }
-        
+
         try {
             await updateDoc(docRef, updateData);
             setProducts(prev => 
                 prev.map(p => 
-                    p.id === id ? { ...p, [field]: field === 'publishedAt' ? (newValue ? new Date() : null) : newValue } : p
+                    p.id === product.id ? { ...p, ...updateData, publishedAt: updateData.publishedAt === null ? null : new Date() as any } : p
                 )
             );
-            addToast(`Product ${field === 'featured' ? 'featured status' : 'published status'} updated`, 'success');
+            addToast(successMsg, 'success');
         } catch (error) {
-            addToast('Failed to update status', 'error');
+            addToast('Failed to update product', 'error');
         }
     }
 
@@ -83,8 +83,7 @@ const ProductsPage: React.FC = () => {
                         <tr>
                             <th className="p-3">{t('admin.products.table.image')}</th>
                             <th className="p-3">{t('admin.products.table.name')}</th>
-                            <th className="p-3">{t('admin.products.table.price')}</th>
-                            <th className="p-3">{t('admin.products.table.stock')}</th>
+                            <th className="p-3">{t('admin.products.table.sku')}</th>
                             <th className="p-3">Featured</th>
                             <th className="p-3">{t('admin.products.table.published')}</th>
                             <th className="p-3 text-right">{t('admin.products.table.actions')}</th>
@@ -97,17 +96,16 @@ const ProductsPage: React.FC = () => {
                                     <img src={product.images?.[0]?.thumbnailUrl || product.images?.[0]?.url || 'https://placehold.co/40'} alt={product.translations?.en?.title} className="w-10 h-10 object-cover rounded"/>
                                 </td>
                                 <td className="p-3 font-medium">{product.translations?.en?.title || 'No Title'}</td>
-                                <td className="p-3">€{((product.price?.amount || 0) / 100).toFixed(2)}</td>
-                                <td className="p-3">{product.stock}</td>
+                                <td className="p-3">{product.sku}</td>
                                 <td className="p-3">
                                     <label className="relative inline-flex items-center cursor-pointer">
-                                        <input type="checkbox" checked={!!product.featured} onChange={() => toggleBoolean(product.id, 'featured', product.featured)} className="sr-only peer" />
+                                        <input type="checkbox" checked={!!product.featured} onChange={() => toggleField(product, 'featured')} className="sr-only peer" />
                                         <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-2 peer-focus:ring-brand-gold/50 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-gold"></div>
                                     </label>
                                 </td>
                                 <td className="p-3">
                                     <label className="relative inline-flex items-center cursor-pointer">
-                                        <input type="checkbox" checked={!!product.publishedAt} onChange={() => toggleBoolean(product.id, 'publishedAt', product.publishedAt)} className="sr-only peer" />
+                                        <input type="checkbox" checked={!!product.publishedAt} onChange={() => toggleField(product, 'publishedAt')} className="sr-only peer" />
                                         <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-2 peer-focus:ring-brand-gold/50 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-gold"></div>
                                     </label>
                                 </td>

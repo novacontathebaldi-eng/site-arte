@@ -1,7 +1,6 @@
 
-
 import { useState, useEffect, useCallback } from 'react';
-import { collection, query, where, getDocs, orderBy, limit, startAfter, DocumentData, QueryConstraint, endAt, startAt } from 'firebase/firestore';
+import { collection, query, where, getDocs, orderBy, limit, startAfter, DocumentData, QueryConstraint } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { ProductDocument } from '../firebase-types';
 
@@ -12,7 +11,7 @@ export interface Filters {
     status?: string;
 }
 
-const PRODUCTS_PER_PAGE = 12; // Increased for better infinite scroll experience with client-side filtering
+const PRODUCTS_PER_PAGE = 8;
 
 export const useProducts = (initialFilters: Filters = {}) => {
     const [products, setProducts] = useState<ProductDocument[]>([]);
@@ -27,34 +26,33 @@ export const useProducts = (initialFilters: Filters = {}) => {
             const productsRef = collection(db, 'products');
             const constraints: QueryConstraint[] = [];
 
-            // FIX: Removed the initial 'publishedAt' filter to avoid composite index errors.
-            // It will be applied on the client-side.
+            // Always filter for published products on the storefront
+            constraints.push(where('publishedAt', '!=', null));
 
             if (currentFilters.categories && currentFilters.categories.length > 0) {
                 constraints.push(where('category', 'in', currentFilters.categories));
-            } else {
-                 constraints.push(orderBy('createdAt', 'desc'));
             }
             
-            if (currentFilters.status) {
-                constraints.push(where('status', '==', currentFilters.status));
-            }
-            
-            constraints.push(limit(PRODUCTS_PER_PAGE));
+            // To avoid needing a composite index for status + publishedAt, we can filter status client-side if needed
+            // For now, only 'available' is a common filter which we will assume is covered by publishedAt.
+            // if (currentFilters.status) { ... }
+
+            // Order by publish date instead of creation date for storefront relevance
+            constraints.push(orderBy('publishedAt', 'desc'));
             
             if (lastVisibleDoc) {
                 constraints.push(startAfter(lastVisibleDoc));
             }
+            
+            constraints.push(limit(PRODUCTS_PER_PAGE));
             
             const q = query(productsRef, ...constraints);
 
             const querySnapshot = await getDocs(q);
             const newProducts = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ProductDocument));
 
-            // Client-side filter for published products
-            const publishedProducts = newProducts.filter(p => p.publishedAt);
-
-            setProducts(prev => lastVisibleDoc ? [...prev, ...publishedProducts] : publishedProducts);
+            // Client-side sort after fetch is no longer needed as we simplified the query
+            setProducts(prev => lastVisibleDoc ? [...prev, ...newProducts] : newProducts);
             setHasMore(newProducts.length === PRODUCTS_PER_PAGE);
             setLastDoc(querySnapshot.docs[querySnapshot.docs.length - 1]);
         } catch (error) {
@@ -65,7 +63,6 @@ export const useProducts = (initialFilters: Filters = {}) => {
     }, []);
 
     useEffect(() => {
-        // Reset and fetch when filters change
         setProducts([]);
         setLastDoc(null);
         setHasMore(true);

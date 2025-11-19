@@ -1,8 +1,13 @@
+
 import React, { useState, Fragment } from 'react';
 import { NAV_LINKS } from '../constants';
 import { useI18n } from '../hooks/useI18n';
 import { useAuth } from '../hooks/useAuth';
 import AuthModal from './auth/AuthModal';
+import { useCart } from '../hooks/useCart';
+import { useScrollDirection } from '../hooks/useScrollDirection';
+import { useRouter } from '../hooks/useRouter';
+import SearchOverlay from './SearchOverlay';
 
 // Icons
 const HeartIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
@@ -47,8 +52,15 @@ const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+
   const { t } = useI18n();
   const { user, userDoc, logout } = useAuth();
+  const { toggleCart, totalItems } = useCart();
+  const { queryParams } = useRouter();
+  const scrollDirection = useScrollDirection();
+  
+  const activeCategory = queryParams.get('category');
 
   const handleUserIconClick = () => {
     if (user) {
@@ -60,7 +72,7 @@ const Header: React.FC = () => {
 
   return (
     <Fragment>
-      <header className="sticky top-0 z-50 bg-brand-white/80 backdrop-blur-lg shadow-sm">
+      <header className={`sticky top-0 z-40 bg-brand-white/80 backdrop-blur-lg shadow-sm transition-transform duration-300 ${scrollDirection === 'down' ? '-translate-y-full' : 'translate-y-0'}`}>
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
             <div className="flex-shrink-0">
@@ -68,17 +80,27 @@ const Header: React.FC = () => {
             </div>
 
             <nav className="hidden lg:flex lg:items-center lg:space-x-8">
-              {NAV_LINKS.map((link) => (
-                <a key={link.href} href={link.href} className="text-sm font-medium text-brand-black/70 hover:text-brand-black transition-colors">
-                  {t(link.labelKey)}
-                </a>
-              ))}
+              {NAV_LINKS.map((link) => {
+                const category = new URLSearchParams(link.href.split('?')[1]).get('category');
+                const isActive = category === activeCategory;
+                return (
+                  <a key={link.href} href={link.href} className="relative text-sm font-medium text-brand-black/70 hover:text-brand-black transition-colors">
+                    {t(link.labelKey)}
+                    <span className={`absolute bottom-[-4px] left-0 w-full h-0.5 bg-brand-gold transform transition-transform duration-300 ${isActive ? 'scale-x-100' : 'scale-x-0'}`}></span>
+                  </a>
+                );
+              })}
             </nav>
 
             <div className="flex items-center space-x-4">
-               <button className="text-brand-black/70 hover:text-brand-black"><SearchIcon className="h-6 w-6" /></button>
-              <a href="#" className="text-brand-black/70 hover:text-brand-black"><HeartIcon className="h-6 w-6" /></a>
-              <a href="#" className="text-brand-black/70 hover:text-brand-black"><ShoppingBagIcon className="h-6 w-6" /></a>
+               <button onClick={() => setIsSearchOpen(true)} className="text-brand-black/70 hover:text-brand-black"><SearchIcon className="h-6 w-6" /></button>
+              <a href="#/dashboard/wishlist" className="text-brand-black/70 hover:text-brand-black"><HeartIcon className="h-6 w-6" /></a>
+              <button onClick={toggleCart} className="relative text-brand-black/70 hover:text-brand-black">
+                <ShoppingBagIcon className="h-6 w-6" />
+                {totalItems > 0 && (
+                  <span className="absolute -top-1 -right-2 flex h-4 w-4 items-center justify-center rounded-full bg-brand-gold text-xs font-bold text-brand-black">{totalItems}</span>
+                )}
+              </button>
               <div className="relative">
                 <button onClick={handleUserIconClick} className="text-brand-black/70 hover:text-brand-black">
                   <UserIcon className="h-6 w-6" />
@@ -130,6 +152,7 @@ const Header: React.FC = () => {
         )}
       </header>
       <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
+      <SearchOverlay isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
     </Fragment>
   );
 };

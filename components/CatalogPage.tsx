@@ -10,6 +10,7 @@ import InfiniteScrollTrigger from './catalog/InfiniteScrollTrigger';
 const CatalogPage: React.FC = () => {
     const { queryParams } = useRouter();
     
+    // Initialize filters from URL query parameters only on first render
     const [initialFilters] = useState<Filters>(() => {
       const category = queryParams.get('category');
       return {
@@ -20,6 +21,7 @@ const CatalogPage: React.FC = () => {
     const { products, loading, hasMore, loadMore, applyFilters } = useProducts(initialFilters);
 
     const handleFilterChange = (newFilters: Filters) => {
+        // Here you could also update URL params for shareable links
         applyFilters(newFilters);
     };
 
@@ -38,13 +40,16 @@ const CatalogPage: React.FC = () => {
                     <div className="lg:col-span-3 mt-8 lg:mt-0">
                         <ProductGrid products={products} loading={loading && products.length === 0} gridClass="grid grid-cols-1 gap-y-10 gap-x-6 sm:grid-cols-2 xl:grid-cols-3 xl:gap-x-8" />
                         
-                        <div className="mt-12 text-center">
+                        <div className="h-20 flex justify-center items-center">
                             {loading && <Spinner />}
-                            {hasMore && !loading && <InfiniteScrollTrigger onVisible={loadMore} />}
-                            {!hasMore && !loading && products.length > 0 && (
+                            {!hasMore && products.length > 0 && (
                                 <p className="text-brand-black/60">You've reached the end of the collection.</p>
                             )}
                         </div>
+                        
+                        {hasMore && !loading && (
+                           <InfiniteScrollTrigger onIntersect={loadMore} />
+                        )}
                     </div>
                 </div>
             </div>

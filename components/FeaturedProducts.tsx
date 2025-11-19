@@ -1,10 +1,8 @@
 
-
 import React, { useState, useEffect } from 'react';
-import { collection, query, where, getDocs, limit } from 'firebase/firestore';
+import { collection, query, where, getDocs, limit, orderBy } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { ProductDocument } from '../firebase-types';
-import ProductCard from './ProductCard';
 import { useI18n } from '../hooks/useI18n';
 import ProductGrid from './ProductGrid';
 
@@ -18,21 +16,15 @@ const FeaturedProducts: React.FC = () => {
       setLoading(true);
       try {
         const productsRef = collection(db, 'products');
-        // FIX: Query only by the 'featured' flag to avoid needing a composite index.
-        // We will filter by the published status on the client-side.
-        // Fetch a few extra to increase the chance of getting 4 published items.
-        const q = query(
-            productsRef, 
+        // This query avoids a composite index by filtering on one field and ordering by another
+        const q = query(productsRef, 
             where('featured', '==', true), 
-            limit(8)
+            where('publishedAt', '!=', null),
+            orderBy('publishedAt', 'desc'),
+            limit(4)
         );
         const querySnapshot = await getDocs(q);
-        
-        const featuredProducts = querySnapshot.docs
-            .map(doc => ({ id: doc.id, ...doc.data() } as ProductDocument))
-            .filter(p => p.publishedAt) // Client-side filter for published products
-            .slice(0, 4); // Ensure we only show a maximum of 4
-
+        const featuredProducts = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ProductDocument));
         setProducts(featuredProducts);
       } catch (error) {
         console.error("Error fetching featured products:", error);

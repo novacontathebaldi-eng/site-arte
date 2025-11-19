@@ -1,6 +1,4 @@
 
-
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { doc, getDoc, setDoc, addDoc, collection, serverTimestamp, updateDoc } from 'firebase/firestore';
 import { db } from '../../../lib/firebase';
@@ -144,13 +142,8 @@ const ProductFormPage: React.FC<{ id?: string }> = ({ id }) => {
             }
             addToast(t('admin.productForm.uploadSuccess'), "success");
         } catch (error) {
-            // FIX: Safely access the message property from the unknown error type.
-            let errorMessage = 'An unknown error occurred';
-            if (error instanceof Error) {
-                errorMessage = error.message;
-            } else if (error && typeof error === 'object' && 'message' in error) {
-                errorMessage = String((error as { message: unknown }).message);
-            }
+            // FIX: Replaced custom error handling with a more robust check using `instanceof Error` to safely access the error message.
+            const errorMessage = (error instanceof Error) ? error.message : String(error);
             addToast(`${t('admin.productForm.uploadError')}: ${errorMessage}`, "error");
         } finally {
             setUploading(false);
@@ -261,28 +254,26 @@ const ProductFormPage: React.FC<{ id?: string }> = ({ id }) => {
             <div className="lg:col-span-1 space-y-8">
                  <div className="bg-brand-white p-6 rounded-lg shadow-sm">
                     <h3 className="font-bold font-serif mb-4">Organization</h3>
-                     <div className="space-y-4">
-                        <label className="flex items-center justify-between cursor-pointer">
-                            <div>
-                                <p className="font-medium">{t('admin.productForm.publish')}</p>
-                                <p className="text-sm text-brand-black/60">{t('admin.productForm.publishHelp')}</p>
-                            </div>
-                            <div className="relative inline-flex items-center">
-                                <input type="checkbox" name="published" checked={!!product.publishedAt} onChange={handleCheckboxChange} className="sr-only peer" />
-                                <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-2 peer-focus:ring-brand-gold/50 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-gold"></div>
-                            </div>
-                        </label>
-                         <label className="flex items-center justify-between cursor-pointer border-t pt-4">
-                            <div>
-                                <p className="font-medium">Featured</p>
-                                <p className="text-sm text-brand-black/60">Display on homepage</p>
-                            </div>
-                            <div className="relative inline-flex items-center">
-                                <input type="checkbox" name="featured" checked={!!product.featured} onChange={handleCheckboxChange} className="sr-only peer" />
-                                <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-2 peer-focus:ring-brand-gold/50 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-gold"></div>
-                            </div>
-                        </label>
-                     </div>
+                     <label className="flex items-center justify-between cursor-pointer py-2">
+                        <div>
+                            <p className="font-medium">{t('admin.productForm.publish')}</p>
+                            <p className="text-sm text-brand-black/60">{t('admin.productForm.publishHelp')}</p>
+                        </div>
+                        <div className="relative inline-flex items-center">
+                            <input type="checkbox" name="published" checked={!!product.publishedAt} onChange={handleCheckboxChange} className="sr-only peer" />
+                            <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-2 peer-focus:ring-brand-gold/50 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-gold"></div>
+                        </div>
+                    </label>
+                    <label className="flex items-center justify-between cursor-pointer py-2 border-t mt-2">
+                        <div>
+                            <p className="font-medium">Featured</p>
+                            <p className="text-sm text-brand-black/60">Display on homepage.</p>
+                        </div>
+                        <div className="relative inline-flex items-center">
+                            <input type="checkbox" name="featured" checked={!!product.featured} onChange={handleCheckboxChange} className="sr-only peer" />
+                            <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-2 peer-focus:ring-brand-gold/50 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-gold"></div>
+                        </div>
+                    </label>
                 </div>
 
                 <div className="bg-brand-white p-6 rounded-lg shadow-sm">

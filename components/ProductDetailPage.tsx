@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { doc, getDoc, collection, query, where, limit, getDocs } from 'firebase/firestore';
+import { doc, getDoc, collection, query, where, limit, getDocs, orderBy } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { ProductDocument } from '../firebase-types';
 import Spinner from './common/Spinner';
@@ -43,12 +43,12 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ productId }) => {
                     const productData = { id: docSnap.id, ...docSnap.data() } as ProductDocument;
                     setProduct(productData);
 
-                    // Fetch related products
+                    // Fetch related products that are also published
                     const relatedQuery = query(
                         collection(db, 'products'),
-                        where('category', '==', productData.category),
-                        where('__name__', '!=', productId), // Exclude the current product
                         where('publishedAt', '!=', null),
+                        where('category', '==', productData.category),
+                        where('__name__', '!=', productId),
                         limit(4)
                     );
                     const relatedSnapshot = await getDocs(relatedQuery);

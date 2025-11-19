@@ -1,7 +1,6 @@
 
-
 import React, { useState, useEffect } from 'react';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
 import { db } from '../../../lib/firebase';
 import { UserDocument } from '../../../firebase-types';
 import Spinner from '../../common/Spinner';
@@ -19,20 +18,16 @@ const CustomersPage: React.FC = () => {
         const fetchCustomers = async () => {
             setLoading(true);
             try {
-                // FIX: Removed orderBy("createdAt", "desc") from the query to avoid needing a composite index on `role` and `createdAt`.
                 const q = query(collection(db, "users"), where("role", "==", "customer"));
                 const querySnapshot = await getDocs(q);
                 const customersData = querySnapshot.docs.map(doc => ({ uid: doc.id, ...doc.data() } as UserDocument));
-                
-                // Sorting is now done on the client-side after fetching the data.
-                customersData.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
-                
+                // Sort client-side to avoid composite index requirement
+                customersData.sort((a, b) => b.createdAt.seconds - a.createdAt.seconds);
                 setCustomers(customersData);
             } catch (error) {
                 console.error("Error fetching customers:", error);
-            } finally {
-                setLoading(false);
             }
+            setLoading(false);
         };
         fetchCustomers();
     }, []);

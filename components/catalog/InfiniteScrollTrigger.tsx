@@ -1,21 +1,25 @@
 
-import React, { useEffect, useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 
 interface InfiniteScrollTriggerProps {
-  onVisible: () => void;
+  onIntersect: () => void;
 }
 
-const InfiniteScrollTrigger: React.FC<InfiniteScrollTriggerProps> = ({ onVisible }) => {
+const InfiniteScrollTrigger: React.FC<InfiniteScrollTriggerProps> = ({ onIntersect }) => {
   const triggerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
-          onVisible();
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          onIntersect();
         }
       },
-      { threshold: 1.0 }
+      {
+        root: null,
+        rootMargin: '0px',
+        threshold: 1.0,
+      }
     );
 
     const currentRef = triggerRef.current;
@@ -28,9 +32,9 @@ const InfiniteScrollTrigger: React.FC<InfiniteScrollTriggerProps> = ({ onVisible
         observer.unobserve(currentRef);
       }
     };
-  }, [onVisible]);
+  }, [onIntersect]);
 
-  return <div ref={triggerRef} style={{ height: '1px' }} />;
+  return <div ref={triggerRef} aria-hidden="true" />;
 };
 
 export default InfiniteScrollTrigger;
