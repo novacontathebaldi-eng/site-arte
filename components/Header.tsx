@@ -3,6 +3,7 @@ import { NAV_LINKS } from '../constants';
 import { useI18n } from '../hooks/useI18n';
 import { useAuth } from '../hooks/useAuth';
 import AuthModal from './auth/AuthModal';
+import { useCart } from '../hooks/useCart';
 
 // Icons
 const HeartIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
@@ -49,6 +50,7 @@ const Header: React.FC = () => {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const { t } = useI18n();
   const { user, userDoc, logout } = useAuth();
+  const { toggleCart, totalItems } = useCart();
 
   const handleUserIconClick = () => {
     if (user) {
@@ -77,8 +79,13 @@ const Header: React.FC = () => {
 
             <div className="flex items-center space-x-4">
                <button className="text-brand-black/70 hover:text-brand-black"><SearchIcon className="h-6 w-6" /></button>
-              <a href="#" className="text-brand-black/70 hover:text-brand-black"><HeartIcon className="h-6 w-6" /></a>
-              <a href="#" className="text-brand-black/70 hover:text-brand-black"><ShoppingBagIcon className="h-6 w-6" /></a>
+              <a href="#/dashboard/wishlist" className="text-brand-black/70 hover:text-brand-black"><HeartIcon className="h-6 w-6" /></a>
+              <button onClick={toggleCart} className="relative text-brand-black/70 hover:text-brand-black">
+                <ShoppingBagIcon className="h-6 w-6" />
+                {totalItems > 0 && (
+                  <span className="absolute -top-1 -right-2 flex h-4 w-4 items-center justify-center rounded-full bg-brand-gold text-xs font-bold text-brand-black">{totalItems}</span>
+                )}
+              </button>
               <div className="relative">
                 <button onClick={handleUserIconClick} className="text-brand-black/70 hover:text-brand-black">
                   <UserIcon className="h-6 w-6" />

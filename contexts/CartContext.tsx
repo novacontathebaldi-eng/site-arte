@@ -18,6 +18,7 @@ interface CartContextType {
   toggleCart: () => void;
   totalItems: number;
   subtotal: number;
+  itemAddedCount: number;
 }
 
 export const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -27,6 +28,7 @@ const GUEST_CART_KEY = 'meeh_guest_cart';
 export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [itemAddedCount, setItemAddedCount] = useState(0);
   const { user } = useAuth();
 
   const syncCartWithFirestore = useCallback(async (localCart: CartItem[]) => {
@@ -129,6 +131,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       saveCart(newItems);
       return newItems;
     });
+    setItemAddedCount(count => count + 1);
     setIsCartOpen(true);
   };
 
@@ -165,6 +168,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     toggleCart,
     totalItems,
     subtotal,
+    itemAddedCount,
   };
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

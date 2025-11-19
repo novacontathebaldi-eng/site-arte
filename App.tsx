@@ -11,6 +11,7 @@ import CheckoutGuard from './components/checkout/CheckoutGuard';
 import OrderConfirmationPage from './components/OrderConfirmationPage';
 import DashboardLayout from './components/dashboard/DashboardLayout';
 import CartSidebar from './components/CartSidebar';
+import FloatingCartButton from './components/FloatingCartButton';
 
 const PageContent: React.FC = () => {
     const { path } = useRouter();
@@ -56,6 +57,7 @@ const App: React.FC = () => {
         <PageContent />
       </main>
       <CartSidebar />
+      <FloatingCartButton />
       <Footer />
     </div>
   );
