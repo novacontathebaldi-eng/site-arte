@@ -41,6 +41,7 @@ const sampleProducts: SeedProductData[] = [
     stock: 1,
     certificateOfAuthenticity: true,
     tags: ['abstract', 'oil', 'canvas', 'dreamscape', 'blue'],
+    keywords: ['ethereal', 'reverie', 'abstract', 'exploration', 'dreamscapes', 'fleeting', 'memories', 'painted', 'oil', 'canvas', 'blue', 'rêverie', 'éthérée', 'ätherische', 'träumerei', 'devaneio', 'etéreo'],
     featured: true, // FEATURED
   },
   {
@@ -59,6 +60,7 @@ const sampleProducts: SeedProductData[] = [
     stock: 1,
     certificateOfAuthenticity: true,
     tags: ['seascape', 'ocean', 'minimalist', 'large-scale', 'oil'],
+    keywords: ["ocean's", 'whisper', 'large', 'serene', 'seascape', 'texture', 'waves', 'gradient', 'sky', 'oil', 'linen', 'sussurro', 'oceano'],
     featured: true, // FEATURED
   },
   // --- JEWELRY ---
@@ -78,6 +80,7 @@ const sampleProducts: SeedProductData[] = [
     stock: 99,
     certificateOfAuthenticity: false,
     tags: ['earrings', 'silver', 'sapphire', 'delicate'],
+    keywords: ['stardust', 'earrings', 'delicate', 'sterling', 'silver', 'embedded', 'tiny', 'sapphires', 'brincos', 'poeira', 'estelar'],
     featured: true, // FEATURED
   },
   // --- DIGITAL ART ---
@@ -97,6 +100,7 @@ const sampleProducts: SeedProductData[] = [
     stock: 99,
     certificateOfAuthenticity: false,
     tags: ['digital', 'sci-fi', 'cyberpunk', 'futuristic', '3d'],
+    keywords: ['cybernetic', 'bloom', 'fusion', 'organic', 'mechanical', 'elements', 'synergy', 'nature', 'technology', '3d', 'render', 'florescer', 'cibernético'],
     featured: true, // FEATURED
   },
   // --- OTHER (NOT FEATURED) ---
@@ -116,6 +120,7 @@ const sampleProducts: SeedProductData[] = [
     stock: 0,
     certificateOfAuthenticity: true,
     tags: ['abstract', 'acrylic', 'red', 'gold', 'large'],
+    keywords: ['crimson', 'tide', 'powerful', 'abstract', 'acrylics', 'red', 'gold', 'marée', 'cramoisie'],
     featured: false,
   },
   {
@@ -133,6 +138,7 @@ const sampleProducts: SeedProductData[] = [
     stock: 5,
     certificateOfAuthenticity: false,
     tags: ['jewelry', 'silver', 'moonstone', 'necklace'],
+    keywords: ['lunar', 'necklace', 'handcrafted', 'silver', 'moonstone', 'centerpiece'],
     featured: false,
   },
   {
@@ -150,6 +156,7 @@ const sampleProducts: SeedProductData[] = [
     stock: 99,
     certificateOfAuthenticity: false,
     tags: ['digital', 'forest', 'fantasy', 'vibrant'],
+    keywords: ['enchanted', 'forest', 'vibrant', 'digital', 'painting', 'magical', 'twilight'],
     featured: false,
   },
    {
@@ -167,6 +174,7 @@ const sampleProducts: SeedProductData[] = [
     stock: 20,
     certificateOfAuthenticity: false,
     tags: ['print', 'cityscape', 'urban', 'giclee'],
+    keywords: ['urban', 'impression', 'high-quality', 'giclée', 'print', 'original', 'cityscape', 'painting', 'archival', 'paper'],
     featured: false,
   },
 ];

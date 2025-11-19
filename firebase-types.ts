@@ -82,6 +82,7 @@ export interface ProductDocument {
   stock: number;
   certificateOfAuthenticity: boolean;
   tags: string[];
+  keywords?: string[]; // For search functionality
   featured: boolean;
   views: number;
   createdAt: Timestamp;

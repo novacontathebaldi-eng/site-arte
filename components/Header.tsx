@@ -4,6 +4,7 @@ import { useI18n } from '../hooks/useI18n';
 import { useAuth } from '../hooks/useAuth';
 import AuthModal from './auth/AuthModal';
 import { useCart } from '../hooks/useCart';
+import SearchModal from './catalog/SearchModal';
 
 // Icons
 const HeartIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
@@ -48,6 +49,7 @@ const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const { t } = useI18n();
   const { user, userDoc, logout } = useAuth();
   const { toggleCart, totalItems } = useCart();
@@ -78,7 +80,7 @@ const Header: React.FC = () => {
             </nav>
 
             <div className="flex items-center space-x-4">
-               <button className="text-brand-black/70 hover:text-brand-black"><SearchIcon className="h-6 w-6" /></button>
+               <button onClick={() => setIsSearchModalOpen(true)} className="text-brand-black/70 hover:text-brand-black" aria-label={t('header.search')}><SearchIcon className="h-6 w-6" /></button>
               <a href="#/dashboard/wishlist" className="text-brand-black/70 hover:text-brand-black"><HeartIcon className="h-6 w-6" /></a>
               <button onClick={toggleCart} className="relative text-brand-black/70 hover:text-brand-black">
                 <ShoppingBagIcon className="h-6 w-6" />
@@ -137,6 +139,7 @@ const Header: React.FC = () => {
         )}
       </header>
       <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
+      <SearchModal isOpen={isSearchModalOpen} onClose={() => setIsSearchModalOpen(false)} />
     </Fragment>
   );
 };

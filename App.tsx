@@ -11,6 +11,7 @@ import OrderConfirmationPage from './components/OrderConfirmationPage';
 import DashboardLayout from './components/dashboard/DashboardLayout';
 import CartSidebar from './components/CartSidebar';
 import FloatingCartButton from './components/FloatingCartButton';
+import CatalogPage from './components/CatalogPage';
 
 const PageContent: React.FC = () => {
     const { path } = useRouter();
@@ -18,6 +19,10 @@ const PageContent: React.FC = () => {
     if (path.startsWith('/product/')) {
         const id = path.split('/product/').pop() || '';
         return <ProductDetailPage productId={id} />;
+    }
+
+    if (path.startsWith('/catalog')) {
+        return <CatalogPage />;
     }
 
     if (path.startsWith('/checkout')) {
