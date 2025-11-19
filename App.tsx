@@ -6,6 +6,11 @@ import Footer from './components/Footer';
 import HomePage from './components/HomePage';
 import CatalogPage from './components/CatalogPage';
 import ProductDetailPage from './components/ProductDetailPage';
+import CheckoutPage from './components/checkout/CheckoutPage';
+import CheckoutGuard from './components/checkout/CheckoutGuard';
+import OrderConfirmationPage from './components/OrderConfirmationPage';
+import DashboardLayout from './components/dashboard/DashboardLayout';
+import CartSidebar from './components/CartSidebar';
 
 const PageContent: React.FC = () => {
     const { path } = useRouter();
@@ -18,6 +23,19 @@ const PageContent: React.FC = () => {
     if (path === '/catalog' || path.startsWith('/catalog?')) {
         return <CatalogPage />;
     }
+    
+    if (path.startsWith('/checkout')) {
+      return <CheckoutGuard><CheckoutPage /></CheckoutGuard>;
+    }
+    
+    if (path.startsWith('/order-confirmation')) {
+      return <OrderConfirmationPage />;
+    }
+
+    if (path.startsWith('/dashboard')) {
+        return <DashboardLayout />;
+    }
+
 
     // Default to homepage for '/' or any other route
     return <HomePage />;
@@ -28,7 +46,7 @@ const App: React.FC = () => {
   const { route } = useRouter();
 
   if (route.startsWith('/admin')) {
-    return <AdminPanel route={route} />;
+    return <AdminPanel />;
   }
   
   return (
@@ -37,6 +55,7 @@ const App: React.FC = () => {
       <main className="flex-grow">
         <PageContent />
       </main>
+      <CartSidebar />
       <Footer />
     </div>
   );

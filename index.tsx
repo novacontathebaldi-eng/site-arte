@@ -6,6 +6,8 @@ import { AuthProvider } from './contexts/AuthContext';
 import { ToastProvider } from './contexts/ToastContext';
 import { ToastContainer } from './components/common/Toast';
 import ErrorBoundary from './components/common/ErrorBoundary';
+import { CartProvider } from './contexts/CartContext';
+import { WishlistProvider } from './contexts/WishlistContext';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -19,8 +21,12 @@ root.render(
       <I18nProvider>
         <ToastProvider>
           <AuthProvider>
-            <App />
-            <ToastContainer />
+            <WishlistProvider>
+              <CartProvider>
+                <App />
+                <ToastContainer />
+              </CartProvider>
+            </WishlistProvider>
           </AuthProvider>
         </ToastProvider>
       </I18nProvider>

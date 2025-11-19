@@ -1,4 +1,3 @@
-
 import { Timestamp } from 'firebase/firestore';
 
 // This enum uses the short codes consistent with the frontend Language type
@@ -104,12 +103,9 @@ export interface Address {
     phone?: string;
 }
 
-export interface OrderItem {
-    productId: string;
-    productSnapshot: Partial<ProductDocument>; // Store key details at time of purchase
+export interface OrderItem extends ProductDocument {
+    // Inherits all product fields, plus quantity
     quantity: number;
-    price: number; // Price per item in cents
-    subtotal: number; // quantity * price in cents
 }
 
 export interface OrderPricing {
@@ -147,7 +143,9 @@ export interface OrderDocument {
   shippingMethod: string;
   paymentMethod: string;
   paymentStatus: 'pending' | 'paid' | 'failed' | 'refunded';
-  paymentIntentId: string; // From Revolut
+  paymentIntentId?: string; // From Revolut, Stripe, etc.
+  pixQrCode?: string;
+  pixCopiaECola?: string;
   tracking?: OrderTracking;
   statusHistory: OrderStatusHistory[];
   language: LanguageCode;
@@ -157,19 +155,30 @@ export interface OrderDocument {
 
 
 // --- ADDRESSES Collection ---
-// Path: /addresses/{addressId}
+// Path: /users/{uid}/addresses/{addressId}
 export interface AddressDocument extends Address {
     id: string;
     userId: string;
     isDefault: boolean;
+    type: 'shipping' | 'billing';
 }
 
 
 // --- WISHLIST Collection ---
 // Path: /users/{uid}/wishlist/{productId}
-export interface WishlistItem {
+export interface WishlistItemDocument {
     productId: string;
     addedAt: Timestamp;
+    productSnapshot: Partial<ProductDocument>;
+}
+
+// --- CART Collection (for logged in users) ---
+// Path: /users/{uid}/cart/{productId}
+export interface CartItemDocument {
+    productId: string;
+    quantity: number;
+    addedAt: Timestamp;
+    productSnapshot: Partial<ProductDocument>; // To avoid re-fetching all details in cart view
 }
 
 
@@ -216,6 +225,7 @@ export interface ContactMessageDocument {
     email: string;
     subject: string;
     message: string;
+
     isRead: boolean;
     createdAt: Timestamp;
 }

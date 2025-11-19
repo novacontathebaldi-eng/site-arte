@@ -7,6 +7,9 @@ import ProductGrid from './ProductGrid';
 import ImageGallery from './catalog/ImageGallery';
 import Button from './common/Button';
 import { useI18n } from '../hooks/useI18n';
+import { useCart } from '../hooks/useCart';
+import { useWishlist } from '../hooks/useWishlist';
+import { useToast } from '../hooks/useToast';
 
 interface ProductDetailPageProps {
     productId: string;
@@ -17,6 +20,9 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ productId }) => {
     const [relatedProducts, setRelatedProducts] = useState<ProductDocument[]>([]);
     const [loading, setLoading] = useState(true);
     const { t, language } = useI18n();
+    const { addToCart } = useCart();
+    const { addToWishlist, isInWishlist } = useWishlist();
+    const { addToast } = useToast();
 
     useEffect(() => {
         const fetchProduct = async () => {
@@ -67,7 +73,18 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ productId }) => {
         return <div className="text-center py-20">Product not found.</div>;
     }
     
+    const handleAddToCart = () => {
+        addToCart(product, 1);
+        addToast(t('cart.added'), 'success');
+    };
+
+    const handleAddToWishlist = () => {
+        addToWishlist(product);
+        addToast(t('wishlist.added'), 'success');
+    };
+
     const p = product.translations?.[language] || product.translations?.en;
+    const inWishlist = isInWishlist(product.id);
     
     return (
         <div className="bg-brand-white">
@@ -84,16 +101,22 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ productId }) => {
                         </div>
 
                         <div className="mt-8 flex gap-4">
-                            <Button size="lg" className="flex-1">Add to Cart</Button>
-                            <Button size="lg" variant="tertiary">Add to Wishlist</Button>
+                            {product.status === 'available' ? (
+                                <Button size="lg" className="flex-1" onClick={handleAddToCart}>{t('product.addToCart')}</Button>
+                            ) : (
+                                <Button size="lg" className="flex-1" disabled>{t(`product.statuses.${product.status}`)}</Button>
+                            )}
+                            <Button size="lg" variant="tertiary" onClick={handleAddToWishlist} disabled={inWishlist}>
+                                {inWishlist ? t('wishlist.inWishlist') : t('product.addToWishlist')}
+                            </Button>
                         </div>
 
                         <div className="mt-8 border-t pt-6">
-                            <h3 className="font-semibold mb-2">Specifications</h3>
+                            <h3 className="font-semibold mb-2">{t('product.specifications')}</h3>
                             <ul className="text-sm space-y-1 text-brand-black/70">
-                                {product.dimensions && (product.dimensions.width > 0) && <li>Dimensions: {product.dimensions.width} x {product.dimensions.height} cm</li>}
-                                {p?.materials && <li>Materials: {p.materials}</li>}
-                                {product.yearCreated && <li>Year: {product.yearCreated}</li>}
+                                {product.dimensions && (product.dimensions.width > 0) && <li>{t('product.dimensions')}: {product.dimensions.width} x {product.dimensions.height} cm</li>}
+                                {p?.materials && <li>{t('product.materials')}: {p.materials}</li>}
+                                {product.yearCreated && <li>{t('product.year')}: {product.yearCreated}</li>}
                             </ul>
                         </div>
                     </div>
@@ -101,7 +124,7 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ productId }) => {
 
                 {relatedProducts.length > 0 && (
                     <div className="mt-24">
-                        <h2 className="text-2xl font-serif font-bold text-center mb-12">You Might Also Like</h2>
+                        <h2 className="text-2xl font-serif font-bold text-center mb-12">{t('product.related')}</h2>
                          <ProductGrid products={relatedProducts} />
                     </div>
                 )}

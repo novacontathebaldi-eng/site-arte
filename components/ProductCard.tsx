@@ -1,6 +1,9 @@
 import React from 'react';
 import { ProductDocument } from '../firebase-types';
 import { useI18n } from '../hooks/useI18n';
+import { useCart } from '../hooks/useCart';
+import { useWishlist } from '../hooks/useWishlist';
+import { useToast } from '../hooks/useToast';
 
 interface ProductCardProps {
   product: ProductDocument;
@@ -22,10 +25,29 @@ const PlusIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
 
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { t, language } = useI18n();
-  
+  const { addToCart } = useCart();
+  const { addToWishlist, isInWishlist } = useWishlist();
+  const { addToast } = useToast();
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      addToCart(product, 1);
+      addToast(t('cart.added'), 'success');
+  };
+
+  const handleAddToWishlist = (e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      addToWishlist(product);
+      addToast(t('wishlist.added'), 'success');
+  };
+
   const productName = product.translations?.[language]?.title || product.translations?.en?.title || 'Untitled Artwork';
   const categoryKey = `product.categories.${product.category}`;
   const imageUrl = product.images?.[0]?.thumbnailUrl || product.images?.[0]?.url || 'https://placehold.co/600x800/2C2C2C/FFFFFF?text=Meeh';
+
+  const inWishlist = isInWishlist(product.id);
 
   return (
     <div className="group relative">
@@ -38,12 +60,14 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         />
         <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
         <div className="absolute top-3 right-3 flex flex-col space-y-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <button className="p-2 bg-brand-white/80 rounded-full text-brand-black/70 hover:bg-brand-white hover:text-brand-black backdrop-blur-sm">
+            <button onClick={handleAddToWishlist} className={`p-2 bg-brand-white/80 rounded-full text-brand-black/70 hover:bg-brand-white hover:text-brand-black backdrop-blur-sm ${inWishlist ? 'text-red-500 fill-current' : ''}`}>
                 <HeartIcon className="w-5 h-5"/>
             </button>
-            <button className="p-2 bg-brand-white/80 rounded-full text-brand-black/70 hover:bg-brand-white hover:text-brand-black backdrop-blur-sm">
-                <PlusIcon className="w-5 h-5"/>
-            </button>
+            {product.status === 'available' && (
+              <button onClick={handleAddToCart} className="p-2 bg-brand-white/80 rounded-full text-brand-black/70 hover:bg-brand-white hover:text-brand-black backdrop-blur-sm">
+                  <PlusIcon className="w-5 h-5"/>
+              </button>
+            )}
         </div>
       </div>
       <div className="mt-4 text-center">

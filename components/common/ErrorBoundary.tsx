@@ -10,19 +10,20 @@ interface State {
 
 // FIX: Changed to React.Component to fix property 'props' does not exist error.
 class ErrorBoundary extends React.Component<Props, State> {
-  public state: State = {
+  // Fix: Removed 'public' keyword for idiomatic class field declaration.
+  state: State = {
     hasError: false
   };
 
-  public static getDerivedStateFromError(_: Error): State {
+  static getDerivedStateFromError(_: Error): State {
     return { hasError: true };
   }
 
-  public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error("Uncaught error:", error, errorInfo);
   }
 
-  public render() {
+  render() {
     if (this.state.hasError) {
       return (
         <div className="flex flex-col items-center justify-center min-h-screen text-center p-4">

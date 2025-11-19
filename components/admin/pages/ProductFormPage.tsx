@@ -130,7 +130,7 @@ const ProductFormPage: React.FC<{ id?: string }> = ({ id }) => {
             }
             addToast(t('admin.productForm.uploadSuccess'), "success");
         } catch (error) {
-            // FIX: Safely access message property from unknown error type.
+            // Fix: Safely access message property from unknown error type.
             let errorMessage = 'An unknown error occurred';
             if (error instanceof Error) {
                 errorMessage = error.message;
@@ -174,7 +174,7 @@ const ProductFormPage: React.FC<{ id?: string }> = ({ id }) => {
                 navigate(`/admin/products/edit/${newDocRef.id}`);
             }
         } catch (error) {
-            // FIX: Safely access message property from unknown error type.
+            // Fix: Safely access message property from unknown error type.
             let errorMessage = 'An unknown error occurred';
             if (error instanceof Error) {
                 errorMessage = error.message;
