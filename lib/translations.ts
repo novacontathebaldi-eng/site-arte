@@ -257,6 +257,10 @@ export const translations: Record<Language, Record<string, any>> = {
         saveError: 'Erreur lors de l\'enregistrement du produit',
         publish: 'Publier',
         publishHelp: 'Rendre ce produit visible sur le site public.',
+        featured: 'En vedette',
+        featuredHelp: 'Afficher ce produit sur la page d\'accueil.',
+        certificate: "Certificat d'authenticité",
+        certificateHelp: "Cette œuvre inclut un certificat.",
       },
        settings: {
         title: 'Paramètres Généraux',
@@ -560,6 +564,10 @@ export const translations: Record<Language, Record<string, any>> = {
         saveError: 'Error saving product',
         publish: 'Publish',
         publishHelp: 'Makes this product visible on the public-facing site.',
+        featured: 'Featured',
+        featuredHelp: 'Show this product on the homepage featured section.',
+        certificate: 'Certificate of Authenticity',
+        certificateHelp: 'This artwork includes a certificate.',
       },
        settings: {
         title: 'General Settings',
@@ -833,6 +841,10 @@ export const translations: Record<Language, Record<string, any>> = {
         saveError: 'Fehler beim Speichern des Produkts',
         publish: 'Veröffentlichen',
         publishHelp: 'Macht dieses Produkt auf der öffentlichen Website sichtbar.',
+        featured: 'Hervorgehoben',
+        featuredHelp: 'Dieses Produkt auf der Startseite anzeigen.',
+        certificate: 'Echtheitszertifikat',
+        certificateHelp: 'Dieses Kunstwerk enthält ein Zertifikat.',
       },
        settings: {
         title: 'Allgemeine Einstellungen',
@@ -1109,6 +1121,10 @@ export const translations: Record<Language, Record<string, any>> = {
         saveError: 'Erro ao salvar o produto',
         publish: 'Publicar',
         publishHelp: 'Torna este produto visível no site público.',
+        featured: 'Em Destaque',
+        featuredHelp: 'Exibir este produto na seção de destaques da página inicial.',
+        certificate: 'Certificado de Autenticidade',
+        certificateHelp: 'Esta obra de arte inclui um certificado.',
       },
       settings: {
         title: 'Configurações Gerais',
@@ -1143,7 +1159,7 @@ export const translations: Record<Language, Record<string, any>> = {
         },
         form: {
             code: 'Código de Desconto',
-            type: 'Tipo',
+            type: 'Type',
             percentage: 'Porcentagem',
             fixedAmount: 'Valor Fixo',
             value: 'Valor',

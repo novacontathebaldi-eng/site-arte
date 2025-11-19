@@ -211,6 +211,18 @@ const ProductFormPage: React.FC<{ id?: string }> = ({ id }) => {
                         </select>
                         </div>
                     </div>
+                    <div className="mt-6 border-t pt-6">
+                         <label className="flex items-center justify-between cursor-pointer">
+                            <div>
+                                <p className="font-medium">{t('admin.productForm.certificate')}</p>
+                                <p className="text-sm text-brand-black/60">{t('admin.productForm.certificateHelp')}</p>
+                            </div>
+                            <div className="relative inline-flex items-center">
+                                <input type="checkbox" name="certificateOfAuthenticity" checked={product.certificateOfAuthenticity} onChange={handleCheckboxChange} className="sr-only peer" />
+                                <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-2 peer-focus:ring-brand-gold/50 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-gold"></div>
+                            </div>
+                        </label>
+                    </div>
                 </div>
 
 
@@ -266,6 +278,18 @@ const ProductFormPage: React.FC<{ id?: string }> = ({ id }) => {
                             <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-2 peer-focus:ring-brand-gold/50 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-gold"></div>
                         </div>
                     </label>
+                    <div className="mt-6 border-t pt-6">
+                        <label className="flex items-center justify-between cursor-pointer">
+                            <div>
+                                <p className="font-medium">{t('admin.productForm.featured')}</p>
+                                <p className="text-sm text-brand-black/60">{t('admin.productForm.featuredHelp')}</p>
+                            </div>
+                            <div className="relative inline-flex items-center">
+                                <input type="checkbox" name="featured" checked={product.featured} onChange={handleCheckboxChange} className="sr-only peer" />
+                                <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-2 peer-focus:ring-brand-gold/50 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-gold"></div>
+                            </div>
+                        </label>
+                    </div>
                 </div>
 
                 <div className="bg-brand-white p-6 rounded-lg shadow-sm">
