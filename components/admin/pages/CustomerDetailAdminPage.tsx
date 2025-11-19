@@ -7,7 +7,7 @@ import { useI18n } from '../../../hooks/useI18n';
 import { useToast } from '../../../hooks/useToast';
 import Button from '../../common/Button';
 import { useRouter } from '../../../hooks/useRouter';
-// FIX: Added missing import for Input component.
+// FIX: Moved missing import for Input component to the top of the file.
 import Input from '../../common/Input';
 
 interface CustomerDetailAdminPageProps {

@@ -7,11 +7,9 @@ export const LANGUAGES: LanguageOption[] = [
   { code: 'pt', name: 'Português' },
 ];
 
+// SIMPLIFIED: Replaced multiple category links with a single link to the full catalog.
 export const NAV_LINKS: NavLink[] = [
-  { href: '#/catalog?category=paintings', labelKey: 'nav.paintings' },
-  { href: '#/catalog?category=jewelry', labelKey: 'nav.jewelry' },
-  { href: '#/catalog?category=digital', labelKey: 'nav.digitalArt' },
-  { href: '#/catalog?category=prints', labelKey: 'nav.prints' },
+  { href: '#/catalog', labelKey: 'nav.catalog' },
 ];
 
 export const CATEGORIES = [

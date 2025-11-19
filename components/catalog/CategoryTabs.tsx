@@ -5,8 +5,8 @@ import { useI18n } from '../../hooks/useI18n';
 import { CATEGORIES } from '../../constants';
 
 interface CategoryTabsProps {
-  selectedCategory: string;
-  onSelectCategory: (category: string) => void;
+  selectedCategory?: string;
+  onSelectCategory: (category?: string) => void;
 }
 
 const CategoryTabs: React.FC<CategoryTabsProps> = ({ selectedCategory, onSelectCategory }) => {
@@ -16,14 +16,13 @@ const CategoryTabs: React.FC<CategoryTabsProps> = ({ selectedCategory, onSelectC
     useEffect(() => {
         const fetchCounts = async () => {
             try {
-                const allProductsQuery = query(collection(db, 'products'), where('publishedAt', '!=', null));
-                const allSnapshot = await getCountFromServer(allProductsQuery);
-                const categoryCounts: Record<string, number> = { all: allSnapshot.data().count };
+                const categoryCounts: Record<string, number> = {};
 
                 for (const category of CATEGORIES) {
                     const categoryQuery = query(
                         collection(db, 'products'),
-                        where('category', '==', category.id)
+                        where('category', '==', category.id),
+                        where('publishedAt', '!=', null)
                     );
                     const snapshot = await getCountFromServer(categoryQuery);
                     categoryCounts[category.id] = snapshot.data().count;
@@ -31,19 +30,34 @@ const CategoryTabs: React.FC<CategoryTabsProps> = ({ selectedCategory, onSelectC
                 setCounts(categoryCounts);
             } catch (error) {
                 console.error("Error fetching product counts:", error);
+                 // Fallback to simpler query if index is missing
+                try {
+                    const categoryCounts: Record<string, number> = {};
+                    for (const category of CATEGORIES) {
+                         const simpleQuery = query(collection(db, 'products'), where('category', '==', category.id));
+                         const snapshot = await getCountFromServer(simpleQuery);
+                         categoryCounts[category.id] = snapshot.data().count;
+                    }
+                    setCounts(categoryCounts);
+                } catch (fallbackError) {
+                    console.error("Fallback count query also failed:", fallbackError);
+                }
             }
         };
         fetchCounts();
     }, []);
 
-    const TABS = [{ id: 'all', nameKey: 'product.categories.all' }, ...CATEGORIES];
+    const handleTabClick = (tabId: string) => {
+        // If clicking the active tab, deselect it (show all by passing undefined)
+        onSelectCategory(selectedCategory === tabId ? undefined : tabId);
+    };
 
     return (
         <nav className="flex space-x-2 sm:space-x-4 overflow-x-auto py-4">
-            {TABS.map(tab => (
+            {CATEGORIES.map(tab => (
                 <button
                     key={tab.id}
-                    onClick={() => onSelectCategory(tab.id)}
+                    onClick={() => handleTabClick(tab.id)}
                     className={`relative whitespace-nowrap px-3 py-2 text-sm font-semibold rounded-md transition-colors ${
                         selectedCategory === tab.id
                             ? 'text-brand-black'

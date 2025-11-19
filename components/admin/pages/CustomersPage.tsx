@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../../../lib/firebase';
 import { UserDocument } from '../../../firebase-types';
 import Spinner from '../../common/Spinner';
@@ -16,9 +16,19 @@ const CustomersPage: React.FC = () => {
     useEffect(() => {
         const fetchCustomers = async () => {
             setLoading(true);
-            const q = query(collection(db, "users"), where("role", "==", "customer"), orderBy("createdAt", "desc"));
+            // FIX: Removed orderBy to prevent composite index error. Data is sorted client-side.
+            const q = query(collection(db, "users"), where("role", "==", "customer"));
             const querySnapshot = await getDocs(q);
             const customersData = querySnapshot.docs.map(doc => ({ uid: doc.id, ...doc.data() } as UserDocument));
+            
+            // Sort by creation date on the client
+            customersData.sort((a, b) => {
+                if (a.createdAt && b.createdAt) {
+                    return b.createdAt.seconds - a.createdAt.seconds;
+                }
+                return 0;
+            });
+
             setCustomers(customersData);
             setLoading(false);
         };

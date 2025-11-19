@@ -16,9 +16,6 @@ import { ProductDocument } from '../firebase-types';
 
 export interface ProductFilters {
   category?: string;
-  minPrice?: number;
-  maxPrice?: number;
-  status?: string[];
   searchTerm?: string;
 }
 
@@ -55,31 +52,22 @@ export const useProducts = (filters: ProductFilters, isSearch = false) => {
       
       const currentFilters = filtersRef.current;
 
-      if (currentFilters.category && currentFilters.category !== 'all') {
+      if (currentFilters.category) {
         q = query(q, where('category', '==', currentFilters.category));
-      }
-      
-      if (currentFilters.status && currentFilters.status.length > 0) {
-        q = query(q, where('status', 'in', currentFilters.status));
-      }
-
-      // Firestore allows only one range filter on a field. So we filter >= minPrice
-      // and do the maxPrice filtering on the client side. Not ideal for large datasets,
-      // but a common workaround for Firestore limitations.
-      if (currentFilters.minPrice && currentFilters.minPrice > 0) {
-        q = query(q, where('price.amount', '>=', currentFilters.minPrice * 100));
       }
       
       if (currentFilters.searchTerm) {
           q = query(q, where('keywords', 'array-contains', currentFilters.searchTerm.toLowerCase()));
       }
       
-      // Conditional ordering to avoid composite index errors
-      if (currentFilters.minPrice && currentFilters.minPrice > 0) {
-          q = query(q, orderBy('price.amount', 'asc'));
+      // Order by publishedAt first to allow inequality filters, then by creation date.
+      // This combination generally works without requiring complex custom indexes.
+      if (isSearch) {
+        // No specific order for search results for now to keep it simple
       } else {
-          q = query(q, orderBy('createdAt', 'desc'));
+        q = query(q, orderBy('publishedAt', 'desc'), orderBy('createdAt', 'desc'));
       }
+
 
       if (!isInitial && lastDoc) {
         q = query(q, startAfter(lastDoc));
@@ -90,11 +78,6 @@ export const useProducts = (filters: ProductFilters, isSearch = false) => {
       const querySnapshot = await getDocs(q);
 
       let newProducts = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ProductDocument));
-
-      // Client-side filter for maxPrice if it's set
-      if (currentFilters.maxPrice && currentFilters.maxPrice > 0) {
-        newProducts = newProducts.filter(p => p.price.amount <= currentFilters.maxPrice! * 100);
-      }
 
       setProducts(prev => isInitial ? newProducts : [...prev, ...newProducts]);
       
