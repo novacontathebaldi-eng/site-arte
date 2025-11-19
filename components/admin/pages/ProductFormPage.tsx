@@ -141,7 +141,7 @@ const ProductFormPage: React.FC<{ id?: string }> = ({ id }) => {
             }
             addToast(t('admin.productForm.uploadSuccess'), "success");
         } catch (error) {
-            // FIX: The 'error' object in a catch block is of type 'unknown'. We must check if it's an instance of Error before accessing its 'message' property to prevent runtime errors.
+            // FIX: O objeto 'error' em um bloco catch é do tipo 'unknown'. Usamos um type guard para acessar suas propriedades com segurança.
             const errorMessage = error instanceof Error ? error.message : String(error);
             addToast(`${t('admin.productForm.uploadError')}: ${errorMessage}`, "error");
         } finally {
@@ -181,7 +181,7 @@ const ProductFormPage: React.FC<{ id?: string }> = ({ id }) => {
                 navigate(`/admin/products/edit/${newDocRef.id}`);
             }
         } catch (error) {
-            // FIX: The 'error' object in a catch block is of type 'unknown'. We must check if it's an instance of Error before accessing its 'message' property to prevent runtime errors.
+            // FIX: O objeto 'error' em um bloco catch é do tipo 'unknown'. Usamos um type guard para acessar suas propriedades com segurança.
             const errorMessage = error instanceof Error ? error.message : String(error);
             addToast(`${t('admin.productForm.saveError')}: ${errorMessage}`, "error");
         } finally {

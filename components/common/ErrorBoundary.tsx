@@ -34,7 +34,7 @@ class ErrorBoundary extends React.Component<Props, State> {
       );
     }
 
-    // FIX: Render children if no error has occurred. The original code was correct.
+    // FIX: Em um componente de classe React, as props são acessadas via `this.props`.
     return this.props.children;
   }
 }
