@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { collection, query, where, getDocs, limit } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { ProductDocument } from '../firebase-types';
-import ProductCard from './ProductCard';
 import { useI18n } from '../hooks/useI18n';
-import ProductGrid from './ProductGrid';
+import CatalogProductGrid from './catalog/CatalogProductGrid';
+import Skeleton from './common/Skeleton';
 
 const FeaturedProducts: React.FC = () => {
   const { t } = useI18n();
@@ -16,7 +16,7 @@ const FeaturedProducts: React.FC = () => {
       setLoading(true);
       try {
         const productsRef = collection(db, 'products');
-        const q = query(productsRef, where('featured', '==', true), where('status', '==', 'available'), limit(4));
+        const q = query(productsRef, where('featured', '==', true), where('publishedAt', '!=', null), limit(4));
         const querySnapshot = await getDocs(q);
         const featuredProducts = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ProductDocument));
         setProducts(featuredProducts);
@@ -35,7 +35,13 @@ const FeaturedProducts: React.FC = () => {
         <h2 className="text-3xl font-serif font-bold tracking-tight text-brand-black text-center mb-12">
           {t('productGrid.featuredTitle')}
         </h2>
-        <ProductGrid products={products} loading={loading} />
+        {loading ? (
+             <div className="grid grid-cols-1 gap-y-10 gap-x-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:gap-x-8">
+                {[...Array(4)].map((_, i) => <Skeleton key={i} className="aspect-[3/4]"/>)}
+             </div>
+        ) : (
+            <CatalogProductGrid products={products} />
+        )}
       </div>
     </div>
   );

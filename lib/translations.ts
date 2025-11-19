@@ -76,9 +76,10 @@ export const translations: Record<Language, Record<string, any>> = {
         jewelry: 'Bijoux',
         digitalArt: 'Art Numérique',
         print: 'Impression',
-        paintings: 'Peinture',
-        prints: 'Impression',
+        paintings: 'Peintures',
+        prints: 'Impressions',
         digital: 'Art Numérique',
+        all: 'Toutes',
       },
       statuses: {
         available: 'Disponible',
@@ -160,6 +161,20 @@ export const translations: Record<Language, Record<string, any>> = {
         empty: 'Vous n\'avez aucune adresse enregistrée.',
         add: 'Ajouter une nouvelle adresse',
       },
+    },
+     catalog: {
+      fetchError: "Impossible de charger les œuvres d'art. Veuillez réessayer.",
+      retry: "Réessayer",
+      endOfResults: "Vous avez atteint la fin de la collection.",
+      noResults: {
+          title: "Aucune œuvre trouvée",
+          subtitle: "Essayez d'ajuster vos filtres ou de rechercher un autre terme."
+      },
+      search: {
+        placeholder: "Rechercher par titre, tag, description...",
+        noResults: "Aucun résultat pour",
+        viewAll: "Voir toutes les œuvres"
+      }
     },
     admin: {
       sidebar: {
@@ -388,9 +403,10 @@ export const translations: Record<Language, Record<string, any>> = {
         jewelry: 'Jewelry',
         digitalArt: 'Digital Art',
         print: 'Print',
-        paintings: 'Painting',
-        prints: 'Print',
+        paintings: 'Paintings',
+        prints: 'Prints',
         digital: 'Digital Art',
+        all: 'All',
       },
       statuses: {
         available: 'Available',
@@ -472,6 +488,20 @@ export const translations: Record<Language, Record<string, any>> = {
         empty: 'You have no saved addresses.',
         add: 'Add new address',
       },
+    },
+    catalog: {
+      fetchError: "Could not load artworks. Please try again.",
+      retry: "Retry",
+      endOfResults: "You've reached the end of the collection.",
+      noResults: {
+          title: "No Artworks Found",
+          subtitle: "Try adjusting your filters or searching for another term."
+      },
+      search: {
+        placeholder: "Search by title, tag, description...",
+        noResults: "No results for",
+        viewAll: "View all artworks"
+      }
     },
     admin: {
       sidebar: {
@@ -701,8 +731,9 @@ export const translations: Record<Language, Record<string, any>> = {
         digitalArt: 'Digitale Kunst',
         print: 'Druck',
         paintings: 'Gemälde',
-        prints: 'Druck',
+        prints: 'Drucke',
         digital: 'Digitale Kunst',
+        all: 'Alle',
       },
       statuses: {
         available: 'Verfügbar',
@@ -784,6 +815,20 @@ export const translations: Record<Language, Record<string, any>> = {
         empty: 'Sie haben keine gespeicherten Adressen.',
         add: 'Neue Adresse hinzufügen',
       },
+    },
+     catalog: {
+      fetchError: "Kunstwerke konnten nicht geladen werden. Bitte versuchen Sie es erneut.",
+      retry: "Erneut versuchen",
+      endOfResults: "Sie haben das Ende der Sammlung erreicht.",
+      noResults: {
+          title: "Keine Kunstwerke gefunden",
+          subtitle: "Versuchen Sie, Ihre Filter anzupassen oder nach einem anderen Begriff zu suchen."
+      },
+      search: {
+        placeholder: "Suche nach Titel, Tag, Beschreibung...",
+        noResults: "Keine Ergebnisse für",
+        viewAll: "Alle Kunstwerke ansehen"
+      }
     },
     admin: {
       sidebar: {
@@ -955,9 +1000,10 @@ export const translations: Record<Language, Record<string, any>> = {
         jewelry: 'Joia',
         digitalArt: 'Arte Digital',
         print: 'Impressão',
-        paintings: 'Pintura',
-        prints: 'Impressão',
+        paintings: 'Pinturas',
+        prints: 'Impressões',
         digital: 'Arte Digital',
+        all: 'Todas',
       },
       statuses: {
         available: 'Disponível',
@@ -1039,6 +1085,20 @@ export const translations: Record<Language, Record<string, any>> = {
         empty: 'Você não possui endereços salvos.',
         add: 'Adicionar novo endereço',
       },
+    },
+     catalog: {
+      fetchError: "Não foi possível carregar as obras de arte. Por favor, tente novamente.",
+      retry: "Tentar Novamente",
+      endOfResults: "Você chegou ao fim da coleção.",
+      noResults: {
+          title: "Nenhuma Obra Encontrada",
+          subtitle: "Tente ajustar seus filtros ou buscar por outro termo."
+      },
+      search: {
+        placeholder: "Buscar por título, tag, descrição...",
+        noResults: "Nenhum resultado para",
+        viewAll: "Ver todas as obras"
+      }
     },
     admin: {
       sidebar: {
