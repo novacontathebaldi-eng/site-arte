@@ -3,6 +3,8 @@ import { doc, setDoc, getDoc, collection, getDocs, writeBatch, deleteDoc } from 
 import { db } from '../lib/firebase';
 import { ProductDocument, CartItemDocument } from '../firebase-types';
 import { useAuth } from '../hooks/useAuth';
+import { useToast } from '../hooks/useToast';
+import { useI18n } from '../hooks/useI18n';
 
 export interface CartItem extends ProductDocument {
   quantity: number;
@@ -30,6 +32,8 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [itemAddedCount, setItemAddedCount] = useState(0);
   const { user } = useAuth();
+  const { addToast } = useToast();
+  const { t } = useI18n();
 
   const syncCartWithFirestore = useCallback(async (localCart: CartItem[]) => {
     if (!user) return;
@@ -118,22 +122,42 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const toggleCart = () => setIsCartOpen(prev => !prev);
 
   const addToCart = (product: ProductDocument, quantity: number) => {
+    // Check if the item is unique and already in cart
+    if (product.stock === 1 && cartItems.some(item => item.id === product.id)) {
+        addToast(t('cart.uniqueItemError'), 'info');
+        setIsCartOpen(true); // Still open the cart to show it's there
+        return;
+    }
+
     setCartItems(prevItems => {
-      const existingItem = prevItems.find(item => item.id === product.id);
-      let newItems;
-      if (existingItem) {
-        newItems = prevItems.map(item =>
-          item.id === product.id ? { ...item, quantity: item.quantity + quantity } : item
-        );
-      } else {
-        newItems = [...prevItems, { ...product, quantity }];
-      }
-      saveCart(newItems);
-      return newItems;
+        const existingItem = prevItems.find(item => item.id === product.id);
+        let newItems;
+        if (existingItem) {
+            const newQuantity = existingItem.quantity + quantity;
+            if (newQuantity > product.stock) {
+                addToast(t('cart.stockError'), "error");
+                return prevItems;
+            }
+            newItems = prevItems.map(item =>
+                item.id === product.id ? { ...item, quantity: newQuantity } : item
+            );
+        } else {
+            if (quantity > product.stock) {
+                addToast(t('cart.stockError'), "error");
+                return prevItems;
+            }
+            newItems = [...prevItems, { ...product, quantity }];
+        }
+        
+        saveCart(newItems);
+        // Only trigger animations/open cart if a change was actually made
+        if (newItems !== prevItems) {
+            setItemAddedCount(c => c + 1);
+            setIsCartOpen(true);
+        }
+        return newItems;
     });
-    setItemAddedCount(count => count + 1);
-    setIsCartOpen(true);
-  };
+};
 
   const removeFromCart = (productId: string) => {
     const newItems = cartItems.filter(item => item.id !== productId);
@@ -141,6 +165,14 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const updateQuantity = (productId: string, quantity: number) => {
+    const itemToUpdate = cartItems.find(item => item.id === productId);
+    if (!itemToUpdate) return;
+    
+    if (quantity > itemToUpdate.stock) {
+        addToast(t('cart.stockError'), "error");
+        return;
+    }
+
     if (quantity <= 0) {
       removeFromCart(productId);
     } else {
