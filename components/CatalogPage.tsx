@@ -10,6 +10,7 @@ import FilterSidebar from './catalog/FilterSidebar';
 import CatalogProductGrid from './catalog/CatalogProductGrid';
 import SearchModal from './catalog/SearchModal';
 import Button from './common/Button';
+import Skeleton from './common/Skeleton';
 
 export interface CatalogFilters {
   price: { min: number; max: number };

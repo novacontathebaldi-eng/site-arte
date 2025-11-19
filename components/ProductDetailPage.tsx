@@ -3,7 +3,7 @@ import { doc, getDoc, collection, query, where, limit, getDocs } from 'firebase/
 import { db } from '../lib/firebase';
 import { ProductDocument } from '../firebase-types';
 import Spinner from './common/Spinner';
-import ProductGrid from './ProductGrid';
+import CatalogProductGrid from './catalog/CatalogProductGrid';
 import ImageGallery from './catalog/ImageGallery';
 import Button from './common/Button';
 import { useI18n } from '../hooks/useI18n';
@@ -139,7 +139,7 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ productId }) => {
                 {relatedProducts.length > 0 && (
                     <div className="mt-24">
                         <h2 className="text-2xl font-serif font-bold text-center mb-12">{t('product.related')}</h2>
-                         <ProductGrid products={relatedProducts} />
+                         <CatalogProductGrid products={relatedProducts} />
                     </div>
                 )}
             </div>
