@@ -1,7 +1,6 @@
 import React, { createContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { Language } from '../types';
 import { translations } from '../lib/translations';
-import get from 'lodash.get';
 
 interface I18nContextType {
   language: Language;
@@ -38,7 +37,12 @@ export const I18nProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const t = useCallback((key: string): string => {
-    return get(translations[language], key) || key;
+    const path = key.split('.');
+    const result = path.reduce(
+      (obj: any, currentKey: string) => obj?.[currentKey],
+      translations[language]
+    );
+    return result || key;
   }, [language]);
 
   return (
