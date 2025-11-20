@@ -59,14 +59,14 @@ const DiscountCodesPage: React.FC = () => {
 
     return (
         <>
-            <div className="bg-brand-white p-6 rounded-lg shadow">
+            <div className="bg-brand-white dark:bg-brand-black p-6 rounded-lg shadow">
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-xl font-bold font-serif">{t('admin.discounts.title')}</h2>
                     <Button onClick={() => handleOpenModal()}>{t('admin.discounts.addNew')}</Button>
                 </div>
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm text-left">
-                        <thead className="bg-black/5">
+                        <thead className="bg-black/5 dark:bg-white/5">
                             <tr>
                                 <th className="p-3">{t('admin.discounts.table.code')}</th>
                                 <th className="p-3">{t('admin.discounts.table.type')}</th>
@@ -78,7 +78,7 @@ const DiscountCodesPage: React.FC = () => {
                         </thead>
                         <tbody>
                             {codes.map(code => (
-                                <tr key={code.id} className="border-b border-black/10 hover:bg-black/5 transition-colors">
+                                <tr key={code.id} className="border-b border-black/10 dark:border-white/10 hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
                                     <td className="p-3 font-mono font-bold text-brand-gold">{code.code}</td>
                                     <td className="p-3 capitalize">{code.type.replace('_', ' ')}</td>
                                     <td className="p-3">{code.type === 'percentage' ? `${code.value}%` : `€${(code.value/100).toFixed(2)}`}</td>

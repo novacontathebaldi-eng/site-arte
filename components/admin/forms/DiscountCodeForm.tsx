@@ -87,15 +87,15 @@ const DiscountCodeForm: React.FC<DiscountCodeFormProps> = ({ code, onSuccess }) 
             <div className="space-y-4">
                 <Input id="code" name="code" label={t('admin.discounts.form.code')} value={formData.code} onChange={handleChange} required />
                 <div>
-                    <label className="block text-sm font-medium text-brand-black/80 mb-1">{t('admin.discounts.form.type')}</label>
-                    <select name="type" value={formData.type} onChange={handleChange} className="w-full px-3 py-2 border rounded-md">
+                    <label className="block text-sm font-medium text-brand-black/80 dark:text-brand-white/80 mb-1">{t('admin.discounts.form.type')}</label>
+                    <select name="type" value={formData.type} onChange={handleChange} className="w-full px-3 py-2 border dark:border-white/20 rounded-md bg-transparent dark:bg-gray-800">
                         <option value="percentage">{t('admin.discounts.form.percentage')}</option>
                         <option value="fixed_amount">{t('admin.discounts.form.fixedAmount')}</option>
                     </select>
                 </div>
                  <div>
                     <Input id="value" name="value" label={t('admin.discounts.form.value')} type="number" value={formData.value} onChange={handleChange} required />
-                    <p className="text-xs text-brand-black/60 mt-1">
+                    <p className="text-xs text-brand-black/60 dark:text-brand-white/60 mt-1">
                         {formData.type === 'percentage' ? t('admin.discounts.form.valueHelpPercentage') : t('admin.discounts.form.valueHelpFixed')}
                     </p>
                 </div>

@@ -6,7 +6,6 @@ import AuthModal from './auth/AuthModal';
 import { useCart } from '../hooks/useCart';
 import SearchModal from './catalog/SearchModal';
 import Skeleton from './common/Skeleton';
-import ThemeSwitcher from './ThemeSwitcher';
 
 // Icons
 const HeartIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
@@ -91,7 +90,6 @@ const Header: React.FC = () => {
               ) : (
                 <Fragment>
                   <button onClick={() => setIsSearchModalOpen(true)} className="text-brand-black/70 dark:text-brand-white/70 hover:text-brand-black dark:hover:text-brand-white" aria-label={t('header.search')}><SearchIcon className="h-6 w-6" /></button>
-                  <ThemeSwitcher />
                   <a href="#/dashboard/wishlist" className="text-brand-black/70 dark:text-brand-white/70 hover:text-brand-black dark:hover:text-brand-white"><HeartIcon className="h-6 w-6" /></a>
                   <button onClick={toggleCart} className="relative text-brand-black/70 dark:text-brand-white/70 hover:text-brand-black dark:hover:text-brand-white">
                     <ShoppingBagIcon className="h-6 w-6" />

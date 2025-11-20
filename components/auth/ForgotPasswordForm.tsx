@@ -30,7 +30,7 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onBackToLoginCl
   return (
     <div>
       <h2 className="text-2xl font-bold text-center mb-2">{t('auth.passwordReset')}</h2>
-      <p className="text-center text-sm text-brand-black/70 mb-6">{t('auth.passwordResetInstructions')}</p>
+      <p className="text-center text-sm text-brand-black/70 dark:text-brand-white/70 mb-6">{t('auth.passwordResetInstructions')}</p>
       
       {error && <p className="text-red-500 text-sm mb-4 text-center">{error}</p>}
       {message && <p className="text-green-600 text-sm mb-4 text-center">{message}</p>}
@@ -43,7 +43,7 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onBackToLoginCl
       )}
 
       <p className="mt-6 text-center text-sm">
-        <button onClick={onBackToLoginClick} className="font-semibold text-brand-black hover:underline">{t('auth.backToLogin')}</button>
+        <button onClick={onBackToLoginClick} className="font-semibold text-brand-black dark:text-brand-white hover:underline">{t('auth.backToLogin')}</button>
       </p>
     </div>
   );

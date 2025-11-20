@@ -46,7 +46,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ onLoginLinkClick, onSuccess }) 
         <Button type="submit" variant="primary" className="w-full">{t('auth.signupButton')}</Button>
       </form>
       <p className="mt-6 text-center text-sm">
-        {t('auth.alreadyHaveAccount')} <button onClick={onLoginLinkClick} className="font-semibold text-brand-black hover:underline">{t('auth.loginHere')}</button>
+        {t('auth.alreadyHaveAccount')} <button onClick={onLoginLinkClick} className="font-semibold text-brand-black dark:text-brand-white hover:underline">{t('auth.loginHere')}</button>
       </p>
     </div>
   );

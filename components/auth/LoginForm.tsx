@@ -46,24 +46,24 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSignupLinkClick, onForgotPasswo
         <Input type="email" id="email" label={t('auth.email')} value={email} onChange={e => setEmail(e.target.value)} required />
         <div>
             <div className="flex justify-between items-baseline mb-1">
-                <label className="block text-sm font-medium text-brand-black/80" htmlFor="password">{t('auth.password')}</label>
-                <button type="button" onClick={onForgotPasswordClick} className="text-sm text-brand-black/70 hover:underline">{t('auth.forgotPassword')}</button>
+                <label className="block text-sm font-medium text-brand-black/80 dark:text-brand-white/80" htmlFor="password">{t('auth.password')}</label>
+                <button type="button" onClick={onForgotPasswordClick} className="text-sm text-brand-black/70 dark:text-brand-white/70 hover:underline">{t('auth.forgotPassword')}</button>
             </div>
             <Input type="password" id="password" value={password} onChange={e => setPassword(e.target.value)} required />
         </div>
         <Button type="submit" variant="primary" className="w-full">{t('auth.loginButton')}</Button>
       </form>
       <div className="flex items-center my-6">
-          <div className="flex-grow border-t border-black/10"></div>
-          <span className="flex-shrink mx-4 text-brand-black/50 text-sm">{t('auth.orContinueWith')}</span>
-          <div className="flex-grow border-t border-black/10"></div>
+          <div className="flex-grow border-t border-black/10 dark:border-white/10"></div>
+          <span className="flex-shrink mx-4 text-brand-black/50 dark:text-brand-white/50 text-sm">{t('auth.orContinueWith')}</span>
+          <div className="flex-grow border-t border-black/10 dark:border-white/10"></div>
       </div>
       <Button onClick={handleGoogleLogin} variant="tertiary" className="w-full">
           <GoogleIcon className="w-5 h-5" />
           Google
       </Button>
       <p className="mt-6 text-center text-sm">
-        {t('auth.dontHaveAccount')} <button onClick={onSignupLinkClick} className="font-semibold text-brand-black hover:underline">{t('auth.createOne')}</button>
+        {t('auth.dontHaveAccount')} <button onClick={onSignupLinkClick} className="font-semibold text-brand-black dark:text-brand-white hover:underline">{t('auth.createOne')}</button>
       </p>
     </div>
   );

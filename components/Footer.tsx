@@ -5,6 +5,7 @@ import { useI18n } from '../hooks/useI18n';
 import InstagramIcon from './icons/InstagramIcon';
 import FacebookIcon from './icons/FacebookIcon';
 import { useSettings } from '../hooks/useSettings';
+import ThemeSelector from './ThemeSelector';
 
 const Footer: React.FC = () => {
     const { t } = useI18n();
@@ -34,7 +35,7 @@ const Footer: React.FC = () => {
               <li><a href="#" className="hover:text-brand-gold">{t('footer.privacy')}</a></li>
             </ul>
           </div>
-          <div>
+          <div className="col-span-2 md:col-span-1">
              <h3 className="font-semibold text-brand-black dark:text-brand-white tracking-wider uppercase">{t('footer.contactInfo')}</h3>
              <ul className="mt-4 space-y-2">
                  <li><a href={`mailto:${settings?.contactEmail || 'hello@meeh.lu'}`} className="hover:text-brand-gold">{settings?.contactEmail || 'hello@meeh.lu'}</a></li>
@@ -45,10 +46,13 @@ const Footer: React.FC = () => {
                  <a href={settings?.socialLinks?.facebook || '#'} target="_blank" rel="noopener noreferrer" className="hover:text-brand-gold"><FacebookIcon className="w-6 h-6"/></a>
              </div>
           </div>
-          <div>
+          <div className="col-span-2 md:col-span-1">
             <h3 className="font-semibold text-brand-black dark:text-brand-white tracking-wider uppercase">{t('footer.language')}</h3>
             <div className="mt-4">
                 <LanguageSelector />
+            </div>
+            <div className="mt-4">
+                <ThemeSelector />
             </div>
           </div>
         </div>

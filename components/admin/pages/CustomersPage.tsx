@@ -40,11 +40,11 @@ const CustomersPage: React.FC = () => {
     }
 
     return (
-        <div className="bg-brand-white p-6 rounded-lg shadow">
+        <div className="bg-brand-white dark:bg-brand-black p-6 rounded-lg shadow">
             <h2 className="text-xl font-bold font-serif mb-6">{t('admin.customers.title')}</h2>
              <div className="overflow-x-auto">
                 <table className="w-full text-sm text-left">
-                     <thead className="bg-black/5">
+                     <thead className="bg-black/5 dark:bg-white/5">
                         <tr>
                             <th className="p-3">Name</th>
                             <th className="p-3">Email</th>
@@ -55,7 +55,7 @@ const CustomersPage: React.FC = () => {
                     </thead>
                      <tbody>
                         {customers.map(customer => (
-                            <tr key={customer.uid} className="border-b border-black/10 hover:bg-black/5 transition-colors">
+                            <tr key={customer.uid} className="border-b border-black/10 dark:border-white/10 hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
                                 <td className="p-3 font-medium">{customer.displayName}</td>
                                 <td className="p-3">{customer.email}</td>
                                 <td className="p-3">{customer.stats.totalOrders}</td>

@@ -43,7 +43,7 @@ const OrdersListPage: React.FC = () => {
             ) : (
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm text-left">
-                        <thead className="bg-black/5">
+                        <thead className="bg-black/5 dark:bg-white/5">
                             <tr>
                                 <th className="p-3">{t('dashboard.orders.order')}</th>
                                 <th className="p-3">{t('dashboard.orders.date')}</th>
@@ -54,7 +54,7 @@ const OrdersListPage: React.FC = () => {
                         </thead>
                         <tbody>
                             {orders.map(order => (
-                                <tr key={order.id} className="border-b border-black/10">
+                                <tr key={order.id} className="border-b border-black/10 dark:border-white/10">
                                     <td className="p-3 font-medium">#{order.id.slice(0, 8)}</td>
                                     <td className="p-3">{new Date(order.createdAt.seconds * 1000).toLocaleDateString()}</td>
                                     <td className="p-3 capitalize">{order.status}</td>

@@ -100,7 +100,7 @@ const ProductsPage: React.FC = () => {
     }
 
     return (
-        <div className="bg-brand-white p-6 rounded-lg shadow">
+        <div className="bg-brand-white dark:bg-brand-black p-6 rounded-lg shadow">
             <div className="flex justify-between items-center mb-6">
                 <h2 className="text-xl font-bold font-serif">{t('admin.products.title')}</h2>
                 <Button onClick={() => navigate('/admin/products/new')}>{t('admin.products.addNew')}</Button>
@@ -119,7 +119,7 @@ const ProductsPage: React.FC = () => {
 
             <div className="overflow-x-auto">
                 <table className="w-full text-sm text-left">
-                    <thead className="bg-black/5">
+                    <thead className="bg-black/5 dark:bg-white/5">
                         <tr>
                              <th className="p-3 w-4">
                                 <input
@@ -141,7 +141,7 @@ const ProductsPage: React.FC = () => {
                     </thead>
                     <tbody>
                         {products.map(product => (
-                            <tr key={product.id} className="border-b border-black/10 hover:bg-black/5 transition-colors">
+                            <tr key={product.id} className="border-b border-black/10 dark:border-white/10 hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
                                 <td className="p-3">
                                     <input
                                         type="checkbox"
@@ -160,7 +160,7 @@ const ProductsPage: React.FC = () => {
                                 <td className="p-3">
                                     <label className="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" checked={!!product.publishedAt} onChange={() => togglePublished(product)} className="sr-only peer" />
-                                        <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-2 peer-focus:ring-brand-gold/50 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-gold"></div>
+                                        <div className="w-11 h-6 bg-gray-200 dark:bg-gray-700 rounded-full peer peer-focus:ring-2 peer-focus:ring-brand-gold/50 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-gold"></div>
                                     </label>
                                 </td>
                                 <td className="p-3">

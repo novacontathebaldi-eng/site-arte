@@ -78,7 +78,7 @@ const SettingsPage: React.FC = () => {
 
     return (
         <div className="space-y-8">
-            <div className="bg-brand-white p-6 rounded-lg shadow-sm">
+            <div className="bg-brand-white dark:bg-brand-black p-6 rounded-lg shadow-sm">
                 <h2 className="text-xl font-bold font-serif mb-4">{t('admin.settings.title')}</h2>
                 <div className="space-y-4">
                     <Input id="site-title" name="siteTitle" label={t('admin.settings.siteTitle')} value={settings.siteTitle || ''} onChange={handleChange} />
@@ -92,7 +92,7 @@ const SettingsPage: React.FC = () => {
                 </div>
             </div>
 
-             <div className="bg-brand-white p-6 rounded-lg shadow-sm">
+             <div className="bg-brand-white dark:bg-brand-black p-6 rounded-lg shadow-sm">
                 <h2 className="text-xl font-bold font-serif mb-4">Social Media</h2>
                 <div className="space-y-4">
                     <Input id="instagram" name="socialLinks.instagram" label="Instagram URL" value={settings.socialLinks?.instagram || ''} onChange={handleChange} />
@@ -100,23 +100,23 @@ const SettingsPage: React.FC = () => {
                 </div>
             </div>
             
-             <div className="bg-brand-white p-6 rounded-lg shadow-sm">
+             <div className="bg-brand-white dark:bg-brand-black p-6 rounded-lg shadow-sm">
                  <div className="flex justify-between items-center mb-4">
                     <h2 className="text-xl font-bold font-serif">{t('admin.settings.discounts')}</h2>
                     <Button variant="tertiary" onClick={() => navigate('/admin/settings/discounts')}>{t('admin.discounts.title')}</Button>
                  </div>
-                 <p className="text-sm text-brand-black/70">Create and manage discount codes for promotions.</p>
+                 <p className="text-sm text-brand-black/70 dark:text-brand-white/70">Create and manage discount codes for promotions.</p>
             </div>
 
-             <div className="bg-brand-white p-6 rounded-lg shadow-sm">
+             <div className="bg-brand-white dark:bg-brand-black p-6 rounded-lg shadow-sm">
                  <h2 className="text-xl font-bold font-serif mb-4">{t('admin.settings.shipping')}</h2>
-                 <p className="text-sm text-brand-black/70">Shipping region and pricing management UI would be here.</p>
+                 <p className="text-sm text-brand-black/70 dark:text-brand-white/70">Shipping region and pricing management UI would be here.</p>
             </div>
 
 
-            <div className="bg-brand-white p-6 rounded-lg shadow-sm">
+            <div className="bg-brand-white dark:bg-brand-black p-6 rounded-lg shadow-sm">
                 <h2 className="text-xl font-bold font-serif mb-4">{t('admin.settings.database')}</h2>
-                <p className="text-sm text-brand-black/70 mb-4">{t('admin.settings.databaseWarning')}</p>
+                <p className="text-sm text-brand-black/70 dark:text-brand-white/70 mb-4">{t('admin.settings.databaseWarning')}</p>
                 <Button onClick={handleSeed} disabled={isSeeding} variant="secondary">
                     {isSeeding ? t('admin.settings.seeding') : t('admin.settings.seedButton')}
                 </Button>

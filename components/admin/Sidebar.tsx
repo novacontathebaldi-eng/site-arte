@@ -35,9 +35,9 @@ const Sidebar: React.FC = () => {
     };
 
     return (
-        <aside className="w-64 bg-brand-white shadow-md flex-shrink-0 hidden lg:block">
-            <div className="h-20 flex items-center justify-center border-b border-black/10">
-                <a href="#" className="text-2xl font-serif font-bold text-brand-black">Meeh</a>
+        <aside className="w-64 bg-brand-white dark:bg-brand-black shadow-md flex-shrink-0 hidden lg:block">
+            <div className="h-20 flex items-center justify-center border-b border-black/10 dark:border-white/10">
+                <a href="#" className="text-2xl font-serif font-bold text-brand-black dark:text-brand-white">Meeh</a>
             </div>
             <nav className="p-4">
                 <ul>
@@ -47,8 +47,8 @@ const Sidebar: React.FC = () => {
                                 href={`#${link.href}`}
                                 className={`flex items-center px-4 py-3 my-1 rounded-md text-sm font-medium transition-colors ${
                                     isActive(link.href)
-                                    ? 'bg-brand-black text-brand-white'
-                                    : 'text-brand-black/70 hover:bg-black/5'
+                                    ? 'bg-brand-black text-brand-white dark:bg-brand-white dark:text-brand-black'
+                                    : 'text-brand-black/70 dark:text-brand-white/70 hover:bg-black/5 dark:hover:bg-white/5'
                                 }`}
                             >
                                 {link.icon}
@@ -62,8 +62,8 @@ const Sidebar: React.FC = () => {
                                                 href={`#${subLink.href}`}
                                                 className={`flex items-center px-4 py-2 my-1 rounded-md text-xs font-medium transition-colors ${
                                                     path.startsWith(subLink.href)
-                                                    ? 'text-brand-black font-semibold'
-                                                    : 'text-brand-black/60 hover:text-brand-black'
+                                                    ? 'text-brand-black dark:text-brand-white font-semibold'
+                                                    : 'text-brand-black/60 dark:text-brand-white/60 hover:text-brand-black dark:hover:text-brand-white'
                                                 }`}
                                              >
                                                 {t(subLink.labelKey)}

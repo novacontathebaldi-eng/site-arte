@@ -42,11 +42,11 @@ const DashboardLayout: React.FC = () => {
     }
 
     return (
-        <div className="bg-gray-50">
+        <div className="bg-gray-50 dark:bg-gray-900">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 <div className="lg:grid lg:grid-cols-4 lg:gap-8">
                     <aside className="lg:col-span-1">
-                        <nav className="bg-white p-4 rounded-lg shadow-md">
+                        <nav className="bg-white dark:bg-brand-black p-4 rounded-lg shadow-md">
                             <ul>
                                 {navLinks.map(link => (
                                     <li key={link.href}>
@@ -54,8 +54,8 @@ const DashboardLayout: React.FC = () => {
                                             href={`#${link.href}`}
                                             className={`block px-4 py-3 my-1 rounded-md text-sm font-medium transition-colors ${
                                                 isActive(link.href)
-                                                ? 'bg-brand-black text-brand-white'
-                                                : 'text-brand-black/70 hover:bg-black/5'
+                                                ? 'bg-brand-black text-brand-white dark:bg-brand-white dark:text-brand-black'
+                                                : 'text-brand-black/70 dark:text-brand-white/70 hover:bg-black/5 dark:hover:bg-white/5'
                                             }`}
                                         >
                                             {t(link.labelKey)}
@@ -66,7 +66,7 @@ const DashboardLayout: React.FC = () => {
                         </nav>
                     </aside>
                     <div className="lg:col-span-3 mt-8 lg:mt-0">
-                        <div className="bg-white p-8 rounded-lg shadow-md min-h-[400px]">
+                        <div className="bg-white dark:bg-brand-black p-8 rounded-lg shadow-md min-h-[400px]">
                             {authLoading ? (
                                 <div className="flex justify-center items-center h-full">
                                     <Spinner />

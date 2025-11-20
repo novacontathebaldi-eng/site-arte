@@ -141,8 +141,7 @@ const ProductFormPage: React.FC<{ id?: string }> = ({ id }) => {
             }
             addToast(t('admin.productForm.uploadSuccess'), "success");
         } catch (error) {
-            // Fix: The 'error' object in a catch block is of type 'unknown' by default in TypeScript.
-            // A type guard is necessary to safely access properties like '.message'.
+            // FIX: O objeto 'error' em um bloco catch é do tipo 'unknown'. É necessária uma verificação de tipo para acessar suas propriedades com segurança.
             const errorMessage = error instanceof Error ? error.message : String(error);
             addToast(`${t('admin.productForm.uploadError')}: ${errorMessage}`, "error");
         } finally {
@@ -182,8 +181,7 @@ const ProductFormPage: React.FC<{ id?: string }> = ({ id }) => {
                 navigate(`/admin/products/edit/${newDocRef.id}`);
             }
         } catch (error) {
-            // Fix: The 'error' object in a catch block is of type 'unknown'.
-            // A type guard is necessary to safely access properties like '.message'.
+            // FIX: O objeto 'error' em um bloco catch é do tipo 'unknown'. É necessária uma verificação de tipo para acessar suas propriedades com segurança.
             const errorMessage = error instanceof Error ? error.message : String(error);
             addToast(`${t('admin.productForm.saveError')}: ${errorMessage}`, "error");
         } finally {
@@ -197,13 +195,13 @@ const ProductFormPage: React.FC<{ id?: string }> = ({ id }) => {
         <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-8">
                 {/* Main Details */}
-                <div className="bg-brand-white p-6 rounded-lg shadow-sm">
+                <div className="bg-brand-white dark:bg-brand-black p-6 rounded-lg shadow-sm">
                     <h3 className="font-bold font-serif mb-4">Product Details</h3>
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <Input id="sku" name="sku" label={t('admin.productForm.sku')} value={product.sku} onChange={handleChange} />
                         <div>
-                        <label className="block text-sm font-medium text-brand-black/80 mb-1">{t('admin.productForm.category')}</label>
-                        <select name="category" value={product.category} onChange={handleChange} className="w-full px-3 py-2 border border-brand-black/20 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-gold/50 focus:border-brand-gold/50 transition-shadow">
+                        <label className="block text-sm font-medium text-brand-black/80 dark:text-brand-white/80 mb-1">{t('admin.productForm.category')}</label>
+                        <select name="category" value={product.category} onChange={handleChange} className="w-full px-3 py-2 border border-brand-black/20 dark:border-white/20 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-gold/50 focus:border-brand-gold/50 transition-shadow bg-transparent dark:bg-gray-800">
                             <option value="paintings">Paintings</option>
                             <option value="jewelry">Jewelry</option>
                             <option value="digital">Digital</option>
@@ -211,15 +209,15 @@ const ProductFormPage: React.FC<{ id?: string }> = ({ id }) => {
                         </select>
                         </div>
                     </div>
-                    <div className="mt-6 border-t pt-6">
+                    <div className="mt-6 border-t dark:border-white/10 pt-6">
                          <label className="flex items-center justify-between cursor-pointer">
                             <div>
                                 <p className="font-medium">{t('admin.productForm.certificate')}</p>
-                                <p className="text-sm text-brand-black/60">{t('admin.productForm.certificateHelp')}</p>
+                                <p className="text-sm text-brand-black/60 dark:text-brand-white/60">{t('admin.productForm.certificateHelp')}</p>
                             </div>
                             <div className="relative inline-flex items-center">
                                 <input type="checkbox" name="certificateOfAuthenticity" checked={product.certificateOfAuthenticity} onChange={handleCheckboxChange} className="sr-only peer" />
-                                <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-2 peer-focus:ring-brand-gold/50 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-gold"></div>
+                                <div className="w-11 h-6 bg-gray-200 dark:bg-gray-700 rounded-full peer peer-focus:ring-2 peer-focus:ring-brand-gold/50 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-gold"></div>
                             </div>
                         </label>
                     </div>
@@ -227,12 +225,12 @@ const ProductFormPage: React.FC<{ id?: string }> = ({ id }) => {
 
 
                 {/* Translations */}
-                <div className="bg-brand-white p-6 rounded-lg shadow-sm">
+                <div className="bg-brand-white dark:bg-brand-black p-6 rounded-lg shadow-sm">
                     <h3 className="font-bold font-serif mb-2">{t('admin.productForm.translations')}</h3>
-                    <div className="border-b border-black/10 mb-4">
+                    <div className="border-b border-black/10 dark:border-white/10 mb-4">
                         <nav className="-mb-px flex space-x-6">
                             {languages.map(lang => (
-                                <button key={lang.code} type="button" onClick={() => setActiveLang(lang.code)} className={`whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm ${activeLang === lang.code ? 'border-brand-gold text-brand-black' : 'border-transparent text-brand-black/50 hover:text-brand-black'}`}>
+                                <button key={lang.code} type="button" onClick={() => setActiveLang(lang.code)} className={`whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm ${activeLang === lang.code ? 'border-brand-gold text-brand-black dark:text-brand-white' : 'border-transparent text-brand-black/50 dark:text-brand-white/50 hover:text-brand-black dark:hover:text-brand-white'}`}>
                                     {lang.name}
                                 </button>
                             ))}
@@ -241,14 +239,14 @@ const ProductFormPage: React.FC<{ id?: string }> = ({ id }) => {
                     <div>
                         <Input id={`title-${activeLang}`} name="title" label={t('admin.productForm.title')} value={product.translations?.[activeLang]?.title || ''} onChange={handleTranslationChange} />
                         <div className="mt-4">
-                            <label className="block text-sm font-medium text-brand-black/80 mb-1">{t('admin.productForm.description')}</label>
-                            <textarea name="description" value={product.translations?.[activeLang]?.description || ''} onChange={handleTranslationChange} rows={8} className="w-full px-3 py-2 border border-brand-black/20 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-gold/50 focus:border-brand-gold/50 transition-shadow"></textarea>
+                            <label className="block text-sm font-medium text-brand-black/80 dark:text-brand-white/80 mb-1">{t('admin.productForm.description')}</label>
+                            <textarea name="description" value={product.translations?.[activeLang]?.description || ''} onChange={handleTranslationChange} rows={8} className="w-full px-3 py-2 border border-brand-black/20 dark:border-white/20 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-gold/50 focus:border-brand-gold/50 transition-shadow bg-transparent dark:bg-gray-800"></textarea>
                         </div>
                     </div>
                 </div>
                 
                 {/* Images */}
-                <div className="bg-brand-white p-6 rounded-lg shadow-sm">
+                <div className="bg-brand-white dark:bg-brand-black p-6 rounded-lg shadow-sm">
                     <h3 className="font-bold font-serif mb-4">{t('admin.productForm.images')}</h3>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                         {product.images.map((img, index) => (
@@ -257,7 +255,7 @@ const ProductFormPage: React.FC<{ id?: string }> = ({ id }) => {
                                 <button type="button" onClick={() => removeImage(index)} className="absolute top-1 right-1 bg-red-500 text-white rounded-full h-6 w-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">&times;</button>
                             </div>
                         ))}
-                        <label className="w-full h-32 border-2 border-dashed rounded-md flex flex-col items-center justify-center cursor-pointer hover:bg-black/5 transition-colors">
+                        <label className="w-full h-32 border-2 border-dashed rounded-md flex flex-col items-center justify-center cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
                             {uploading ? <Spinner/> : <span>+ {t('admin.productForm.addImage')}</span>}
                             <input type="file" multiple onChange={handleImageUpload} className="hidden" disabled={uploading} />
                         </label>
@@ -266,33 +264,33 @@ const ProductFormPage: React.FC<{ id?: string }> = ({ id }) => {
             </div>
             
             <div className="lg:col-span-1 space-y-8">
-                 <div className="bg-brand-white p-6 rounded-lg shadow-sm">
+                 <div className="bg-brand-white dark:bg-brand-black p-6 rounded-lg shadow-sm">
                     <h3 className="font-bold font-serif mb-4">Organization</h3>
                      <label className="flex items-center justify-between cursor-pointer">
                         <div>
                             <p className="font-medium">{t('admin.productForm.publish')}</p>
-                            <p className="text-sm text-brand-black/60">{t('admin.productForm.publishHelp')}</p>
+                            <p className="text-sm text-brand-black/60 dark:text-brand-white/60">{t('admin.productForm.publishHelp')}</p>
                         </div>
                         <div className="relative inline-flex items-center">
                             <input type="checkbox" name="published" checked={!!product.publishedAt} onChange={handleCheckboxChange} className="sr-only peer" />
-                            <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-2 peer-focus:ring-brand-gold/50 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-gold"></div>
+                            <div className="w-11 h-6 bg-gray-200 dark:bg-gray-700 rounded-full peer peer-focus:ring-2 peer-focus:ring-brand-gold/50 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-gold"></div>
                         </div>
                     </label>
-                    <div className="mt-6 border-t pt-6">
+                    <div className="mt-6 border-t dark:border-white/10 pt-6">
                         <label className="flex items-center justify-between cursor-pointer">
                             <div>
                                 <p className="font-medium">{t('admin.productForm.featured')}</p>
-                                <p className="text-sm text-brand-black/60">{t('admin.productForm.featuredHelp')}</p>
+                                <p className="text-sm text-brand-black/60 dark:text-brand-white/60">{t('admin.productForm.featuredHelp')}</p>
                             </div>
                             <div className="relative inline-flex items-center">
                                 <input type="checkbox" name="featured" checked={product.featured} onChange={handleCheckboxChange} className="sr-only peer" />
-                                <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-2 peer-focus:ring-brand-gold/50 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-gold"></div>
+                                <div className="w-11 h-6 bg-gray-200 dark:bg-gray-700 rounded-full peer peer-focus:ring-2 peer-focus:ring-brand-gold/50 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-gold"></div>
                             </div>
                         </label>
                     </div>
                 </div>
 
-                <div className="bg-brand-white p-6 rounded-lg shadow-sm">
+                <div className="bg-brand-white dark:bg-brand-black p-6 rounded-lg shadow-sm">
                     <h3 className="font-bold font-serif mb-4">Pricing & Inventory</h3>
                     <Input id="price" name="price.amount" label={t('admin.productForm.price')} type="number" value={product.price?.amount || 0} onChange={handleChange} />
                     <Input id="stock" name="stock" label={t('admin.productForm.stock')} type="number" value={product.stock} onChange={handleChange} className="mt-4" />

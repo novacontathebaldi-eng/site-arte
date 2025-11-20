@@ -4,7 +4,7 @@ import AdminHeader from './AdminHeader';
 
 const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
-    <div className="min-h-screen bg-black/5 flex text-brand-black">
+    <div className="min-h-screen bg-black/5 dark:bg-gray-900 flex text-brand-black dark:text-brand-white">
       <Sidebar />
       <div className="flex-1 flex flex-col">
         <AdminHeader />

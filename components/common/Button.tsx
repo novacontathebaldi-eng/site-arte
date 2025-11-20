@@ -4,9 +4,9 @@ type ButtonVariant = 'primary' | 'secondary' | 'tertiary';
 type ButtonSize = 'sm' | 'md' | 'lg';
 
 const variantClasses = {
-  primary: 'bg-brand-black text-brand-white hover:bg-black/80',
+  primary: 'bg-brand-black text-brand-white hover:bg-black/80 dark:bg-brand-white dark:text-brand-black dark:hover:bg-white/80',
   secondary: 'bg-brand-gold text-brand-black hover:bg-yellow-500',
-  tertiary: 'bg-brand-white text-brand-black border border-brand-black/20 hover:bg-black/5',
+  tertiary: 'bg-brand-white text-brand-black border border-brand-black/20 hover:bg-black/5 dark:bg-transparent dark:text-brand-white dark:border-brand-white/20 dark:hover:bg-white/10',
 };
 
 const sizeClasses = {
