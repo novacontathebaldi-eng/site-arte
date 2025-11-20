@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-// FIX: Added 'updateDoc' to the import list from 'firebase/firestore'.
-import { collection, addDoc, serverTimestamp, Timestamp, writeBatch, doc, getDoc, runTransaction, increment, updateDoc } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, Timestamp, writeBatch, doc, runTransaction, increment, updateDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { useCart } from '../../hooks/useCart';
 import { useAuth } from '../../hooks/useAuth';
@@ -11,6 +10,8 @@ import { Address, OrderDocument, OrderItem, LanguageCode } from '../../firebase-
 import AddressStep from './AddressStep';
 import PaymentStep from './PaymentStep';
 import ReviewStep from './ReviewStep';
+import Spinner from '../common/Spinner';
+import Button from '../common/Button';
 
 type CheckoutStep = 'address' | 'payment' | 'review';
 
@@ -21,11 +22,30 @@ const CheckoutPage: React.FC = () => {
   const [paymentMethod, setPaymentMethod] = useState<string>('creditCard');
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const { cartItems, subtotal, clearCart } = useCart();
-  const { user } = useAuth();
+  const { cartItems, subtotal, clearCart, loading: cartLoading } = useCart();
+  const { user, loading: authLoading, openAuthModal } = useAuth();
   const { navigate } = useRouter();
   const { addToast } = useToast();
   const { t, language } = useI18n();
+
+  if (authLoading || cartLoading) {
+    return <div className="flex justify-center items-center h-screen"><Spinner size="lg" /></div>;
+  }
+
+  if (!user) {
+    return (
+      <div className="text-center py-20">
+        <h2 className="text-2xl font-serif font-bold">{t('checkout.loginRequired')}</h2>
+        <p className="mt-2 text-brand-black/70">Please log in or create an account to proceed with your purchase.</p>
+        <Button onClick={openAuthModal} className="mt-6">Login / Sign Up</Button>
+      </div>
+    );
+  }
+  
+  if (cartItems.length === 0) {
+      navigate('/catalog');
+      return <div className="flex justify-center items-center h-screen"><Spinner size="lg" /></div>;
+  }
 
   const handleAddressSubmit = (shipping: Address, billing: Address) => {
     setShippingAddress(shipping);
@@ -52,15 +72,12 @@ const CheckoutPage: React.FC = () => {
         }
     }));
     
-    // Placeholder for shipping and tax calculation
-    const shippingCost = 500; // 5 EUR
-    const tax = 0; // Assuming tax is included
+    const shippingCost = 500;
+    const tax = 0;
     const total = subtotal + shippingCost;
 
     try {
         const counterRef = doc(db, 'counters', 'orders');
-        
-        // Use a transaction to safely increment the order number
         const newOrderNumber = await runTransaction(db, async (transaction) => {
             const counterDoc = await transaction.get(counterRef);
             if (!counterDoc.exists()) {
@@ -75,12 +92,9 @@ const CheckoutPage: React.FC = () => {
         const orderData: Omit<OrderDocument, 'id'> = {
             orderNumber: `#${newOrderNumber}`,
             userId: user.uid,
-            user: {
-                displayName: user.displayName || 'Guest',
-                email: user.email!,
-            },
+            user: { displayName: user.displayName || 'Guest', email: user.email!, },
             status: 'pending',
-            paymentStatus: 'pending', // Always start as pending
+            paymentStatus: 'pending',
             items: orderItems,
             pricing: { subtotal, shipping: shippingCost, discount: 0, tax, total, currency: 'EUR' },
             shippingAddress,
@@ -93,18 +107,12 @@ const CheckoutPage: React.FC = () => {
             updatedAt: serverTimestamp() as Timestamp,
         };
         
-        if (paymentMethod === 'pix') {
-            orderData.pixQrCode = 'https://picsum.photos/200';
-            orderData.pixCopiaECola = '00020126...placeholder...';
-        }
-        
-        const batch = writeBatch(db);
-        
-        // 1. Create the new order document
         const orderRef = doc(collection(db, 'orders'));
+        
+        // Simulate payment and create order in a batch
+        const batch = writeBatch(db);
         batch.set(orderRef, orderData);
         
-        // 2. Update user's stats
         const userRef = doc(db, 'users', user.uid);
         batch.update(userRef, {
             'stats.totalOrders': increment(1),
@@ -113,11 +121,14 @@ const CheckoutPage: React.FC = () => {
 
         await batch.commit();
         
-        // SIMULATE PAYMENT
-        // In a real app, this happens on a webhook from the payment provider
+        // Post-creation payment simulation
         if (paymentMethod === 'creditCard') {
-            // Simulate a successful payment
-            await updateDoc(orderRef, { paymentStatus: 'paid', status: 'confirmed' });
+            await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate network latency
+            const paymentSuccess = Math.random() > 0.2; // 80% success rate
+            
+            if (paymentSuccess) {
+                 await updateDoc(orderRef, { paymentStatus: 'paid', status: 'confirmed' });
+            }
         }
         
         clearCart();
@@ -152,38 +163,24 @@ const CheckoutPage: React.FC = () => {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <h1 className="text-3xl font-serif font-bold text-center mb-8">{t('checkout.title')}</h1>
         
-        {/* Step Indicator */}
         <nav aria-label="Progress">
           <ol role="list" className="flex items-center justify-center">
             {STEPS.map((s, index) => (
               <li key={s.id} className={`relative ${index !== STEPS.length - 1 ? 'pr-8 sm:pr-20' : ''}`}>
                 {index < currentStepIndex ? (
                   <>
-                    <div className="absolute inset-0 flex items-center" aria-hidden="true">
-                      <div className="h-0.5 w-full bg-brand-gold"></div>
-                    </div>
-                    <button onClick={() => setStep(s.id as CheckoutStep)} className="relative flex h-8 w-8 items-center justify-center rounded-full bg-brand-gold hover:bg-yellow-500">
-                        <span className="sr-only">{s.name}</span>
-                    </button>
+                    <div className="absolute inset-0 flex items-center" aria-hidden="true"><div className="h-0.5 w-full bg-brand-gold"></div></div>
+                    <button onClick={() => setStep(s.id as CheckoutStep)} className="relative flex h-8 w-8 items-center justify-center rounded-full bg-brand-gold hover:bg-yellow-500"><span className="sr-only">{s.name}</span></button>
                   </>
                 ) : index === currentStepIndex ? (
                    <>
-                    <div className="absolute inset-0 flex items-center" aria-hidden="true">
-                      <div className="h-0.5 w-full bg-gray-200"></div>
-                    </div>
-                    <div className="relative flex h-8 w-8 items-center justify-center rounded-full border-2 border-brand-gold bg-white">
-                      <span className="h-2.5 w-2.5 rounded-full bg-brand-gold" aria-hidden="true"></span>
-                      <span className="sr-only">{s.name}</span>
-                    </div>
+                    <div className="absolute inset-0 flex items-center" aria-hidden="true"><div className="h-0.5 w-full bg-gray-200"></div></div>
+                    <div className="relative flex h-8 w-8 items-center justify-center rounded-full border-2 border-brand-gold bg-white"><span className="h-2.5 w-2.5 rounded-full bg-brand-gold" aria-hidden="true"></span><span className="sr-only">{s.name}</span></div>
                   </>
                 ) : (
                    <>
-                    <div className="absolute inset-0 flex items-center" aria-hidden="true">
-                      <div className="h-0.5 w-full bg-gray-200"></div>
-                    </div>
-                    <div className="group relative flex h-8 w-8 items-center justify-center rounded-full border-2 border-gray-300 bg-white">
-                        <span className="sr-only">{s.name}</span>
-                    </div>
+                    <div className="absolute inset-0 flex items-center" aria-hidden="true"><div className="h-0.5 w-full bg-gray-200"></div></div>
+                    <div className="group relative flex h-8 w-8 items-center justify-center rounded-full border-2 border-gray-300 bg-white"><span className="sr-only">{s.name}</span></div>
                   </>
                 )}
               </li>

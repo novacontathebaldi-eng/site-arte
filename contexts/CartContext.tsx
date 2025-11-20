@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect, ReactNode, useCallback } from 'react';
-import { doc, setDoc, getDoc, collection, getDocs, writeBatch, deleteDoc } from 'firebase/firestore';
+import { doc, setDoc, getDoc, collection, getDocs, writeBatch, deleteDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { ProductDocument, CartItemDocument } from '../firebase-types';
 import { useAuth } from '../hooks/useAuth';
@@ -8,6 +8,11 @@ import { useI18n } from '../hooks/useI18n';
 
 export interface CartItem extends ProductDocument {
   quantity: number;
+}
+
+interface GuestCart {
+  items: CartItem[];
+  lastUpdated: number;
 }
 
 interface CartContextType {
@@ -27,6 +32,8 @@ interface CartContextType {
 export const CartContext = createContext<CartContextType | undefined>(undefined);
 
 const GUEST_CART_KEY = 'meeh_guest_cart';
+const GUEST_CART_EXPIRATION = 7 * 24 * 60 * 60 * 1000; // 7 days
+const USER_CART_EXPIRATION = 30 * 24 * 60 * 60 * 1000; // 30 days
 
 export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
@@ -42,23 +49,17 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const batch = writeBatch(db);
     const cartCollectionRef = collection(db, 'users', user.uid, 'cart');
     
-    // Clear remote cart first
+    // This function now acts as an "overwrite" which is what we want after a merge.
     const existingCartSnap = await getDocs(cartCollectionRef);
     existingCartSnap.forEach(doc => batch.delete(doc.ref));
 
-    // Add local items to remote cart
     localCart.forEach(item => {
-        if (!item.price) return; // Do not sync items without a price
+        if (!item.price) return;
         const docRef = doc(cartCollectionRef, item.id);
-        const cartItemData: CartItemDocument = {
+        const cartItemData: Partial<CartItemDocument> = {
             productId: item.id,
             quantity: item.quantity,
-            addedAt: new Date() as any, // Firestore will convert to Timestamp
-            productSnapshot: { // Store a lightweight snapshot
-                translations: item.translations,
-                price: item.price,
-                images: item.images,
-            }
+            addedAt: serverTimestamp(),
         };
         batch.set(docRef, cartItemData);
     });
@@ -66,74 +67,101 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     await batch.commit();
   }, [user]);
 
-  const loadCartFromFirestore = useCallback(async () => {
-    if (!user) return;
-    const cartCollectionRef = collection(db, 'users', user.uid, 'cart');
-    const querySnapshot = await getDocs(cartCollectionRef);
-    const firestoreCartItems: CartItem[] = [];
-
-    for (const doc of querySnapshot.docs) {
-      const cartItemData = doc.data() as CartItemDocument;
-      const productDocRef = doc(db, 'products', cartItemData.productId);
-      const productSnap = await getDoc(productDocRef);
-      if (productSnap.exists()) {
-        firestoreCartItems.push({
-          ...(productSnap.data() as ProductDocument),
-          id: productSnap.id,
-          quantity: cartItemData.quantity,
-        });
-      }
-    }
-    setCartItems(firestoreCartItems);
-  }, [user]);
-  
   // Effect to handle user login/logout and cart synchronization
   useEffect(() => {
     setLoading(true);
-    const localCartRaw = localStorage.getItem(GUEST_CART_KEY);
-    const localCart: CartItem[] = localCartRaw ? JSON.parse(localCartRaw) : [];
 
     if (user) {
         const processUserCart = async () => {
-            if (localCart.length > 0) {
-                await syncCartWithFirestore(localCart);
-                localStorage.removeItem(GUEST_CART_KEY);
+            // 1. Load guest cart from local storage
+            const localCartRaw = localStorage.getItem(GUEST_CART_KEY);
+            const guestCart: GuestCart | null = localCartRaw ? JSON.parse(localCartRaw) : null;
+            const localItems: CartItem[] = guestCart?.items || [];
+
+            // 2. Load remote cart from Firestore
+            const cartCollectionRef = collection(db, 'users', user.uid, 'cart');
+            const remoteSnapshot = await getDocs(cartCollectionRef);
+            const remoteCartMap: Map<string, CartItem> = new Map();
+
+            for (const remoteDoc of remoteSnapshot.docs) {
+                const cartItemData = remoteDoc.data() as CartItemDocument;
+                
+                // Check for expiration
+                const itemTimestamp = cartItemData.addedAt?.toDate().getTime();
+                if(itemTimestamp && Date.now() - itemTimestamp > USER_CART_EXPIRATION) {
+                    await deleteDoc(remoteDoc.ref);
+                    continue; // Skip expired item
+                }
+                
+                const productDocRef = doc(db, 'products', cartItemData.productId);
+                const productSnap = await getDoc(productDocRef);
+                if (productSnap.exists()) {
+                    const productData = { ...(productSnap.data() as ProductDocument), id: productSnap.id };
+                    remoteCartMap.set(productData.id, { ...productData, quantity: cartItemData.quantity });
+                }
             }
-            await loadCartFromFirestore();
+
+            // 3. Merge guest cart into remote cart if guest cart exists
+            if (localItems.length > 0) {
+                localItems.forEach(localItem => {
+                    const existingItem = remoteCartMap.get(localItem.id);
+                    if (existingItem) {
+                        const newQuantity = existingItem.quantity + localItem.quantity;
+                        existingItem.quantity = Math.min(newQuantity, existingItem.stock);
+                    } else {
+                        remoteCartMap.set(localItem.id, localItem);
+                    }
+                });
+
+                const mergedCart = Array.from(remoteCartMap.values());
+                await syncCartWithFirestore(mergedCart); // Overwrite Firestore with merged cart
+                setCartItems(mergedCart);
+                localStorage.removeItem(GUEST_CART_KEY); // Clean up guest cart
+            } else {
+                setCartItems(Array.from(remoteCartMap.values()));
+            }
             setLoading(false);
         };
         processUserCart();
     } else {
-        setCartItems(localCart);
+        // Guest user logic
+        const localCartRaw = localStorage.getItem(GUEST_CART_KEY);
+        if (localCartRaw) {
+            const guestCart: GuestCart = JSON.parse(localCartRaw);
+            if (Date.now() - guestCart.lastUpdated > GUEST_CART_EXPIRATION) {
+                localStorage.removeItem(GUEST_CART_KEY);
+                setCartItems([]);
+            } else {
+                setCartItems(guestCart.items);
+            }
+        } else {
+            setCartItems([]);
+        }
         setLoading(false);
     }
-  }, [user, loadCartFromFirestore, syncCartWithFirestore]);
+  }, [user, syncCartWithFirestore]);
 
 
   const saveCart = (items: CartItem[]) => {
+    setCartItems(items);
     if (user) {
-      // Save to Firestore (can be optimized to not save on every change)
       syncCartWithFirestore(items);
     } else {
-      // Save to local storage for guests
-      localStorage.setItem(GUEST_CART_KEY, JSON.stringify(items));
+      const guestCart: GuestCart = { items, lastUpdated: Date.now() };
+      localStorage.setItem(GUEST_CART_KEY, JSON.stringify(guestCart));
     }
-    setCartItems(items);
   };
   
   const toggleCart = () => setIsCartOpen(prev => !prev);
 
   const addToCart = (product: ProductDocument, quantity: number) => {
-    // Data validation guard
     if (!product.price || typeof product.price.amount !== 'number') {
         addToast('This product is currently unavailable for purchase.', 'error');
         return;
     }
-
-    // Check if the item is unique and already in cart
     if (product.stock === 1 && cartItems.some(item => item.id === product.id)) {
         addToast(t('cart.uniqueItemError'), 'info');
-        setIsCartOpen(true); // Still open the cart to show it's there
+        setIsCartOpen(true);
         return;
     }
 
@@ -157,9 +185,8 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             newItems = [...prevItems, { ...product, quantity }];
         }
         
-        saveCart(newItems);
-        // Only trigger animations/open cart if a change was actually made
         if (newItems !== prevItems) {
+            saveCart(newItems);
             setItemAddedCount(c => c + 1);
             setIsCartOpen(true);
         }
@@ -191,8 +218,17 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
   
-  const clearCart = () => {
-    saveCart([]);
+  const clearCart = async () => {
+    setCartItems([]);
+    if (user) {
+        const cartCollectionRef = collection(db, 'users', user.uid, 'cart');
+        const existingCartSnap = await getDocs(cartCollectionRef);
+        const batch = writeBatch(db);
+        existingCartSnap.forEach(doc => batch.delete(doc.ref));
+        await batch.commit();
+    } else {
+        localStorage.removeItem(GUEST_CART_KEY);
+    }
   };
 
   const totalItems = cartItems.reduce((total, item) => total + item.quantity, 0);

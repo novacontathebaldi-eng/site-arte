@@ -25,6 +25,9 @@ interface AuthContextType {
   loginWithEmail: (email: string, pass: string) => Promise<User>;
   loginWithGoogle: () => Promise<User>;
   sendPasswordReset: (email: string) => Promise<void>;
+  isAuthModalOpen: boolean;
+  openAuthModal: () => void;
+  closeAuthModal: () => void;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -33,6 +36,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [user, setUser] = useState<User | null>(null);
   const [userDoc, setUserDoc] = useState<UserDocument | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   
   const createUserProfileDocument = async (user: User, additionalData?: Record<string, any>) => {
     const userRef = doc(db, 'users', user.uid);
@@ -130,7 +134,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     await sendPasswordResetEmail(auth, email);
   }
 
-  const value = { user, userDoc, loading, logout, signupWithEmail, loginWithEmail, loginWithGoogle, sendPasswordReset };
+  const openAuthModal = () => setIsAuthModalOpen(true);
+  const closeAuthModal = () => setIsAuthModalOpen(false);
+
+
+  const value = { user, userDoc, loading, logout, signupWithEmail, loginWithEmail, loginWithGoogle, sendPasswordReset, isAuthModalOpen, openAuthModal, closeAuthModal };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

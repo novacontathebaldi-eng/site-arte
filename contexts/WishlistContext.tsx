@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect, ReactNode, useCallback } from 'react';
-import { collection, doc, setDoc, deleteDoc, onSnapshot, Unsubscribe } from 'firebase/firestore';
+import { collection, doc, setDoc, deleteDoc, onSnapshot, Unsubscribe, serverTimestamp } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { ProductDocument, WishlistItemDocument } from '../firebase-types';
 import { useAuth } from '../hooks/useAuth';
@@ -18,7 +18,7 @@ export const WishlistContext = createContext<WishlistContextType | undefined>(un
 export const WishlistProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [wishlistItems, setWishlistItems] = useState<ProductDocument[]>([]);
   const [loading, setLoading] = useState(true);
-  const { user } = useAuth();
+  const { user, openAuthModal } = useAuth();
   const { addToast } = useToast();
   
   useEffect(() => {
@@ -27,10 +27,13 @@ export const WishlistProvider: React.FC<{ children: ReactNode }> = ({ children }
     if (user) {
       const wishlistColRef = collection(db, 'users', user.uid, 'wishlist');
       unsubscribe = onSnapshot(wishlistColRef, (snapshot) => {
-        const items = snapshot.docs.map(doc => ({
-            id: doc.id,
-            ...(doc.data() as WishlistItemDocument).productSnapshot,
-        } as ProductDocument));
+        const items = snapshot.docs.map(doc => {
+            const data = doc.data() as WishlistItemDocument;
+            return {
+                ...data.productSnapshot,
+                id: doc.id,
+            } as ProductDocument
+        });
         setWishlistItems(items);
         setLoading(false);
       }, (error) => {
@@ -47,17 +50,18 @@ export const WishlistProvider: React.FC<{ children: ReactNode }> = ({ children }
   const addToWishlist = async (product: ProductDocument) => {
     if (!user) {
       addToast('Please log in to save items to your wishlist.', 'info');
+      openAuthModal();
       return;
     }
     try {
       const wishlistItemRef = doc(db, 'users', user.uid, 'wishlist', product.id);
       const itemData: WishlistItemDocument = {
         productId: product.id,
-        addedAt: new Date() as any,
+        addedAt: serverTimestamp() as any,
         productSnapshot: {
           translations: product.translations,
           price: product.price,
-          images: product.images ? product.images.slice(0,1) : [], // Just save the first image safely
+          images: product.images ? product.images.slice(0,1) : [],
           category: product.category,
         }
       }

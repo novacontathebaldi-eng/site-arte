@@ -6,7 +6,6 @@ import Footer from './components/Footer';
 import HomePage from './components/HomePage';
 import ProductDetailPage from './components/ProductDetailPage';
 import CheckoutPage from './components/checkout/CheckoutPage';
-import CheckoutGuard from './components/checkout/CheckoutGuard';
 import OrderConfirmationPage from './components/OrderConfirmationPage';
 import DashboardLayout from './components/dashboard/DashboardLayout';
 import CartSidebar from './components/CartSidebar';
@@ -26,7 +25,7 @@ const PageContent: React.FC = () => {
     }
 
     if (path.startsWith('/checkout')) {
-      return <CheckoutGuard><CheckoutPage /></CheckoutGuard>;
+      return <CheckoutPage />;
     }
     
     if (path.startsWith('/order-confirmation')) {

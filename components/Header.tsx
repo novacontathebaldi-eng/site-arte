@@ -48,18 +48,17 @@ const XIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
 
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const { t } = useI18n();
-  const { user, userDoc, logout, loading: authLoading } = useAuth();
+  const { user, userDoc, logout, loading: authLoading, isAuthModalOpen, openAuthModal, closeAuthModal } = useAuth();
   const { toggleCart, totalItems } = useCart();
 
   const handleUserIconClick = () => {
     if (user) {
       setIsUserMenuOpen(!isUserMenuOpen);
     } else {
-      setIsAuthModalOpen(true);
+      openAuthModal();
     }
   };
 
@@ -150,7 +149,7 @@ const Header: React.FC = () => {
           </div>
         )}
       </header>
-      <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
+      <AuthModal isOpen={isAuthModalOpen} onClose={closeAuthModal} />
       <SearchModal isOpen={isSearchModalOpen} onClose={() => setIsSearchModalOpen(false)} />
     </Fragment>
   );
