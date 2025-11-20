@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { collection, addDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
+// FIX: Added 'updateDoc' to the import list from 'firebase/firestore'.
+import { collection, addDoc, serverTimestamp, Timestamp, writeBatch, doc, getDoc, runTransaction, increment, updateDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { useCart } from '../../hooks/useCart';
 import { useAuth } from '../../hooks/useAuth';
@@ -41,7 +42,15 @@ const CheckoutPage: React.FC = () => {
     if (!user || !shippingAddress || !billingAddress) return null;
     setIsProcessing(true);
 
-    const orderItems: OrderItem[] = cartItems.map(item => ({...item}));
+    const orderItems: OrderItem[] = cartItems.map(item => ({
+        productId: item.id,
+        quantity: item.quantity,
+        snapshot: {
+            title: item.translations[language]?.title || item.translations.en?.title || 'Untitled',
+            imageUrl: item.images[0]?.thumbnailUrl || item.images[0]?.url,
+            price: item.price.amount,
+        }
+    }));
     
     // Placeholder for shipping and tax calculation
     const shippingCost = 500; // 5 EUR
@@ -49,10 +58,29 @@ const CheckoutPage: React.FC = () => {
     const total = subtotal + shippingCost;
 
     try {
-        const orderData: Omit<OrderDocument, 'id' | 'orderNumber'> = {
+        const counterRef = doc(db, 'counters', 'orders');
+        
+        // Use a transaction to safely increment the order number
+        const newOrderNumber = await runTransaction(db, async (transaction) => {
+            const counterDoc = await transaction.get(counterRef);
+            if (!counterDoc.exists()) {
+                transaction.set(counterRef, { current: 1001 });
+                return 1001;
+            }
+            const newCurrent = counterDoc.data().current + 1;
+            transaction.update(counterRef, { current: newCurrent });
+            return newCurrent;
+        });
+
+        const orderData: Omit<OrderDocument, 'id'> = {
+            orderNumber: `#${newOrderNumber}`,
             userId: user.uid,
+            user: {
+                displayName: user.displayName || 'Guest',
+                email: user.email!,
+            },
             status: 'pending',
-            paymentStatus: 'pending',
+            paymentStatus: 'pending', // Always start as pending
             items: orderItems,
             pricing: { subtotal, shipping: shippingCost, discount: 0, tax, total, currency: 'EUR' },
             shippingAddress,
@@ -65,21 +93,32 @@ const CheckoutPage: React.FC = () => {
             updatedAt: serverTimestamp() as Timestamp,
         };
         
-        // This is where you would call your backend to generate PIX code if selected
         if (paymentMethod === 'pix') {
-            // NOTE: In a real app, call a secure backend function here.
-            // await generatePixData();
-            // This is a placeholder:
             orderData.pixQrCode = 'https://picsum.photos/200';
-            orderData.pixCopiaECola = '00020126...';
+            orderData.pixCopiaECola = '00020126...placeholder...';
         }
         
-        // Add order to Firestore
-        const orderRef = await addDoc(collection(db, 'orders'), orderData);
+        const batch = writeBatch(db);
         
-        // TODO: Here you would call Revolut or another payment processor if method is 'creditCard'
-        // If payment is successful, you would update the order's paymentStatus to 'paid'.
-        // For now, we assume payment will be handled later.
+        // 1. Create the new order document
+        const orderRef = doc(collection(db, 'orders'));
+        batch.set(orderRef, orderData);
+        
+        // 2. Update user's stats
+        const userRef = doc(db, 'users', user.uid);
+        batch.update(userRef, {
+            'stats.totalOrders': increment(1),
+            'stats.totalSpent': increment(total),
+        });
+
+        await batch.commit();
+        
+        // SIMULATE PAYMENT
+        // In a real app, this happens on a webhook from the payment provider
+        if (paymentMethod === 'creditCard') {
+            // Simulate a successful payment
+            await updateDoc(orderRef, { paymentStatus: 'paid', status: 'confirmed' });
+        }
         
         clearCart();
         return orderRef.id;
@@ -96,7 +135,6 @@ const CheckoutPage: React.FC = () => {
   const handleFinalSubmit = async () => {
     const orderId = await createOrder();
     if (orderId) {
-      // TODO: Send confirmation email via Brevo
       navigate(`/order-confirmation?id=${orderId}`);
     }
   };

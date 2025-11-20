@@ -52,8 +52,16 @@ const AddressStep: React.FC<AddressStepProps> = ({ onSubmit }) => {
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const userAddresses = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as AddressDocument));
       setAddresses(userAddresses);
-      if (userAddresses.length > 0 && !selectedShipping) {
-          setSelectedShipping(userAddresses[0].id);
+      
+      if (userAddresses.length > 0) {
+        // If there's a default, use it. Otherwise, use the first one.
+        const defaultAddress = userAddresses.find(a => a.isDefault);
+        if (!selectedShipping) {
+          setSelectedShipping(defaultAddress ? defaultAddress.id : userAddresses[0].id);
+        }
+      } else {
+        // Automatically show form if no addresses exist
+        setShowNewAddressForm(true);
       }
       setLoading(false);
     });
@@ -87,7 +95,7 @@ const AddressStep: React.FC<AddressStepProps> = ({ onSubmit }) => {
     <div className="bg-white p-8 rounded-lg shadow-md">
       <div>
         <h2 className="text-xl font-bold font-serif mb-4">{t('checkout.shippingAddress')}</h2>
-        {addresses.length > 0 ? (
+        {addresses.length > 0 && (
             <div className="space-y-4">
                 {addresses.map(addr => (
                     <label key={addr.id} className="flex items-start p-4 border rounded-md cursor-pointer">
@@ -101,8 +109,8 @@ const AddressStep: React.FC<AddressStepProps> = ({ onSubmit }) => {
                     </label>
                 ))}
             </div>
-        ) : <p className="text-brand-black/70">No saved addresses.</p>}
-        <button onClick={() => setShowNewAddressForm(!showNewAddressForm)} className="mt-4 text-brand-gold font-semibold">{t('checkout.addNewAddress')}</button>
+        )}
+        <button onClick={() => setShowNewAddressForm(!showNewAddressForm)} className="mt-4 text-brand-gold font-semibold">{showNewAddressForm ? 'Cancel' : t('checkout.addNewAddress')}</button>
         {showNewAddressForm && <AddressForm onSave={handleAddNewAddress}/>}
       </div>
 

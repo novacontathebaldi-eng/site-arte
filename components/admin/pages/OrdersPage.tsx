@@ -48,6 +48,20 @@ const OrdersPage: React.FC = () => {
         }
     };
 
+    const getPaymentStatusColor = (status: string) => {
+        switch(status) {
+            case 'paid':
+                return 'bg-green-100 text-green-800';
+            case 'pending':
+            case 'failed':
+                return 'bg-yellow-100 text-yellow-800';
+            case 'refunded':
+                return 'bg-gray-100 text-gray-800';
+            default:
+                return 'bg-gray-100 text-gray-800';
+        }
+    }
+
 
     if (loading) {
         return <div className="flex justify-center items-center h-full"><Spinner size="lg" /></div>;
@@ -60,10 +74,11 @@ const OrdersPage: React.FC = () => {
                 <table className="w-full text-sm text-left">
                      <thead className="bg-black/5">
                         <tr>
-                            <th className="p-3">Order ID</th>
+                            <th className="p-3">Order</th>
                             <th className="p-3">Customer</th>
                             <th className="p-3">Date</th>
                             <th className="p-3">Status</th>
+                            <th className="p-3">{t('admin.orders.table.paymentStatus')}</th>
                             <th className="p-3 text-right">Total</th>
                             <th className="p-3 text-right">Actions</th>
                         </tr>
@@ -71,12 +86,17 @@ const OrdersPage: React.FC = () => {
                      <tbody>
                         {orders.map(order => (
                             <tr key={order.id} className="border-b border-black/10 hover:bg-black/5 transition-colors">
-                                <td className="p-3 font-mono text-xs">#{order.id.slice(0, 8)}</td>
+                                <td className="p-3 font-mono text-xs">{order.orderNumber}</td>
                                 <td className="p-3 font-medium">{order.shippingAddress.recipientName}</td>
                                 <td className="p-3">{new Date(order.createdAt.seconds * 1000).toLocaleDateString()}</td>
                                 <td className="p-3">
                                     <span className={`px-2 py-1 text-xs rounded-full font-medium capitalize ${getStatusColor(order.status)}`}>
                                         {order.status}
+                                    </span>
+                                </td>
+                                 <td className="p-3">
+                                    <span className={`px-2 py-1 text-xs rounded-full font-medium capitalize ${getPaymentStatusColor(order.paymentStatus)}`}>
+                                        {order.paymentStatus}
                                     </span>
                                 </td>
                                 <td className="p-3 text-right font-medium">€{(order.pricing.total / 100).toFixed(2)}</td>

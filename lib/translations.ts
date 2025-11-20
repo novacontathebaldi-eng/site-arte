@@ -132,6 +132,9 @@ export const translations: Record<Language, Record<string, any>> = {
       placeOrder: 'Passer la commande',
       processing: 'Traitement...',
       error: 'Une erreur s\'est produite lors de la commande.',
+      completePayment: 'Compléter le paiement maintenant',
+      paymentUpdateSuccess: 'Paiement mis à jour avec succès!',
+      paymentUpdateError: 'Échec de la mise à jour du paiement.',
     },
     order: {
       confirmationTitle: 'Merci pour votre commande !',
@@ -247,6 +250,9 @@ export const translations: Record<Language, Record<string, any>> = {
         save: 'Enregistrer',
         statusUpdated: 'Statut mis à jour',
         trackingAdded: 'Suivi ajouté',
+        table: {
+            paymentStatus: 'Statut Pmt'
+        },
       },
       customers: {
         title: 'Gérer les Clients',
@@ -466,6 +472,9 @@ export const translations: Record<Language, Record<string, any>> = {
       placeOrder: 'Place Order',
       processing: 'Processing...',
       error: 'An error occurred while placing your order.',
+      completePayment: 'Complete Payment Now',
+      paymentUpdateSuccess: 'Payment updated successfully!',
+      paymentUpdateError: 'Failed to update payment.',
     },
     order: {
       confirmationTitle: 'Thank you for your order!',
@@ -581,6 +590,9 @@ export const translations: Record<Language, Record<string, any>> = {
         save: 'Save',
         statusUpdated: 'Status updated',
         trackingAdded: 'Tracking added',
+         table: {
+            paymentStatus: 'Pmt Status'
+        },
       },
       customers: {
         title: 'Manage Customers',
@@ -778,6 +790,13 @@ export const translations: Record<Language, Record<string, any>> = {
       inWishlist: 'Auf der Wunschliste',
       moveToCart: 'In den Warenkorb',
     },
+    admin: {
+       orders: {
+         table: {
+            paymentStatus: 'Zahlungsstatus'
+        },
+      }
+    },
     catalog: {
       fetchError: "Kunstwerke konnten nicht geladen werden. Bitte versuchen Sie es erneut.",
       retry: "Erneut versuchen",
@@ -930,6 +949,9 @@ export const translations: Record<Language, Record<string, any>> = {
       placeOrder: 'Finalizar Pedido',
       processing: 'Processando...',
       error: 'Ocorreu um erro ao finalizar seu pedido.',
+      completePayment: 'Completar Pagamento Agora',
+      paymentUpdateSuccess: 'Pagamento atualizado com sucesso!',
+      paymentUpdateError: 'Falha ao atualizar o pagamento.',
     },
     order: {
       confirmationTitle: 'Obrigado pelo seu pedido!',
@@ -1045,6 +1067,9 @@ export const translations: Record<Language, Record<string, any>> = {
         save: 'Salvar',
         statusUpdated: 'Status atualizado',
         trackingAdded: 'Rastreamento adicionado',
+         table: {
+            paymentStatus: 'Status Pagto.'
+        },
       },
       customers: {
         title: 'Gerenciar Clientes',

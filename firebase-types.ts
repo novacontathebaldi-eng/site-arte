@@ -105,9 +105,14 @@ export interface Address {
     phone?: string;
 }
 
-export interface OrderItem extends ProductDocument {
-    // Inherits all product fields, plus quantity
+export interface OrderItem {
+    productId: string;
     quantity: number;
+    snapshot: {
+        title: string;
+        imageUrl: string;
+        price: number; // price per item in cents at time of purchase
+    };
 }
 
 export interface OrderPricing {

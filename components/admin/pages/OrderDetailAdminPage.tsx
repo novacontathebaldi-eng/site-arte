@@ -73,6 +73,15 @@ const OrderDetailAdminPage: React.FC<OrderDetailAdminPageProps> = ({ orderId }) 
              addToast('Failed to add tracking', 'error');
         }
     }
+    
+    const getPaymentStatusColor = (status: string) => {
+        switch(status) {
+            case 'paid': return 'bg-green-100 text-green-800';
+            case 'pending': case 'failed': return 'bg-yellow-100 text-yellow-800';
+            case 'refunded': return 'bg-gray-100 text-gray-800';
+            default: return 'bg-gray-100 text-gray-800';
+        }
+    }
 
     if (loading) return <div className="flex justify-center py-12"><Spinner size="lg" /></div>;
     if (!order) return <p>Order not found.</p>;
@@ -87,16 +96,30 @@ const OrderDetailAdminPage: React.FC<OrderDetailAdminPageProps> = ({ orderId }) 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-8">
-                <Card title={`${t('admin.orders.detailsTitle')} #${order.id.slice(0,8)}`}>
+                <Card title={`${t('admin.orders.detailsTitle')} ${order.orderNumber}`}>
+                     <div className="flex items-center gap-4 mb-4">
+                        <div>
+                            <span className="text-sm font-medium">Order Status:</span>
+                            <span className={`ml-2 px-2 py-1 text-xs rounded-full font-medium capitalize bg-blue-100 text-blue-800`}>
+                                {order.status}
+                            </span>
+                        </div>
+                         <div>
+                            <span className="text-sm font-medium">Payment Status:</span>
+                            <span className={`ml-2 px-2 py-1 text-xs rounded-full font-medium capitalize ${getPaymentStatusColor(order.paymentStatus)}`}>
+                                {order.paymentStatus}
+                            </span>
+                        </div>
+                    </div>
                     <div className="divide-y divide-black/10">
                     {order.items.map(item => (
-                        <div key={item.id} className="flex items-center py-4">
-                            <img src={item.images[0]?.thumbnailUrl} alt={item.translations[language]?.title} className="w-16 h-16 rounded object-cover"/>
+                        <div key={item.productId} className="flex items-center py-4">
+                            <img src={item.snapshot.imageUrl} alt={item.snapshot.title} className="w-16 h-16 rounded object-cover"/>
                             <div className="ml-4 flex-grow">
-                                <p className="font-semibold">{item.translations[language]?.title}</p>
-                                <p className="text-sm text-brand-black/60">Qty: {item.quantity} | SKU: {item.sku}</p>
+                                <p className="font-semibold">{item.snapshot.title}</p>
+                                <p className="text-sm text-brand-black/60">Qty: {item.quantity}</p>
                             </div>
-                            <p className="font-medium">€{(item.price.amount * item.quantity / 100).toFixed(2)}</p>
+                            <p className="font-medium">€{(item.snapshot.price * item.quantity / 100).toFixed(2)}</p>
                         </div>
                     ))}
                     </div>
