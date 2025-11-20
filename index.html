@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="/index.css">
     <script>
       tailwind.config = {
+        darkMode: 'class',
         theme: {
           extend: {
             colors: {
@@ -60,7 +61,7 @@
 }
 </script>
 </head>
-  <body class="bg-brand-white text-brand-black">
+  <body class="bg-brand-white text-brand-black dark:bg-brand-black dark:text-brand-white transition-colors duration-300">
     <div id="root"></div>
   <script type="module" src="/index.tsx"></script>
 </body>

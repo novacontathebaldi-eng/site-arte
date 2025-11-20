@@ -19,15 +19,15 @@ const LanguageSelector: React.FC = () => {
   const { language, setLanguage } = useI18n();
 
   return (
-    <div className="flex items-center space-x-1 p-1 bg-white/10 rounded-md">
+    <div className="flex items-center space-x-1 p-1 bg-black/5 dark:bg-white/10 rounded-md">
       {LANGUAGES.map((lang) => (
         <button
           key={lang.code}
           onClick={() => setLanguage(lang.code)}
           className={`flex items-center justify-center w-9 h-8 text-xs font-semibold rounded-md transition-colors
             ${language === lang.code
-              ? 'bg-brand-white ring-1 ring-white/20 shadow-sm'
-              : 'hover:bg-white/10'
+              ? 'bg-brand-white dark:bg-gray-700 ring-1 ring-black/10 dark:ring-white/10 shadow-sm'
+              : 'hover:bg-black/5 dark:hover:bg-white/10'
             }`}
           aria-label={`Switch to ${lang.name}`}
         >

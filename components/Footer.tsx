@@ -11,14 +11,14 @@ const Footer: React.FC = () => {
     const { settings } = useSettings();
     
   return (
-    <footer className="bg-brand-black text-brand-white/70">
+    <footer className="bg-black/5 dark:bg-white/5 text-brand-black/70 dark:text-brand-white/70">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
           <div className="col-span-2 md:col-span-1">
-             <a href="#" className="text-2xl font-serif font-bold text-brand-white">Meeh</a>
+             <a href="#" className="text-2xl font-serif font-bold text-brand-black dark:text-brand-white">Meeh</a>
           </div>
           <div>
-            <h3 className="font-semibold text-brand-white tracking-wider uppercase">{t('footer.shop')}</h3>
+            <h3 className="font-semibold text-brand-black dark:text-brand-white tracking-wider uppercase">{t('footer.shop')}</h3>
             <ul className="mt-4 space-y-2">
               {NAV_LINKS.map(link => (
                 <li key={link.href}><a href={link.href} className="hover:text-brand-gold">{t(link.labelKey)}</a></li>
@@ -26,7 +26,7 @@ const Footer: React.FC = () => {
             </ul>
           </div>
           <div>
-            <h3 className="font-semibold text-brand-white tracking-wider uppercase">{t('footer.info')}</h3>
+            <h3 className="font-semibold text-brand-black dark:text-brand-white tracking-wider uppercase">{t('footer.info')}</h3>
             <ul className="mt-4 space-y-2">
               <li><a href="#" className="hover:text-brand-gold">{t('footer.about')}</a></li>
               <li><a href="#" className="hover:text-brand-gold">{t('footer.contact')}</a></li>
@@ -35,7 +35,7 @@ const Footer: React.FC = () => {
             </ul>
           </div>
           <div>
-             <h3 className="font-semibold text-brand-white tracking-wider uppercase">{t('footer.contactInfo')}</h3>
+             <h3 className="font-semibold text-brand-black dark:text-brand-white tracking-wider uppercase">{t('footer.contactInfo')}</h3>
              <ul className="mt-4 space-y-2">
                  <li><a href={`mailto:${settings?.contactEmail || 'hello@meeh.lu'}`} className="hover:text-brand-gold">{settings?.contactEmail || 'hello@meeh.lu'}</a></li>
                  <li>Luxembourg</li>
@@ -46,14 +46,14 @@ const Footer: React.FC = () => {
              </div>
           </div>
           <div>
-            <h3 className="font-semibold text-brand-white tracking-wider uppercase">{t('footer.language')}</h3>
+            <h3 className="font-semibold text-brand-black dark:text-brand-white tracking-wider uppercase">{t('footer.language')}</h3>
             <div className="mt-4">
                 <LanguageSelector />
             </div>
           </div>
         </div>
 
-        <div className="mt-12 border-t border-white/10 pt-8 text-center text-sm">
+        <div className="mt-12 border-t border-black/10 dark:border-white/10 pt-8 text-center text-sm">
           <p>&copy; {new Date().getFullYear()} Melissa "Meeh" Pelussi. {t('footer.rights')}</p>
         </div>
       </div>

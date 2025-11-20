@@ -37,15 +37,15 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children }) => {
         }
       `}</style>
       <div
-        className="relative bg-brand-white rounded-lg shadow-xl p-8 max-w-md w-full"
+        className="relative bg-brand-white dark:bg-brand-black rounded-lg shadow-xl p-8 max-w-md w-full"
         onClick={(e) => e.stopPropagation()}
       >
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-brand-black/40 hover:text-brand-black"
+          className="absolute top-4 right-4 text-brand-black/40 dark:text-brand-white/40 hover:text-brand-black dark:hover:text-brand-white"
           aria-label="Close modal"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M18 6 6 18" />
             <path d="m6 6 12 12" />
           </svg>

@@ -6,6 +6,7 @@ import AuthModal from './auth/AuthModal';
 import { useCart } from '../hooks/useCart';
 import SearchModal from './catalog/SearchModal';
 import Skeleton from './common/Skeleton';
+import ThemeSwitcher from './ThemeSwitcher';
 
 // Icons
 const HeartIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
@@ -64,16 +65,16 @@ const Header: React.FC = () => {
 
   return (
     <Fragment>
-      <header className="sticky top-0 z-50 bg-brand-white/80 backdrop-blur-lg shadow-sm">
+      <header className="sticky top-0 z-50 bg-brand-white/80 dark:bg-brand-black/80 backdrop-blur-lg shadow-sm">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
             <div className="flex-shrink-0">
-              <a href="#" className="text-2xl font-serif font-bold text-brand-black">Meeh</a>
+              <a href="#" className="text-2xl font-serif font-bold text-brand-black dark:text-brand-white">Meeh</a>
             </div>
 
             <nav className="hidden lg:flex lg:items-center lg:space-x-8">
               {NAV_LINKS.map((link) => (
-                <a key={link.href} href={link.href} className="text-sm font-medium text-brand-black/70 hover:text-brand-black transition-colors">
+                <a key={link.href} href={link.href} className="text-sm font-medium text-brand-black/70 dark:text-brand-white/70 hover:text-brand-black dark:hover:text-brand-white transition-colors">
                   {t(link.labelKey)}
                 </a>
               ))}
@@ -89,34 +90,35 @@ const Header: React.FC = () => {
                 </div>
               ) : (
                 <Fragment>
-                  <button onClick={() => setIsSearchModalOpen(true)} className="text-brand-black/70 hover:text-brand-black" aria-label={t('header.search')}><SearchIcon className="h-6 w-6" /></button>
-                  <a href="#/dashboard/wishlist" className="text-brand-black/70 hover:text-brand-black"><HeartIcon className="h-6 w-6" /></a>
-                  <button onClick={toggleCart} className="relative text-brand-black/70 hover:text-brand-black">
+                  <button onClick={() => setIsSearchModalOpen(true)} className="text-brand-black/70 dark:text-brand-white/70 hover:text-brand-black dark:hover:text-brand-white" aria-label={t('header.search')}><SearchIcon className="h-6 w-6" /></button>
+                  <ThemeSwitcher />
+                  <a href="#/dashboard/wishlist" className="text-brand-black/70 dark:text-brand-white/70 hover:text-brand-black dark:hover:text-brand-white"><HeartIcon className="h-6 w-6" /></a>
+                  <button onClick={toggleCart} className="relative text-brand-black/70 dark:text-brand-white/70 hover:text-brand-black dark:hover:text-brand-white">
                     <ShoppingBagIcon className="h-6 w-6" />
                     {totalItems > 0 && (
                       <span className="absolute -top-1 -right-2 flex h-4 w-4 items-center justify-center rounded-full bg-brand-gold text-xs font-bold text-brand-black">{totalItems}</span>
                     )}
                   </button>
                   <div className="relative">
-                    <button onClick={handleUserIconClick} className="text-brand-black/70 hover:text-brand-black">
+                    <button onClick={handleUserIconClick} className="text-brand-black/70 dark:text-brand-white/70 hover:text-brand-black dark:hover:text-brand-white">
                       <UserIcon className="h-6 w-6" />
                     </button>
                     {user && isUserMenuOpen && (
-                      <div className="absolute right-0 mt-2 w-48 bg-brand-white rounded-md shadow-lg py-1 z-50 ring-1 ring-black ring-opacity-5">
-                        <div className="px-4 py-2 text-sm text-brand-black/80 border-b">
+                      <div className="absolute right-0 mt-2 w-48 bg-brand-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-50 ring-1 ring-black dark:ring-white ring-opacity-5 dark:ring-opacity-10">
+                        <div className="px-4 py-2 text-sm text-brand-black/80 dark:text-brand-white/80 border-b border-black/10 dark:border-white/10">
                           {t('header.signedInAs')}<br/>
-                          <strong className="truncate text-brand-black">{user.displayName || user.email}</strong>
+                          <strong className="truncate text-brand-black dark:text-brand-white">{user.displayName || user.email}</strong>
                         </div>
-                        <a href="#/dashboard" className="block px-4 py-2 text-sm text-brand-black hover:bg-black/5">{t('header.dashboard')}</a>
+                        <a href="#/dashboard" className="block px-4 py-2 text-sm text-brand-black dark:text-brand-white hover:bg-black/5 dark:hover:bg-white/10">{t('header.dashboard')}</a>
                         {userDoc?.role === 'admin' && (
-                            <a href="#/admin" className="block px-4 py-2 text-sm font-bold text-brand-gold hover:bg-black/5">Admin Panel</a>
+                            <a href="#/admin" className="block px-4 py-2 text-sm font-bold text-brand-gold hover:bg-black/5 dark:hover:bg-white/10">Admin Panel</a>
                         )}
                         <button
                           onClick={async () => {
                             await logout();
                             setIsUserMenuOpen(false);
                           }}
-                          className="w-full text-left block px-4 py-2 text-sm text-brand-black hover:bg-black/5"
+                          className="w-full text-left block px-4 py-2 text-sm text-brand-black dark:text-brand-white hover:bg-black/5 dark:hover:bg-white/10"
                         >
                           {t('header.logout')}
                         </button>
@@ -127,7 +129,7 @@ const Header: React.FC = () => {
               )}
                <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="lg:hidden text-brand-black/70 hover:text-brand-black"
+                className="lg:hidden text-brand-black/70 dark:text-brand-white/70 hover:text-brand-black dark:hover:text-brand-white"
                 aria-label="Toggle menu"
               >
                 {isMenuOpen ? <XIcon className="h-6 w-6" /> : <MenuIcon className="h-6 w-6" />}
@@ -138,10 +140,10 @@ const Header: React.FC = () => {
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="lg:hidden bg-brand-white border-t border-black/10">
+          <div className="lg:hidden bg-brand-white dark:bg-brand-black border-t border-black/10 dark:border-white/10">
             <nav className="flex flex-col items-center space-y-4 p-4">
               {NAV_LINKS.map((link) => (
-                <a key={link.href} href={link.href} className="text-base font-medium text-brand-black/70 hover:text-brand-black transition-colors" onClick={() => setIsMenuOpen(false)}>
+                <a key={link.href} href={link.href} className="text-base font-medium text-brand-black/70 dark:text-brand-white/70 hover:text-brand-black dark:hover:text-brand-white transition-colors" onClick={() => setIsMenuOpen(false)}>
                   {t(link.labelKey)}
                 </a>
               ))}
