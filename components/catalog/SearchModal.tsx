@@ -15,7 +15,8 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
     const { t, language } = useI18n();
     const [searchTerm, setSearchTerm] = useState('');
     const [debouncedSearchTerm] = useDebounce(searchTerm, 300);
-    const { products, loading } = useProducts({ searchTerm: debouncedSearchTerm }, true);
+    // FIX: The useProducts hook expects only one argument.
+    const { products, loading } = useProducts({ searchTerm: debouncedSearchTerm });
 
     useEffect(() => {
         if (!isOpen) {

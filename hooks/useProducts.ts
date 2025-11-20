@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   collection,
   query,
@@ -15,13 +15,12 @@ import { db } from '../lib/firebase';
 import { ProductDocument } from '../firebase-types';
 
 export interface ProductFilters {
-  category?: string;
   searchTerm?: string;
 }
 
-const PAGE_SIZE = 12;
+const PAGE_SIZE = 8;
 
-export const useProducts = (filters: ProductFilters, isSearch = false) => {
+export const useProducts = (filters: ProductFilters) => {
   const [products, setProducts] = useState<ProductDocument[]>([]);
   const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -29,13 +28,10 @@ export const useProducts = (filters: ProductFilters, isSearch = false) => {
   const [lastDoc, setLastDoc] = useState<QueryDocumentSnapshot<DocumentData> | null>(null);
   const [hasMore, setHasMore] = useState(true);
 
-  // Use a ref to store filters to avoid re-running effect on every filter change during typing
-  const filtersRef = useRef(filters);
+  const fetchProducts = useCallback(async (isInitialLoad = false) => {
+    if ((!isInitialLoad && loadingMore) || !hasMore) return;
 
-  const fetchProducts = useCallback(async (isInitial = false) => {
-    if ((!isInitial && loadingMore) || !hasMore) return;
-
-    if (isInitial) {
+    if (isInitialLoad) {
       setLoading(true);
     } else {
       setLoadingMore(true);
@@ -45,41 +41,24 @@ export const useProducts = (filters: ProductFilters, isSearch = false) => {
     try {
       let q: Query<DocumentData> = collection(db, 'products');
 
-      // Always filter for published products unless it's a search
-      if (!isSearch) {
-        q = query(q, where('publishedAt', '!=', null));
+      q = query(q, where('publishedAt', '!=', null));
+      
+      if (filters.searchTerm) {
+        q = query(q, where('keywords', 'array-contains', filters.searchTerm.toLowerCase()));
       }
       
-      const currentFilters = filtersRef.current;
-
-      if (currentFilters.category) {
-        q = query(q, where('category', '==', currentFilters.category));
-      }
+      q = query(q, orderBy('createdAt', 'desc'));
       
-      if (currentFilters.searchTerm) {
-          q = query(q, where('keywords', 'array-contains', currentFilters.searchTerm.toLowerCase()));
-      }
-      
-      // Order by publishedAt first to allow inequality filters, then by creation date.
-      // This combination generally works without requiring complex custom indexes.
-      if (isSearch) {
-        // No specific order for search results for now to keep it simple
-      } else {
-        q = query(q, orderBy('publishedAt', 'desc'), orderBy('createdAt', 'desc'));
-      }
-
-
-      if (!isInitial && lastDoc) {
+      if (!isInitialLoad && lastDoc) {
         q = query(q, startAfter(lastDoc));
       }
 
       q = query(q, limit(PAGE_SIZE));
       
       const querySnapshot = await getDocs(q);
+      const newProducts = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ProductDocument));
 
-      let newProducts = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ProductDocument));
-
-      setProducts(prev => isInitial ? newProducts : [...prev, ...newProducts]);
+      setProducts(prev => isInitialLoad ? newProducts : [...prev, ...newProducts]);
       
       const newLastDoc = querySnapshot.docs[querySnapshot.docs.length - 1] || null;
       setLastDoc(newLastDoc);
@@ -90,30 +69,34 @@ export const useProducts = (filters: ProductFilters, isSearch = false) => {
       console.error("Error fetching products:", err);
       setError(err instanceof Error ? err : new Error('An unknown error occurred'));
     } finally {
-      if (isInitial) {
+      if (isInitialLoad) {
         setLoading(false);
       } else {
         setLoadingMore(false);
       }
     }
-  }, [loadingMore, hasMore, lastDoc, isSearch]);
+  }, [filters.searchTerm, hasMore, lastDoc, loadingMore]);
 
   useEffect(() => {
-    filtersRef.current = filters;
-    setProducts([]);
-    setLastDoc(null);
-    setHasMore(true);
-    // The timeout gives a moment for the UI to clear before the new loading state appears,
-    // providing a smoother transition when filters change.
-    const timer = setTimeout(() => fetchProducts(true), 50);
-    return () => clearTimeout(timer);
-  }, [filters, fetchProducts]);
+    if (filters.searchTerm) { // Only auto-fetch for search
+        setProducts([]);
+        setLastDoc(null);
+        setHasMore(true);
+        fetchProducts(true);
+    }
+  }, [filters.searchTerm, fetchProducts]);
+
+  // Initial fetch for non-search usage
+  useEffect(() => {
+    if (!filters.searchTerm) {
+      fetchProducts(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   
   const loadMore = useCallback(() => {
-    if (hasMore && !loading && !loadingMore) {
-        fetchProducts(false);
-    }
-  }, [hasMore, loading, loadingMore, fetchProducts]);
+    fetchProducts(false);
+  }, [fetchProducts]);
 
   return { products, loading, loadingMore, error, hasMore, loadMore };
 };

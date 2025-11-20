@@ -1,0 +1,11 @@
+/* This file is created to resolve the 404 error for index.css. */
+/* Additional global styles can be added here if needed. */
+
+/* Custom scrollbar styles for a better look in scrollable areas */
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+.scrollbar-hide {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}

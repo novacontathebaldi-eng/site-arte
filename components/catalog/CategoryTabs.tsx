@@ -1,76 +1,54 @@
-import React, { useState, useEffect } from 'react';
-import { collection, query, where, getCountFromServer } from 'firebase/firestore';
-import { db } from '../../lib/firebase';
+import React, { useRef, useEffect } from 'react';
 import { useI18n } from '../../hooks/useI18n';
-import { CATEGORIES } from '../../constants';
 
-interface CategoryTabsProps {
-  selectedCategory?: string;
-  onSelectCategory: (category?: string) => void;
+interface Category {
+    id: string;
+    nameKey: string;
 }
 
-const CategoryTabs: React.FC<CategoryTabsProps> = ({ selectedCategory, onSelectCategory }) => {
+interface CategoryTabsProps {
+  categories: Category[];
+  activeCategoryId: string;
+  onTabClick: (categoryId: string) => void;
+}
+
+const CategoryTabs: React.FC<CategoryTabsProps> = ({ categories, activeCategoryId, onTabClick }) => {
     const { t } = useI18n();
-    const [counts, setCounts] = useState<Record<string, number>>({});
+    const tabRefs = useRef<Map<string, HTMLButtonElement | null>>(new Map());
 
+    // Effect to scroll the active tab into view (horizontally)
     useEffect(() => {
-        const fetchCounts = async () => {
-            try {
-                const categoryCounts: Record<string, number> = {};
-
-                for (const category of CATEGORIES) {
-                    const categoryQuery = query(
-                        collection(db, 'products'),
-                        where('category', '==', category.id),
-                        where('publishedAt', '!=', null)
-                    );
-                    const snapshot = await getCountFromServer(categoryQuery);
-                    categoryCounts[category.id] = snapshot.data().count;
-                }
-                setCounts(categoryCounts);
-            } catch (error) {
-                console.error("Error fetching product counts:", error);
-                 // Fallback to simpler query if index is missing
-                try {
-                    const categoryCounts: Record<string, number> = {};
-                    for (const category of CATEGORIES) {
-                         const simpleQuery = query(collection(db, 'products'), where('category', '==', category.id));
-                         const snapshot = await getCountFromServer(simpleQuery);
-                         categoryCounts[category.id] = snapshot.data().count;
-                    }
-                    setCounts(categoryCounts);
-                } catch (fallbackError) {
-                    console.error("Fallback count query also failed:", fallbackError);
-                }
-            }
-        };
-        fetchCounts();
-    }, []);
-
-    const handleTabClick = (tabId: string) => {
-        // If clicking the active tab, deselect it (show all by passing undefined)
-        onSelectCategory(selectedCategory === tabId ? undefined : tabId);
+        const activeTabElement = tabRefs.current.get(activeCategoryId);
+        if (activeTabElement) {
+            activeTabElement.scrollIntoView({
+                behavior: 'smooth',
+                block: 'nearest',
+                inline: 'center'
+            });
+        }
+    }, [activeCategoryId]);
+    
+    const handleTabClick = (e: React.MouseEvent<HTMLButtonElement>, categoryId: string) => {
+        e.preventDefault();
+        onTabClick(categoryId);
     };
 
     return (
-        <nav className="flex space-x-2 sm:space-x-4 overflow-x-auto py-4">
-            {CATEGORIES.map(tab => (
+        <nav className="flex space-x-2 sm:space-x-4 overflow-x-auto py-4 scrollbar-hide">
+            {categories.map(tab => (
                 <button
                     key={tab.id}
-                    onClick={() => handleTabClick(tab.id)}
-                    className={`relative whitespace-nowrap px-3 py-2 text-sm font-semibold rounded-md transition-colors ${
-                        selectedCategory === tab.id
+                    ref={(el) => tabRefs.current.set(tab.id, el)}
+                    onClick={(e) => handleTabClick(e, tab.id)}
+                    className={`relative whitespace-nowrap px-4 py-2 text-sm font-semibold rounded-md transition-colors ${
+                        activeCategoryId === tab.id
                             ? 'text-brand-black'
                             : 'text-brand-black/60 hover:text-brand-black'
                     }`}
+                     aria-current={activeCategoryId === tab.id ? 'page' : undefined}
                 >
                     {t(tab.nameKey)}
-                    {counts[tab.id] !== undefined && (
-                        <span className={`ml-2 text-xs font-normal px-1.5 py-0.5 rounded-full ${selectedCategory === tab.id ? 'bg-brand-black/10' : 'bg-black/5'}`}>
-                            {counts[tab.id]}
-                        </span>
-                    )}
-                    {selectedCategory === tab.id && (
+                    {activeCategoryId === tab.id && (
                         <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand-gold rounded-full" />
                     )}
                 </button>
