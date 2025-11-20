@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect, ReactNode, useCallback } from 'react';
-import { doc, setDoc, getDoc, collection, getDocs, writeBatch, deleteDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, setDoc, getDoc, collection, getDocs, writeBatch, deleteDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { ProductDocument, CartItemDocument } from '../firebase-types';
 import { useAuth } from '../hooks/useAuth';
@@ -87,10 +87,13 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 const cartItemData = remoteDoc.data() as CartItemDocument;
                 
                 // Check for expiration
-                const itemTimestamp = cartItemData.addedAt?.toDate().getTime();
-                if(itemTimestamp && Date.now() - itemTimestamp > USER_CART_EXPIRATION) {
-                    await deleteDoc(remoteDoc.ref);
-                    continue; // Skip expired item
+                const addedAt = cartItemData.addedAt;
+                if (addedAt && typeof addedAt.toDate === 'function') { // Check if it's a valid Timestamp
+                    const itemTimestamp = addedAt.toDate().getTime();
+                    if(Date.now() - itemTimestamp > USER_CART_EXPIRATION) {
+                        await deleteDoc(remoteDoc.ref);
+                        continue; // Skip expired item
+                    }
                 }
                 
                 const productDocRef = doc(db, 'products', cartItemData.productId);

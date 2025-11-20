@@ -101,7 +101,7 @@ const CheckoutPage: React.FC = () => {
             billingAddress,
             shippingMethod: 'Standard Shipping',
             paymentMethod,
-            statusHistory: [{ status: 'pending', timestamp: serverTimestamp() as Timestamp }],
+            statusHistory: [{ status: 'pending', timestamp: Timestamp.now() }],
             language: language as LanguageCode,
             createdAt: serverTimestamp() as Timestamp,
             updatedAt: serverTimestamp() as Timestamp,
