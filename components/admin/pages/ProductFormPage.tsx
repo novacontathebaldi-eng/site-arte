@@ -119,7 +119,8 @@ const ProductFormPage: React.FC<{ id?: string }> = ({ id }) => {
         if (!e.target.files || e.target.files.length === 0) return;
         setUploading(true);
         try {
-            for (const file of Array.from(e.target.files)) {
+            // FIX: Cast Array.from result to File[] to avoid 'unknown' type on file
+            for (const file of Array.from(e.target.files) as File[]) {
                 const fileExt = file.name.split('.').pop();
                 const fileName = `${Math.random()}.${fileExt}`;
                 const filePath = `products/${id || 'new'}/${fileName}`;

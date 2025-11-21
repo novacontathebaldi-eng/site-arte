@@ -5,6 +5,7 @@ import { ProductDocument } from '../firebase-types';
 import { useI18n } from '../hooks/useI18n';
 import Skeleton from './common/Skeleton';
 import ProductCard from './ProductCard';
+import Reveal from './common/Reveal';
 
 const FeaturedProducts: React.FC = () => {
   const { t } = useI18n();
@@ -30,24 +31,30 @@ const FeaturedProducts: React.FC = () => {
   }, []);
 
   return (
-    <div id="products" className="bg-brand-white">
-      <div className="mx-auto max-w-2xl py-16 px-4 sm:py-24 sm:px-6 lg:max-w-7xl lg:px-8">
-        <h2 className="text-3xl font-serif font-bold tracking-tight text-brand-black text-center mb-12">
-          {t('productGrid.featuredTitle')}
-        </h2>
+    <section id="products" className="min-h-screen flex flex-col justify-center py-20 bg-brand-white dark:bg-brand-gray-900 snap-section relative z-10">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <Reveal>
+            <h2 className="text-4xl md:text-5xl font-serif font-bold tracking-tight text-brand-black dark:text-brand-white text-center mb-4">
+            {t('productGrid.featuredTitle')}
+            </h2>
+            <div className="w-24 h-1 bg-brand-gold mx-auto mb-16 rounded-full"></div>
+        </Reveal>
+
         {loading ? (
-             <div className="grid grid-cols-1 gap-y-10 gap-x-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:gap-x-8">
+             <div className="grid grid-cols-1 gap-y-10 gap-x-6 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-8">
                 {[...Array(4)].map((_, i) => <Skeleton key={i} className="aspect-[3/4]"/>)}
              </div>
         ) : (
-            <div className="grid grid-cols-1 gap-y-10 gap-x-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:gap-x-8">
-              {products.map((product) => (
-                <ProductCard key={product.id} product={product} />
+            <div className="grid grid-cols-1 gap-y-10 gap-x-6 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-8">
+              {products.map((product, index) => (
+                <Reveal key={product.id} delay={`${index * 150}ms`} animation="scale-in">
+                    <ProductCard product={product} />
+                </Reveal>
               ))}
             </div>
         )}
       </div>
-    </div>
+    </section>
   );
 };
 

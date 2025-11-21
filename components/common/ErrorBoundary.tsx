@@ -34,8 +34,8 @@ class ErrorBoundary extends React.Component<Props, State> {
       );
     }
 
-    // FIX: In a React class component, props are accessed via `this.props`.
-    return this.props.children;
+    // FIX: Explicitly cast props to avoid TS error "Property 'props' does not exist on type 'ErrorBoundary'"
+    return (this.props as Props).children;
   }
 }
 
