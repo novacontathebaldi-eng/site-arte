@@ -85,18 +85,18 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ productId }) => {
     const inWishlist = isInWishlist(product.id);
     
     return (
-        <div className="bg-brand-white">
+        <div className="bg-brand-white dark:bg-brand-gray-900">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 <div className="lg:grid lg:grid-cols-2 lg:gap-x-12">
                     <div className="aspect-w-3 aspect-h-4 w-full overflow-hidden bg-black/5 rounded-md">
                         <img src={product.images?.[0]?.url || 'https://placehold.co/800x1000'} alt={p?.title} className="w-full h-full object-cover" />
                     </div>
                     <div className="mt-8 lg:mt-0">
-                        <p className="text-sm uppercase tracking-widest text-brand-black/60">{t(`product.categories.${product.category}`)}</p>
+                        <p className="text-sm uppercase tracking-widest text-brand-black/60 dark:text-brand-white/60">{t(`product.categories.${product.category}`)}</p>
                         <h1 className="text-3xl lg:text-4xl font-serif font-bold my-3">{p?.title}</h1>
                         <p className="text-3xl font-medium mb-6">€{((product.price?.amount || 0) / 100).toFixed(2)}</p>
                         
-                        <div className="prose text-brand-black/80 max-w-none">
+                        <div className="prose dark:prose-invert text-brand-black/80 dark:text-brand-white/80 max-w-none">
                             <p>{p?.description}</p>
                         </div>
 
@@ -111,9 +111,9 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ productId }) => {
                             </Button>
                         </div>
 
-                        <div className="mt-8 border-t pt-6">
+                        <div className="mt-8 border-t dark:border-white/10 pt-6">
                             <h3 className="font-semibold mb-2">{t('product.specifications')}</h3>
-                            <ul className="text-sm space-y-1 text-brand-black/70">
+                            <ul className="text-sm space-y-1 text-brand-black/70 dark:text-brand-white/70">
                                 {product.dimensions && (product.dimensions.width > 0) && <li>{t('product.dimensions')}: {product.dimensions.width} x {product.dimensions.height} cm</li>}
                                 {p?.materials && <li>{t('product.materials')}: {p.materials}</li>}
                                 {product.yearCreated && <li>{t('product.year')}: {product.yearCreated}</li>}

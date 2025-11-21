@@ -24,7 +24,7 @@ const AddressForm: React.FC<{ onSave: (address: Address) => void; }> = ({ onSave
         onSave(address);
     }
     return (
-        <form onSubmit={handleSubmit} className="space-y-4 mt-4 border-t pt-4">
+        <form onSubmit={handleSubmit} className="space-y-4 mt-4 border-t dark:border-white/10 pt-4">
              <Input id="recipientName" name="recipientName" label="Full Name" value={address.recipientName} onChange={handleChange} required />
              <Input id="addressLine1" name="addressLine1" label="Address Line 1" value={address.addressLine1} onChange={handleChange} required />
              <Input id="city" name="city" label="City" value={address.city} onChange={handleChange} required />
@@ -92,13 +92,13 @@ const AddressStep: React.FC<AddressStepProps> = ({ onSubmit }) => {
   if (loading) return <div className="flex justify-center p-8"><Spinner /></div>;
 
   return (
-    <div className="bg-white p-8 rounded-lg shadow-md">
+    <div className="bg-white dark:bg-brand-gray-800 p-8 rounded-lg shadow-md">
       <div>
         <h2 className="text-xl font-bold font-serif mb-4">{t('checkout.shippingAddress')}</h2>
         {addresses.length > 0 && (
             <div className="space-y-4">
                 {addresses.map(addr => (
-                    <label key={addr.id} className="flex items-start p-4 border rounded-md cursor-pointer">
+                    <label key={addr.id} className="flex items-start p-4 border dark:border-brand-gray-700 rounded-md cursor-pointer">
                         <input type="radio" name="shippingAddress" value={addr.id} checked={selectedShipping === addr.id} onChange={(e) => setSelectedShipping(e.target.value)} className="mt-1"/>
                         <div className="ml-4">
                             <p className="font-semibold">{addr.recipientName}</p>
@@ -114,7 +114,7 @@ const AddressStep: React.FC<AddressStepProps> = ({ onSubmit }) => {
         {showNewAddressForm && <AddressForm onSave={handleAddNewAddress}/>}
       </div>
 
-      <div className="mt-8 border-t pt-6">
+      <div className="mt-8 border-t dark:border-white/10 pt-6">
         <h2 className="text-xl font-bold font-serif mb-4">{t('checkout.billingAddress')}</h2>
         <label className="flex items-center">
             <input type="checkbox" checked={useSameAddress} onChange={(e) => setUseSameAddress(e.target.checked)} className="rounded"/>
@@ -124,7 +124,7 @@ const AddressStep: React.FC<AddressStepProps> = ({ onSubmit }) => {
         {!useSameAddress && (
              <div className="space-y-4 mt-4">
                 {addresses.map(addr => (
-                    <label key={addr.id} className="flex items-start p-4 border rounded-md cursor-pointer">
+                    <label key={addr.id} className="flex items-start p-4 border dark:border-brand-gray-700 rounded-md cursor-pointer">
                         <input type="radio" name="billingAddress" value={addr.id} checked={selectedBilling === addr.id} onChange={(e) => setSelectedBilling(e.target.value)} className="mt-1"/>
                         <div className="ml-4">
                             <p className="font-semibold">{addr.recipientName}</p>

@@ -19,6 +19,9 @@
               'brand-black': '#2C2C2C',
               'brand-gold': '#D4AF37',
               'brand-white': '#FFFFFF',
+              'brand-gray-900': '#121212', // Main dark background
+              'brand-gray-800': '#1E1E1E', // Card backgrounds
+              'brand-gray-700': '#2A2A2A', // Borders, hover states
             },
             fontFamily: {
               sans: ['Inter', 'sans-serif'],
@@ -61,7 +64,7 @@
 }
 </script>
 </head>
-  <body class="bg-brand-white text-brand-black dark:bg-brand-black dark:text-brand-white transition-colors duration-300">
+  <body class="bg-brand-white text-brand-black dark:bg-brand-gray-900 dark:text-brand-white transition-colors duration-300">
     <div id="root"></div>
   <script type="module" src="/index.tsx"></script>
 </body>

@@ -21,7 +21,7 @@ const AdminHeader: React.FC = () => {
     }
 
     return (
-        <header className="h-20 bg-brand-white dark:bg-brand-black border-b border-black/10 dark:border-white/10 flex items-center justify-between px-6 lg:px-8 flex-shrink-0">
+        <header className="h-20 bg-brand-white dark:bg-brand-gray-800 border-b border-black/10 dark:border-brand-gray-700 flex items-center justify-between px-6 lg:px-8 flex-shrink-0">
             <h1 className="text-xl font-bold font-serif">{getPageTitle()}</h1>
             <div className="flex items-center gap-4">
                 <LanguageSelector />
@@ -38,7 +38,7 @@ const AdminHeader: React.FC = () => {
                          <span className="hidden sm:inline text-sm font-medium">{user?.displayName || user?.email}</span>
                     </button>
                     {isUserMenuOpen && (
-                        <div className="absolute right-0 mt-2 w-48 bg-brand-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-50 ring-1 ring-black dark:ring-white ring-opacity-5 dark:ring-opacity-10">
+                        <div className="absolute right-0 mt-2 w-48 bg-brand-white dark:bg-brand-gray-700 rounded-md shadow-lg py-1 z-50 ring-1 ring-black dark:ring-brand-gray-700 ring-opacity-5">
                              <a href="#" className="block px-4 py-2 text-sm text-brand-black dark:text-brand-white hover:bg-black/5 dark:hover:bg-white/10">{t('admin.header.viewSite')}</a>
                              <button
                                 onClick={async () => {

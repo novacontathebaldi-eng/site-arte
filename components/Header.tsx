@@ -64,7 +64,7 @@ const Header: React.FC = () => {
 
   return (
     <Fragment>
-      <header className="sticky top-0 z-50 bg-brand-white/80 dark:bg-brand-black/80 backdrop-blur-lg shadow-sm">
+      <header className="sticky top-0 z-50 bg-brand-white/80 dark:bg-brand-gray-900/80 backdrop-blur-lg shadow-sm">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
             <div className="flex-shrink-0">
@@ -102,7 +102,7 @@ const Header: React.FC = () => {
                       <UserIcon className="h-6 w-6" />
                     </button>
                     {user && isUserMenuOpen && (
-                      <div className="absolute right-0 mt-2 w-48 bg-brand-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-50 ring-1 ring-black dark:ring-white ring-opacity-5 dark:ring-opacity-10">
+                      <div className="absolute right-0 mt-2 w-48 bg-brand-white dark:bg-brand-gray-800 rounded-md shadow-lg py-1 z-50 ring-1 ring-black dark:ring-brand-gray-700 ring-opacity-5">
                         <div className="px-4 py-2 text-sm text-brand-black/80 dark:text-brand-white/80 border-b border-black/10 dark:border-white/10">
                           {t('header.signedInAs')}<br/>
                           <strong className="truncate text-brand-black dark:text-brand-white">{user.displayName || user.email}</strong>
@@ -138,7 +138,7 @@ const Header: React.FC = () => {
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="lg:hidden bg-brand-white dark:bg-brand-black border-t border-black/10 dark:border-white/10">
+          <div className="lg:hidden bg-brand-white dark:bg-brand-gray-800 border-t border-black/10 dark:border-white/10">
             <nav className="flex flex-col items-center space-y-4 p-4">
               {NAV_LINKS.map((link) => (
                 <a key={link.href} href={link.href} className="text-base font-medium text-brand-black/70 dark:text-brand-white/70 hover:text-brand-black dark:hover:text-brand-white transition-colors" onClick={() => setIsMenuOpen(false)}>

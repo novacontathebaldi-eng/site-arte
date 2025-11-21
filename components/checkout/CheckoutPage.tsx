@@ -36,7 +36,7 @@ const CheckoutPage: React.FC = () => {
     return (
       <div className="text-center py-20">
         <h2 className="text-2xl font-serif font-bold">{t('checkout.loginRequired')}</h2>
-        <p className="mt-2 text-brand-black/70">Please log in or create an account to proceed with your purchase.</p>
+        <p className="mt-2 text-brand-black/70 dark:text-brand-white/70">Please log in or create an account to proceed with your purchase.</p>
         <Button onClick={openAuthModal} className="mt-6">Login / Sign Up</Button>
       </div>
     );
@@ -159,7 +159,7 @@ const CheckoutPage: React.FC = () => {
   const currentStepIndex = STEPS.findIndex(s => s.id === step);
 
   return (
-    <div className="bg-gray-50">
+    <div className="bg-gray-50 dark:bg-brand-gray-900">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <h1 className="text-3xl font-serif font-bold text-center mb-8">{t('checkout.title')}</h1>
         
@@ -174,13 +174,13 @@ const CheckoutPage: React.FC = () => {
                   </>
                 ) : index === currentStepIndex ? (
                    <>
-                    <div className="absolute inset-0 flex items-center" aria-hidden="true"><div className="h-0.5 w-full bg-gray-200"></div></div>
-                    <div className="relative flex h-8 w-8 items-center justify-center rounded-full border-2 border-brand-gold bg-white"><span className="h-2.5 w-2.5 rounded-full bg-brand-gold" aria-hidden="true"></span><span className="sr-only">{s.name}</span></div>
+                    <div className="absolute inset-0 flex items-center" aria-hidden="true"><div className="h-0.5 w-full bg-gray-200 dark:bg-brand-gray-700"></div></div>
+                    <div className="relative flex h-8 w-8 items-center justify-center rounded-full border-2 border-brand-gold bg-white dark:bg-brand-gray-800"><span className="h-2.5 w-2.5 rounded-full bg-brand-gold" aria-hidden="true"></span><span className="sr-only">{s.name}</span></div>
                   </>
                 ) : (
                    <>
-                    <div className="absolute inset-0 flex items-center" aria-hidden="true"><div className="h-0.5 w-full bg-gray-200"></div></div>
-                    <div className="group relative flex h-8 w-8 items-center justify-center rounded-full border-2 border-gray-300 bg-white"><span className="sr-only">{s.name}</span></div>
+                    <div className="absolute inset-0 flex items-center" aria-hidden="true"><div className="h-0.5 w-full bg-gray-200 dark:bg-brand-gray-700"></div></div>
+                    <div className="group relative flex h-8 w-8 items-center justify-center rounded-full border-2 border-gray-300 dark:border-brand-gray-700 bg-white dark:bg-brand-gray-800"><span className="sr-only">{s.name}</span></div>
                   </>
                 )}
               </li>

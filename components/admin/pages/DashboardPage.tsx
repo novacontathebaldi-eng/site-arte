@@ -24,10 +24,10 @@ interface DashboardStats {
 }
 
 const StatCard: React.FC<{ title: string; value: string; icon: React.ReactNode; }> = ({ title, value, icon }) => (
-    <div className="bg-brand-white p-6 rounded-lg shadow-sm transition-shadow hover:shadow-md">
+    <div className="bg-brand-white dark:bg-brand-gray-800 p-6 rounded-lg shadow-sm transition-shadow hover:shadow-md">
         <div className="flex justify-between items-start">
             <div>
-                <p className="text-sm font-medium text-brand-black/60">{title}</p>
+                <p className="text-sm font-medium text-brand-black/60 dark:text-brand-white/60">{title}</p>
                 <p className="text-3xl font-bold mt-1">{value}</p>
             </div>
             <div className="p-3 bg-brand-gold/10 rounded-full text-brand-gold">
@@ -94,7 +94,7 @@ const DashboardPage: React.FC = () => {
     ];
 
     const DashboardCard: React.FC<{title: string, children: React.ReactNode, viewAllLink?: string}> = ({title, children, viewAllLink}) => (
-        <div className="bg-brand-white p-6 rounded-lg shadow-sm">
+        <div className="bg-brand-white dark:bg-brand-gray-800 p-6 rounded-lg shadow-sm">
             <div className="flex justify-between items-center mb-4">
                 <h3 className="font-bold font-serif">{title}</h3>
                 {viewAllLink && <a href={`#${viewAllLink}`} className="text-sm font-medium text-brand-gold hover:underline">{t('admin.dashboard.viewAll')}</a>}
@@ -128,7 +128,7 @@ const DashboardPage: React.FC = () => {
                             <table className="w-full text-sm">
                                 <tbody>
                                     {stats?.recentOrders.map(order => (
-                                        <tr key={order.id} className="border-b last:border-b-0 border-black/5 hover:bg-black/5 cursor-pointer" onClick={() => navigate(`/admin/orders/${order.id}`)}>
+                                        <tr key={order.id} className="border-b last:border-b-0 border-black/10 dark:border-white/10 hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer" onClick={() => navigate(`/admin/orders/${order.id}`)}>
                                             <td className="p-3">#{order.id.slice(0, 6)}</td>
                                             <td className="p-3">{order.user?.displayName || order.user?.email}</td>
                                             <td className="p-3 capitalize">{order.status}</td>
