@@ -44,7 +44,7 @@ const Hero: React.FC = () => {
         ></div>
 
         {/* Overlay Gradient */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/10 to-brand-gray-900/90 z-0"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/20 to-brand-gray-900/90 z-0"></div>
 
         {/* Main Text Content: Fades Out & Scales Down */}
         <div 
@@ -58,7 +58,7 @@ const Hero: React.FC = () => {
           <h1 className="text-5xl sm:text-6xl md:text-8xl font-serif font-bold text-brand-white drop-shadow-2xl mb-6 tracking-tight">
             {t('hero.title')}
           </h1>
-          <p className="text-lg sm:text-xl md:text-2xl text-brand-white/90 max-w-2xl mx-auto mb-10 font-light drop-shadow-md">
+          <p className="text-lg sm:text-xl md:text-2xl text-brand-white max-w-2xl mx-auto mb-10 font-medium drop-shadow-xl shadow-black">
             {t('hero.subtitle')}
           </p>
           <Button
@@ -66,7 +66,7 @@ const Hero: React.FC = () => {
             href="#products"
             variant="primary"
             size="lg"
-            className="bg-brand-gold text-brand-black hover:bg-brand-white hover:text-brand-black border-none"
+            className="bg-brand-gold text-brand-black hover:bg-brand-white hover:text-brand-black border-none font-bold shadow-lg"
           >
             {t('hero.button')}
           </Button>

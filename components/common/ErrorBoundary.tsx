@@ -1,4 +1,4 @@
-import React, { ErrorInfo, ReactNode } from 'react';
+import React, { Component, ErrorInfo, ReactNode } from 'react';
 
 interface Props {
   children: ReactNode;
@@ -8,7 +8,7 @@ interface State {
   hasError: boolean;
 }
 
-class ErrorBoundary extends React.Component<Props, State> {
+class ErrorBoundary extends Component<Props, State> {
   public state: State = { hasError: false };
 
   static getDerivedStateFromError(_: Error): State {
@@ -34,8 +34,7 @@ class ErrorBoundary extends React.Component<Props, State> {
       );
     }
 
-    // FIX: Explicitly cast props to avoid TS error "Property 'props' does not exist on type 'ErrorBoundary'"
-    return (this.props as Props).children;
+    return this.props.children;
   }
 }
 

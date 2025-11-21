@@ -64,7 +64,7 @@ const Header: React.FC = () => {
 
   return (
     <Fragment>
-      <header className="sticky top-0 z-50 bg-brand-white/80 dark:bg-brand-gray-900/80 backdrop-blur-lg shadow-sm">
+      <header className="sticky top-0 z-50 bg-brand-white/60 dark:bg-brand-gray-900/60 backdrop-blur-lg shadow-sm transition-colors duration-300">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
             <div className="flex-shrink-0">
@@ -73,7 +73,7 @@ const Header: React.FC = () => {
 
             <nav className="hidden lg:flex lg:items-center lg:space-x-8">
               {NAV_LINKS.map((link) => (
-                <a key={link.href} href={link.href} className="text-sm font-medium text-brand-black/70 dark:text-brand-white/70 hover:text-brand-black dark:hover:text-brand-white transition-colors">
+                <a key={link.href} href={link.href} className="text-sm font-medium text-brand-black/80 dark:text-brand-white/80 hover:text-brand-black dark:hover:text-brand-white transition-colors">
                   {t(link.labelKey)}
                 </a>
               ))}
