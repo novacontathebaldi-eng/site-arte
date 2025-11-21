@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../lib/firebase';
+import { db } from '../lib/firebase/config';
 import { ProductDocument } from '../firebase-types';
 import Spinner from './common/Spinner';
 import Button from './common/Button';

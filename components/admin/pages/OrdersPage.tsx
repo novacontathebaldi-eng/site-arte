@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { collection, getDocs, orderBy, query } from 'firebase/firestore';
-import { db } from '../../../lib/firebase';
+import { db } from '../../../lib/firebase/config';
 import { OrderDocument } from '../../../firebase-types';
 import Button from '../../common/Button';
 import { useRouter } from '../../../hooks/useRouter';

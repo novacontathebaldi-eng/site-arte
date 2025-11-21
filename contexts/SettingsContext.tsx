@@ -1,6 +1,6 @@
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
 import { doc, onSnapshot } from 'firebase/firestore';
-import { db } from '../lib/firebase';
+import { db } from '../lib/firebase/config';
 import { SettingsDocument } from '../firebase-types';
 
 interface SettingsContextType {

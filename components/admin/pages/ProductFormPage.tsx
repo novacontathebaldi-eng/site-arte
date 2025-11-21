@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { doc, getDoc, setDoc, addDoc, collection, serverTimestamp, updateDoc } from 'firebase/firestore';
-import { db } from '../../../lib/firebase';
-import { supabase } from '../../../lib/supabase';
+import { db } from '../../../lib/firebase/config';
+import { uploadProductImage } from '../../../lib/supabase/storage';
 import { ProductDocument, LanguageCode } from '../../../firebase-types';
 import { useRouter } from '../../../hooks/useRouter';
 import { useToast } from '../../../hooks/useToast';
@@ -119,21 +119,9 @@ const ProductFormPage: React.FC<{ id?: string }> = ({ id }) => {
         if (!e.target.files || e.target.files.length === 0) return;
         setUploading(true);
         try {
-            // FIX: Cast Array.from result to File[] to avoid 'unknown' type on file
+            // Using new modular upload function
             for (const file of Array.from(e.target.files) as File[]) {
-                const fileExt = file.name.split('.').pop();
-                const fileName = `${Math.random()}.${fileExt}`;
-                const filePath = `products/${id || 'new'}/${fileName}`;
-
-                const { error: uploadError } = await supabase.storage
-                    .from('products')
-                    .upload(filePath, file);
-
-                if (uploadError) throw uploadError;
-
-                const { data: { publicUrl } } = supabase.storage
-                    .from('products')
-                    .getPublicUrl(filePath);
+                const publicUrl = await uploadProductImage(file, `products/${id || 'new'}`);
                 
                 setProduct(prev => ({
                     ...prev,
@@ -142,7 +130,6 @@ const ProductFormPage: React.FC<{ id?: string }> = ({ id }) => {
             }
             addToast(t('admin.productForm.uploadSuccess'), "success");
         } catch (error) {
-            // FIX: The 'error' object in a catch block is of type 'unknown'. A type check is required to safely access its properties.
             const errorMessage = error instanceof Error ? error.message : String(error);
             addToast(`${t('admin.productForm.uploadError')}: ${errorMessage}`, "error");
         } finally {
@@ -182,7 +169,6 @@ const ProductFormPage: React.FC<{ id?: string }> = ({ id }) => {
                 navigate(`/admin/products/edit/${newDocRef.id}`);
             }
         } catch (error) {
-            // FIX: The 'error' object in a catch block is of type 'unknown'. A type check is required to safely access its properties.
             const errorMessage = error instanceof Error ? error.message : String(error);
             addToast(`${t('admin.productForm.saveError')}: ${errorMessage}`, "error");
         } finally {
@@ -202,7 +188,7 @@ const ProductFormPage: React.FC<{ id?: string }> = ({ id }) => {
                         <Input id="sku" name="sku" label={t('admin.productForm.sku')} value={product.sku} onChange={handleChange} />
                         <div>
                         <label className="block text-sm font-medium text-brand-black/80 dark:text-brand-white/80 mb-1">{t('admin.productForm.category')}</label>
-                        <select name="category" value={product.category} onChange={handleChange} className="w-full px-3 py-2 border border-brand-black/20 dark:border-white/20 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-gold/50 focus:border-brand-gold/50 transition-shadow bg-transparent dark:bg-gray-800">
+                        <select name="category" value={product.category} onChange={handleChange} className="w-full px-3 py-2 border border-brand-black/20 dark:border-white/20 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-gold/50 focus:border-brand-gold/50 transition-shadow bg-transparent dark:bg-gray-800 text-brand-black dark:text-brand-white">
                             <option value="paintings">Paintings</option>
                             <option value="jewelry">Jewelry</option>
                             <option value="digital">Digital</option>
@@ -241,7 +227,7 @@ const ProductFormPage: React.FC<{ id?: string }> = ({ id }) => {
                         <Input id={`title-${activeLang}`} name="title" label={t('admin.productForm.title')} value={product.translations?.[activeLang]?.title || ''} onChange={handleTranslationChange} />
                         <div className="mt-4">
                             <label className="block text-sm font-medium text-brand-black/80 dark:text-brand-white/80 mb-1">{t('admin.productForm.description')}</label>
-                            <textarea name="description" value={product.translations?.[activeLang]?.description || ''} onChange={handleTranslationChange} rows={8} className="w-full px-3 py-2 border border-brand-black/20 dark:border-white/20 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-gold/50 focus:border-brand-gold/50 transition-shadow bg-transparent dark:bg-gray-800"></textarea>
+                            <textarea name="description" value={product.translations?.[activeLang]?.description || ''} onChange={handleTranslationChange} rows={8} className="w-full px-3 py-2 border border-brand-black/20 dark:border-white/20 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-gold/50 focus:border-brand-gold/50 transition-shadow bg-transparent dark:bg-gray-800 text-brand-black dark:text-brand-white"></textarea>
                         </div>
                     </div>
                 </div>
@@ -256,9 +242,9 @@ const ProductFormPage: React.FC<{ id?: string }> = ({ id }) => {
                                 <button type="button" onClick={() => removeImage(index)} className="absolute top-1 right-1 bg-red-500 text-white rounded-full h-6 w-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">&times;</button>
                             </div>
                         ))}
-                        <label className="w-full h-32 border-2 border-dashed rounded-md flex flex-col items-center justify-center cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
-                            {uploading ? <Spinner/> : <span>+ {t('admin.productForm.addImage')}</span>}
-                            <input type="file" multiple onChange={handleImageUpload} className="hidden" disabled={uploading} />
+                        <label className="w-full h-32 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-md flex flex-col items-center justify-center cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+                            {uploading ? <Spinner/> : <span className="text-gray-500 dark:text-gray-400">+ {t('admin.productForm.addImage')}</span>}
+                            <input type="file" multiple onChange={handleImageUpload} className="hidden" disabled={uploading} accept="image/*" />
                         </label>
                     </div>
                 </div>

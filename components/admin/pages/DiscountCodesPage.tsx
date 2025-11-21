@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
-import { db } from '../../../lib/firebase';
+import { db } from '../../../lib/firebase/config';
 import { DiscountCodeDocument } from '../../../firebase-types';
 import Button from '../../common/Button';
 import { useToast } from '../../../hooks/useToast';

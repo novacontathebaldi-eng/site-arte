@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { collection, query, where, getDocs, limit, orderBy, getCountFromServer } from 'firebase/firestore';
-import { db } from '../../../lib/firebase';
+import { db } from '../../../lib/firebase/config';
 import { useI18n } from '../../../hooks/useI18n';
 import { OrderDocument, ProductDocument, ContactMessageDocument } from '../../../firebase-types';
 import Skeleton from '../../common/Skeleton';

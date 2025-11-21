@@ -11,7 +11,7 @@ import {
   DocumentData,
   QueryDocumentSnapshot,
 } from 'firebase/firestore';
-import { db } from '../lib/firebase';
+import { db } from '../lib/firebase/config';
 import { ProductDocument } from '../firebase-types';
 
 export interface ProductFilters {

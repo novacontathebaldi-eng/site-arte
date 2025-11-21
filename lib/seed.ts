@@ -1,5 +1,5 @@
 import { collection, writeBatch, serverTimestamp, doc } from 'firebase/firestore';
-import { db } from './firebase';
+import { db } from './firebase/config';
 import { ProductDocument, LanguageCode, ProductImage, SettingsDocument } from '../firebase-types';
 
 // Omit fields that will be generated automatically
