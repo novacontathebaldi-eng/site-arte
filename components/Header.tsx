@@ -9,25 +9,25 @@ import Skeleton from './common/Skeleton';
 
 // Icons
 const HeartIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
     <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
   </svg>
 );
 const ShoppingBagIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
     <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
     <path d="M3 6h18" />
     <path d="M16 10a4 4 0 0 1-8 0" />
   </svg>
 );
 const UserIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
     <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
     <circle cx="12" cy="7" r="4" />
   </svg>
 );
 const SearchIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
         <circle cx="11" cy="11" r="8"></circle>
         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
     </svg>
@@ -64,59 +64,80 @@ const Header: React.FC = () => {
 
   return (
     <Fragment>
-      <header className="sticky top-0 z-50 bg-brand-white/60 dark:bg-brand-gray-900/60 backdrop-blur-lg shadow-sm transition-colors duration-300">
+      <header className="sticky top-0 z-50 bg-brand-white/80 dark:bg-brand-gray-900/80 backdrop-blur-md shadow-sm border-b border-transparent dark:border-white/5 transition-all duration-300">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
             <div className="flex-shrink-0">
-              <a href="#" className="text-2xl font-serif font-bold text-brand-black dark:text-brand-white">Meeh</a>
+              <a href="#" className="text-2xl font-serif font-bold text-brand-black dark:text-brand-white tracking-tight">Meeh</a>
             </div>
 
             <nav className="hidden lg:flex lg:items-center lg:space-x-8">
               {NAV_LINKS.map((link) => (
-                <a key={link.href} href={link.href} className="text-sm font-medium text-brand-black/80 dark:text-brand-white/80 hover:text-brand-black dark:hover:text-brand-white transition-colors">
+                <a key={link.href} href={link.href} className="text-sm font-medium tracking-wide text-brand-black/70 dark:text-brand-white/70 hover:text-brand-black dark:hover:text-brand-white transition-colors">
                   {t(link.labelKey)}
                 </a>
               ))}
             </nav>
 
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center gap-2">
               {authLoading ? (
                  <div className="flex items-center space-x-4 animate-pulse">
-                    <div className="h-6 w-6 bg-black/10 rounded-full"></div>
-                    <div className="h-6 w-6 bg-black/10 rounded-full"></div>
-                    <div className="h-6 w-6 bg-black/10 rounded-full"></div>
-                    <div className="h-6 w-6 bg-black/10 rounded-full"></div>
+                    <div className="h-8 w-8 bg-black/5 dark:bg-white/10 rounded-full"></div>
+                    <div className="h-8 w-8 bg-black/5 dark:bg-white/10 rounded-full"></div>
+                    <div className="h-8 w-8 bg-black/5 dark:bg-white/10 rounded-full"></div>
                 </div>
               ) : (
                 <Fragment>
-                  <button onClick={() => setIsSearchModalOpen(true)} className="text-brand-black/70 dark:text-brand-white/70 hover:text-brand-black dark:hover:text-brand-white" aria-label={t('header.search')}><SearchIcon className="h-6 w-6" /></button>
-                  <a href="#/dashboard/wishlist" className="text-brand-black/70 dark:text-brand-white/70 hover:text-brand-black dark:hover:text-brand-white"><HeartIcon className="h-6 w-6" /></a>
-                  <button onClick={toggleCart} className="relative text-brand-black/70 dark:text-brand-white/70 hover:text-brand-black dark:hover:text-brand-white">
-                    <ShoppingBagIcon className="h-6 w-6" />
+                  <button 
+                    onClick={() => setIsSearchModalOpen(true)} 
+                    className="p-2 rounded-full text-brand-black/70 dark:text-brand-white/70 hover:bg-black/5 dark:hover:bg-white/10 hover:text-brand-black dark:hover:text-brand-white transition-all" 
+                    aria-label={t('header.search')}
+                  >
+                    <SearchIcon />
+                  </button>
+                  
+                  <a 
+                    href="#/dashboard/wishlist" 
+                    className="p-2 rounded-full text-brand-black/70 dark:text-brand-white/70 hover:bg-black/5 dark:hover:bg-white/10 hover:text-brand-black dark:hover:text-brand-white transition-all"
+                  >
+                    <HeartIcon />
+                  </a>
+                  
+                  <button 
+                    onClick={toggleCart} 
+                    className="p-2 rounded-full relative text-brand-black/70 dark:text-brand-white/70 hover:bg-black/5 dark:hover:bg-white/10 hover:text-brand-black dark:hover:text-brand-white transition-all"
+                  >
+                    <ShoppingBagIcon />
                     {totalItems > 0 && (
-                      <span className="absolute -top-1 -right-2 flex h-4 w-4 items-center justify-center rounded-full bg-brand-gold text-xs font-bold text-brand-black">{totalItems}</span>
+                      <span className="absolute top-0 right-0 flex h-4 w-4 items-center justify-center rounded-full bg-brand-gold text-[10px] font-bold text-brand-black shadow-sm ring-2 ring-brand-white dark:ring-brand-gray-900">
+                        {totalItems}
+                      </span>
                     )}
                   </button>
+                  
                   <div className="relative">
-                    <button onClick={handleUserIconClick} className="text-brand-black/70 dark:text-brand-white/70 hover:text-brand-black dark:hover:text-brand-white">
-                      <UserIcon className="h-6 w-6" />
+                    <button 
+                        onClick={handleUserIconClick} 
+                        className="p-2 rounded-full text-brand-black/70 dark:text-brand-white/70 hover:bg-black/5 dark:hover:bg-white/10 hover:text-brand-black dark:hover:text-brand-white transition-all"
+                    >
+                      <UserIcon />
                     </button>
                     {user && isUserMenuOpen && (
-                      <div className="absolute right-0 mt-2 w-48 bg-brand-white dark:bg-brand-gray-800 rounded-md shadow-lg py-1 z-50 ring-1 ring-black dark:ring-brand-gray-700 ring-opacity-5">
-                        <div className="px-4 py-2 text-sm text-brand-black/80 dark:text-brand-white/80 border-b border-black/10 dark:border-white/10">
-                          {t('header.signedInAs')}<br/>
-                          <strong className="truncate text-brand-black dark:text-brand-white">{user.displayName || user.email}</strong>
+                      <div className="absolute right-0 mt-2 w-56 bg-brand-white dark:bg-brand-gray-800 rounded-lg shadow-xl py-1 z-50 ring-1 ring-black dark:ring-brand-gray-700 ring-opacity-5 transform origin-top-right transition-all">
+                        <div className="px-4 py-3 text-sm text-brand-black/80 dark:text-brand-white/80 border-b border-black/10 dark:border-white/10 mb-1">
+                          <span className="block text-xs text-brand-black/50 dark:text-brand-white/50">{t('header.signedInAs')}</span>
+                          <strong className="block truncate text-brand-black dark:text-brand-white font-semibold mt-0.5">{user.displayName || user.email}</strong>
                         </div>
-                        <a href="#/dashboard" className="block px-4 py-2 text-sm text-brand-black dark:text-brand-white hover:bg-black/5 dark:hover:bg-white/10">{t('header.dashboard')}</a>
+                        <a href="#/dashboard" className="block px-4 py-2 text-sm text-brand-black dark:text-brand-white hover:bg-black/5 dark:hover:bg-white/10 transition-colors">{t('header.dashboard')}</a>
                         {userDoc?.role === 'admin' && (
-                            <a href="#/admin" className="block px-4 py-2 text-sm font-bold text-brand-gold hover:bg-black/5 dark:hover:bg-white/10">Admin Panel</a>
+                            <a href="#/admin" className="block px-4 py-2 text-sm font-bold text-brand-gold hover:bg-black/5 dark:hover:bg-white/10 transition-colors">Admin Panel</a>
                         )}
                         <button
                           onClick={async () => {
                             await logout();
                             setIsUserMenuOpen(false);
                           }}
-                          className="w-full text-left block px-4 py-2 text-sm text-brand-black dark:text-brand-white hover:bg-black/5 dark:hover:bg-white/10"
+                          className="w-full text-left block px-4 py-2 text-sm text-brand-black dark:text-brand-white hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
                         >
                           {t('header.logout')}
                         </button>
@@ -127,7 +148,7 @@ const Header: React.FC = () => {
               )}
                <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="lg:hidden text-brand-black/70 dark:text-brand-white/70 hover:text-brand-black dark:hover:text-brand-white"
+                className="lg:hidden p-2 -mr-2 text-brand-black/70 dark:text-brand-white/70 hover:text-brand-black dark:hover:text-brand-white"
                 aria-label="Toggle menu"
               >
                 {isMenuOpen ? <XIcon className="h-6 w-6" /> : <MenuIcon className="h-6 w-6" />}
@@ -138,10 +159,10 @@ const Header: React.FC = () => {
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="lg:hidden bg-brand-white dark:bg-brand-gray-800 border-t border-black/10 dark:border-white/10">
-            <nav className="flex flex-col items-center space-y-4 p-4">
+          <div className="lg:hidden bg-brand-white dark:bg-brand-gray-800 border-t border-black/10 dark:border-white/10 absolute w-full shadow-lg">
+            <nav className="flex flex-col items-center space-y-4 p-6">
               {NAV_LINKS.map((link) => (
-                <a key={link.href} href={link.href} className="text-base font-medium text-brand-black/70 dark:text-brand-white/70 hover:text-brand-black dark:hover:text-brand-white transition-colors" onClick={() => setIsMenuOpen(false)}>
+                <a key={link.href} href={link.href} className="text-lg font-medium text-brand-black/70 dark:text-brand-white/70 hover:text-brand-black dark:hover:text-brand-white transition-colors" onClick={() => setIsMenuOpen(false)}>
                   {t(link.labelKey)}
                 </a>
               ))}
