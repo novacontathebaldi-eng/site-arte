@@ -38,7 +38,7 @@ const CategoryTabs: React.FC<CategoryTabsProps> = ({ categories, activeCategoryI
             {categories.map(tab => (
                 <button
                     key={tab.id}
-                    ref={(el) => tabRefs.current.set(tab.id, el)}
+                    ref={(el) => { if (el) tabRefs.current.set(tab.id, el); }}
                     onClick={(e) => handleTabClick(e, tab.id)}
                     className={`relative whitespace-nowrap px-4 py-2 text-sm font-semibold rounded-md transition-colors ${
                         activeCategoryId === tab.id
