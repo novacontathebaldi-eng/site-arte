@@ -1,6 +1,6 @@
 import { supabase } from './config';
 
-const BUCKET_NAME = 'products';
+const BUCKET_NAME = 'storage-arte';
 
 /**
  * Uploads an image to Supabase Storage.
