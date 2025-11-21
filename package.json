@@ -14,7 +14,12 @@
     "firebase": "^12.6.0",
     "@firebase/app": "^0.14.6",
     "@supabase/supabase-js": "^2.44.0",
-    "use-debounce": "^10.0.6"
+    "use-debounce": "^10.0.6",
+    "framer-motion": "^11.0.0",
+    "@studio-freight/lenis": "^1.0.42",
+    "react-helmet-async": "^2.0.5",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^2.3.0"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
