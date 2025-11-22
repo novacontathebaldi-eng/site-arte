@@ -1,0 +1,45 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Função auxiliar para verificar se o usuário é admin
+    // (Você precisará setar uma flag 'isAdmin' no documento do usuário ou usar Custom Claims)
+    function isAdmin() {
+      return request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // Função para verificar se o usuário é dono do dado
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    // Regras para Produtos (Catálogo)
+    match /products/{productId} {
+      allow read: if true; // Qualquer um pode ver produtos
+      allow write: if isAdmin(); // Apenas admin pode criar/editar
+    }
+
+    // Regras para Usuários
+    match /users/{userId} {
+      allow read, write: if isOwner(userId) || isAdmin();
+    }
+
+    // Regras para Carrinho
+    match /carts/{cartId} {
+      allow read, write: if request.auth != null && (resource == null || resource.data.userId == request.auth.uid);
+    }
+
+    // Regras para Pedidos
+    match /orders/{orderId} {
+      allow create: if request.auth != null;
+      allow read: if request.auth != null && (resource.data.userId == request.auth.uid || isAdmin());
+      allow update, delete: if isAdmin();
+    }
+    
+    // Regra padrão para bloquear o resto
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

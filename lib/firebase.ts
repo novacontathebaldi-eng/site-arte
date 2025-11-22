@@ -1,5 +1,4 @@
-// FIX: Changed to named imports to resolve module resolution errors with 'firebase/app'.
-import { initializeApp, getApps, getApp } from 'firebase/app';
+import { initializeApp, getApps } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
@@ -9,11 +8,11 @@ const firebaseConfig = {
   projectId: "thebaldi-me",
   storageBucket: "thebaldi-me.firebasestorage.app",
   messagingSenderId: "794996190135",
-  appId: "1:794996190135:web:ec7ac21c07fc58847d5632",
+  appId: "1:794996190135:web:ec7ac21c07fc58847d5632"
 };
 
-// Initialize Firebase
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+// Initialize Firebase only if it hasn't been initialized already
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApps()[0];
 const auth = getAuth(app);
 const db = getFirestore(app);
 

@@ -1,5 +1,8 @@
 {
-  "name": "Meeh - Art by Melissa Pelussi",
-  "description": "A modern e-commerce platform showcasing the unique art of Melissa Pelussi (Meeh), featuring paintings, jewelry, digital art, and prints from Luxembourg.",
-  "requestFramePermissions": []
+  "name": "Melissa Pelussi Art",
+  "description": "Contemporary Art Store by Melissa Pelussi. Luxury art, prints, and digital assets.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
 }

@@ -1,0 +1,67 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-black: 44, 44, 44;    
+  --color-gold: 212, 175, 55;   
+  --color-white: 255, 255, 255; 
+  --color-light: 245, 245, 245; 
+  --color-gray: 107, 107, 107;  
+
+  --primary: #2C2C2C;
+  --accent: #D4AF37;
+  --light: #F5F5F5;
+  --secondary: #6B6B6B;
+  --background: #F5F5F5;
+  --foreground: #2C2C2C;
+}
+
+.dark {
+  --primary: #F5F5F5; 
+  --background: #2C2C2C;
+  --foreground: #FFFFFF;
+  --light: #1a1a1a;
+}
+
+html, body {
+  height: 100%;
+  width: 100%;
+}
+
+/* Lenis Scroll Fixes */
+html.lenis {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+.lenis.lenis-scrolling iframe {
+  pointer-events: none;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--light);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--accent);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #b59328;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+}

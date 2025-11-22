@@ -4,81 +4,158 @@ import {
   getDocs, 
   getDoc, 
   addDoc, 
-  setDoc, 
   updateDoc, 
-  deleteDoc, 
-  query, 
-  where, 
+  deleteDoc,
+  query,
   onSnapshot,
-  QueryConstraint,
+  getDocsFromCache,
   DocumentData,
-  WithFieldValue,
-  serverTimestamp
+  QueryConstraint
 } from 'firebase/firestore';
 import { db } from './config';
 
-// Generic Get One
-export const getDocument = async <T>(collectionName: string, id: string): Promise<T | null> => {
-  const docRef = doc(db, collectionName, id);
-  const docSnap = await getDoc(docRef);
-  
-  if (docSnap.exists()) {
-    return { id: docSnap.id, ...docSnap.data() } as T;
+// Genérico para buscar coleção (Promise)
+export const getCollection = async (collectionName: string, ...constraints: QueryConstraint[]) => {
+  try {
+    const colRef = collection(db, collectionName);
+    const q = query(colRef, ...constraints);
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+  } catch (error) {
+    console.error(`Error fetching collection ${collectionName}:`, error);
+    throw error;
   }
-  return null;
 };
 
-// Generic Get All (with optional queries)
-export const getCollection = async <T>(collectionName: string, constraints: QueryConstraint[] = []): Promise<T[]> => {
-  const q = query(collection(db, collectionName), ...constraints);
-  const querySnapshot = await getDocs(q);
-  return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as T));
+// Buscar documento único (Promise)
+export const getDocument = async (collectionName: string, id: string) => {
+  try {
+    const docRef = doc(db, collectionName, id);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      return { id: docSnap.id, ...docSnap.data() };
+    }
+    return null;
+  } catch (error) {
+    console.error(`Error fetching document ${id} from ${collectionName}:`, error);
+    throw error;
+  }
 };
 
-// Generic Create (Auto ID)
-export const createDocument = async <T extends WithFieldValue<DocumentData>>(collectionName: string, data: T) => {
-  const colRef = collection(db, collectionName);
-  const docRef = await addDoc(colRef, {
-    ...data,
-    createdAt: serverTimestamp(),
-    updatedAt: serverTimestamp()
-  });
-  return docRef.id;
+// Criar documento
+export const createDocument = async (collectionName: string, data: DocumentData) => {
+  try {
+    const colRef = collection(db, collectionName);
+    const docRef = await addDoc(colRef, {
+      ...data,
+      createdAt: new Date().toISOString()
+    });
+    return docRef.id;
+  } catch (error) {
+    console.error(`Error creating document in ${collectionName}:`, error);
+    throw error;
+  }
 };
 
-// Generic Set (Specific ID)
-export const setDocument = async <T extends WithFieldValue<DocumentData>>(collectionName: string, id: string, data: T, merge = true) => {
-  const docRef = doc(db, collectionName, id);
-  await setDoc(docRef, {
-    ...data,
-    updatedAt: serverTimestamp()
-  }, { merge });
-};
-
-// Generic Update
+// Atualizar documento
 export const updateDocument = async (collectionName: string, id: string, data: Partial<DocumentData>) => {
-  const docRef = doc(db, collectionName, id);
-  await updateDoc(docRef, {
-    ...data,
-    updatedAt: serverTimestamp()
-  });
+  try {
+    const docRef = doc(db, collectionName, id);
+    await updateDoc(docRef, {
+      ...data,
+      updatedAt: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error(`Error updating document ${id}:`, error);
+    throw error;
+  }
 };
 
-// Generic Delete
-export const removeDocument = async (collectionName: string, id: string) => {
-  const docRef = doc(db, collectionName, id);
-  await deleteDoc(docRef);
+// Deletar documento
+export const deleteDocument = async (collectionName: string, id: string) => {
+  try {
+    const docRef = doc(db, collectionName, id);
+    await deleteDoc(docRef);
+  } catch (error) {
+    console.error(`Error deleting document ${id}:`, error);
+    throw error;
+  }
 };
 
-// Real-time Listener
-export const subscribeToCollection = <T>(
+// --- REAL-TIME LISTENERS (Para Pix, Pedidos e Admin) ---
+
+/**
+ * Ouve alterações em uma coleção em tempo real.
+ * Retorna uma função unsubscribe para parar de ouvir.
+ */
+export const subscribeToCollection = (
   collectionName: string, 
-  constraints: QueryConstraint[], 
-  callback: (data: T[]) => void
+  callback: (data: any[]) => void, 
+  ...constraints: QueryConstraint[]
 ) => {
-  const q = query(collection(db, collectionName), ...constraints);
-  return onSnapshot(q, (snapshot) => {
-    const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as T));
+  const colRef = collection(db, collectionName);
+  const q = query(colRef, ...constraints);
+
+  // onSnapshot mantém uma conexão aberta
+  const unsubscribe = onSnapshot(q, (snapshot) => {
+    const data = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
     callback(data);
+  }, (error) => {
+    console.error(`Error subscribing to collection ${collectionName}:`, error);
   });
+
+  return unsubscribe;
+};
+
+/**
+ * Ouve alterações em um documento específico em tempo real.
+ * Ideal para mudança de status de pedido (Pendente -> Pago).
+ */
+export const subscribeToDocument = (
+  collectionName: string, 
+  id: string, 
+  callback: (data: any) => void
+) => {
+  const docRef = doc(db, collectionName, id);
+
+  const unsubscribe = onSnapshot(docRef, (docSnap) => {
+    if (docSnap.exists()) {
+      callback({ id: docSnap.id, ...docSnap.data() });
+    } else {
+      callback(null);
+    }
+  }, (error) => {
+    console.error(`Error subscribing to document ${id}:`, error);
+  });
+
+  return unsubscribe;
+};
+
+// --- OFFLINE / CACHE ---
+
+/**
+ * Força a busca de dados do cache local do dispositivo.
+ * Útil quando offline ou para economizar leituras.
+ */
+export const getCollectionFromCache = async (collectionName: string, ...constraints: QueryConstraint[]) => {
+  try {
+    const colRef = collection(db, collectionName);
+    const q = query(colRef, ...constraints);
+    // getDocsFromCache falha se não tiver cache, então o try/catch é importante
+    const snapshot = await getDocsFromCache(q);
+    return snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+  } catch (error) {
+    console.warn(`Cache miss for ${collectionName}, falling back to network...`);
+    // Fallback para rede se cache falhar
+    return getCollection(collectionName, ...constraints);
+  }
 };

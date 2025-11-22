@@ -3,6 +3,9 @@
 
 # Build output
 /dist
+/.next/
+/out/
+/build
 
 # Logs
 logs
@@ -36,5 +39,8 @@ pids
 
 # TypeScript cache
 *.tsbuildinfo
+
+# Next.js & Vercel specific
+.vercel
 
 ARQUIVOS
