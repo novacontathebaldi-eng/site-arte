@@ -1,9 +1,10 @@
+
 import { useQuery } from '@tanstack/react-query';
 import { getCollection } from '../lib/firebase/firestore';
 import { Product, ProductCategory } from '../types/product';
 
 export const useProducts = () => {
-  return useQuery({
+  return useQuery<Product[]>({
     queryKey: ['products'],
     queryFn: async () => {
       const data = await getCollection('products');

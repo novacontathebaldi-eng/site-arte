@@ -1,3 +1,4 @@
+
 import React, { useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { useLanguage } from '../hooks/useLanguage';
@@ -20,7 +21,7 @@ export const Hero: React.FC = () => {
       {/* Parallax Background */}
       <motion.div 
         className="absolute inset-0 w-full h-full z-0"
-        style={{ y, scale, filter: `blur(${blur})` }}
+        style={{ y, scale, filter: `blur(${blur})` } as any}
       >
         {/* Using a high quality placeholder abstract art with eager loading */}
         <img 

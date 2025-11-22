@@ -26,6 +26,10 @@ const FloatingCartButton = dynamic(() => import('./components/FloatingCartButton
   ssr: false 
 });
 
+// New Components
+const AuthModal = dynamic(() => import('./components/auth/AuthModal').then(mod => mod.AuthModal), { ssr: false });
+const Dashboard = dynamic(() => import('./components/Dashboard').then(mod => mod.Dashboard), { ssr: false });
+
 const App: React.FC = () => {
   const { theme } = useThemeStore();
   const { t } = useLanguage();
@@ -105,6 +109,10 @@ const App: React.FC = () => {
         <Chatbot />
         <FloatingCartButton />
         <AddToCartAnimation />
+        
+        {/* Auth & Dashboard Layers */}
+        <AuthModal />
+        <Dashboard />
     </div>
   );
 };

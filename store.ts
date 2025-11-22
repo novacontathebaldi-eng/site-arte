@@ -4,3 +4,4 @@ export * from './store/uiStore';
 export * from './store/cartStore';
 export * from './store/authStore';
 export * from './store/themeStore';
+export * from './store/wishlistStore';

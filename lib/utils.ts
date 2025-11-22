@@ -40,3 +40,12 @@ export function throttle<T extends (...args: any[]) => void>(func: T, limit: num
 }
 
 export const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+export const calculatePasswordStrength = (password: string): number => {
+  let strength = 0;
+  if (password.length >= 8) strength += 25;
+  if (password.match(/[A-Z]/)) strength += 25;
+  if (password.match(/[0-9]/)) strength += 25;
+  if (password.match(/[^a-zA-Z0-9]/)) strength += 25;
+  return strength;
+};

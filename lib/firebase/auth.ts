@@ -1,20 +1,15 @@
-import { 
-  signInWithPopup, 
-  GoogleAuthProvider, 
-  signOut as firebaseSignOut,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  updateProfile,
-  sendPasswordResetEmail,
-  User
-} from 'firebase/auth';
-import { auth } from './config';
 
-const googleProvider = new GoogleAuthProvider();
+import firebase from 'firebase/compat/app';
+import { auth } from './config';
+import { User } from 'firebase/auth';
+
+// Re-export types if needed, though typically handled by compat
+// Note: We use firebase.auth.* for providers in compat mode
 
 export const signInWithGoogle = async () => {
   try {
-    const result = await signInWithPopup(auth, googleProvider);
+    const provider = new firebase.auth.GoogleAuthProvider();
+    const result = await auth.signInWithPopup(provider);
     return result.user;
   } catch (error) {
     console.error("Error signing in with Google", error);
@@ -24,7 +19,7 @@ export const signInWithGoogle = async () => {
 
 export const signInWithEmail = async (email: string, pass: string) => {
   try {
-    const result = await signInWithEmailAndPassword(auth, email, pass);
+    const result = await auth.signInWithEmailAndPassword(email, pass);
     return result.user;
   } catch (error) {
     throw error;
@@ -33,9 +28,9 @@ export const signInWithEmail = async (email: string, pass: string) => {
 
 export const signUpWithEmail = async (email: string, pass: string, displayName: string) => {
   try {
-    const result = await createUserWithEmailAndPassword(auth, email, pass);
+    const result = await auth.createUserWithEmailAndPassword(email, pass);
     if (result.user) {
-      await updateProfile(result.user, { displayName });
+      await result.user.updateProfile({ displayName });
     }
     return result.user;
   } catch (error) {
@@ -45,7 +40,7 @@ export const signUpWithEmail = async (email: string, pass: string, displayName: 
 
 export const resetPassword = async (email: string) => {
   try {
-    await sendPasswordResetEmail(auth, email);
+    await auth.sendPasswordResetEmail(email);
   } catch (error) {
     throw error;
   }
@@ -53,7 +48,7 @@ export const resetPassword = async (email: string) => {
 
 export const logout = async () => {
   try {
-    await firebaseSignOut(auth);
+    await auth.signOut();
   } catch (error) {
     console.error("Error signing out", error);
   }
@@ -63,7 +58,7 @@ export const getCurrentUser = (): Promise<User | null> => {
   return new Promise((resolve) => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       unsubscribe();
-      resolve(user);
+      resolve(user as User);
     });
   });
 };

@@ -5,9 +5,9 @@ import { useLanguage } from '../../hooks/useLanguage';
 import { motion } from 'framer-motion';
 
 export const Header: React.FC = () => {
-  const { isCartOpen, toggleCart, isMobileMenuOpen, toggleMobileMenu, toggleSearch } = useUIStore();
+  const { isCartOpen, toggleCart, isMobileMenuOpen, toggleMobileMenu, toggleSearch, openAuthModal, toggleDashboard } = useUIStore();
   const { items } = useCartStore();
-  const { user, login, logout } = useAuthStore();
+  const { user, logout } = useAuthStore();
   const { t } = useLanguage();
   const [scrolled, setScrolled] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -19,17 +19,21 @@ export const Header: React.FC = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Definição de cores baseada no estado de scroll
-  // Quando scrolled: Fundo sólido (Branco no Light, Preto no Dark) e texto contrastante
-  // Quando topo: Fundo transparente e texto sempre Branco (por causa do Hero)
   const headerClasses = scrolled
     ? 'bg-white/90 dark:bg-[#1a1a1a]/90 backdrop-blur-md shadow-sm py-3 text-primary dark:text-white border-gray-200 dark:border-white/10'
     : 'bg-transparent py-6 text-white border-transparent';
 
-  // Cor do logo e ícones quando scrolled vs topo
   const contentColorClass = scrolled 
     ? 'text-primary dark:text-white' 
     : 'text-white';
+
+  const handleUserClick = () => {
+    if (user) {
+        toggleDashboard();
+    } else {
+        openAuthModal('login');
+    }
+  };
 
   return (
     <motion.header
@@ -55,21 +59,15 @@ export const Header: React.FC = () => {
             <Search size={20} />
           </button>
           
-          <div className="relative group">
-            <button className="hover:text-accent transition-colors flex items-center gap-2">
-               <User size={20} />
-               {mounted && user && <span className="text-xs">{user.displayName.split(' ')[0]}</span>}
-            </button>
-             <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all p-2 text-primary dark:text-white">
-                {mounted && user ? (
-                    <button onClick={logout} className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-white/10 rounded">{t('nav.logout')}</button>
-                ) : (
-                    <button onClick={login} className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-white/10 rounded">{t('nav.login')}</button>
-                )}
-             </div>
-          </div>
+          <button 
+            onClick={handleUserClick}
+            className="hover:text-accent transition-colors flex items-center gap-2"
+          >
+            <User size={20} />
+            {mounted && user && <span className="text-xs uppercase tracking-wider">{user.displayName?.split(' ')[0]}</span>}
+          </button>
 
-          <button onClick={toggleCart} className="relative hover:text-accent transition-colors" aria-label={t('cart.title')}>
+          <button id="header-cart-btn" onClick={toggleCart} className="relative hover:text-accent transition-colors" aria-label={t('cart.title')}>
             <ShoppingBag size={20} />
             {mounted && items.length > 0 && (
               <span className="absolute -top-2 -right-2 bg-accent text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center animate-pulse">
