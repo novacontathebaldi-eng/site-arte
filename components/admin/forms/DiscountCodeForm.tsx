@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { doc, setDoc, addDoc, collection, serverTimestamp, Timestamp } from 'firebase/firestore';
-import { db } from '../../../lib/firebase/config';
+import { db } from '../../../lib/firebase';
 import { DiscountCodeDocument } from '../../../firebase-types';
 import Button from '../../common/Button';
 import Input from '../../common/Input';

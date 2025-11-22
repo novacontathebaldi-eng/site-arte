@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { db } from '../../../lib/firebase/config';
+import { db } from '../../../lib/firebase';
 import Button from '../../common/Button';
 import Input from '../../common/Input';
 import { seedDatabase } from '../../../lib/seed';

@@ -1,13 +1,20 @@
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
 import {
+  Auth,
   User,
   onAuthStateChanged,
   signOut,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  GoogleAuthProvider,
+  sendPasswordResetEmail,
+  updateProfile,
 } from 'firebase/auth';
 import { doc, setDoc, serverTimestamp, getDoc, updateDoc } from 'firebase/firestore';
-import { auth, db } from '../lib/firebase/config';
-import { loginWithEmail, loginWithGoogle, signupWithEmail, logoutUser, resetPassword } from '../lib/firebase/auth';
-import { UserDocument, LanguageCode } from '../firebase-types';
+import { auth, db } from '../lib/firebase';
+import { UserDocument } from '../firebase-types';
+import { LanguageCode } from '../firebase-types';
 
 interface AuthContextType {
   user: User | null;
@@ -81,7 +88,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (userAuth) => {
       if (userAuth) {
-        // Optimization: Only fetch doc if we don't have it or on hard refresh
         await createUserProfileDocument(userAuth);
         const userRef = doc(db, 'users', userAuth.uid);
         const userSnap = await getDoc(userRef);
@@ -98,41 +104,41 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, []);
   
   const logout = async () => {
-    await logoutUser();
+    await signOut(auth);
   };
 
-  const handleSignupWithEmail = async (name: string, email: string, pass: string): Promise<User> => {
-    const user = await signupWithEmail(email, pass, name);
+  const signupWithEmail = async (name: string, email: string, pass: string): Promise<User> => {
+    const { user } = await createUserWithEmailAndPassword(auth, email, pass);
+    await updateProfile(user, { displayName: name });
     await createUserProfileDocument(user, { displayName: name });
     const userSnap = await getDoc(doc(db, 'users', user.uid));
     setUserDoc(userSnap.exists() ? userSnap.data() as UserDocument : null);
     return user;
   };
   
-  const handleLoginWithGoogle = async (): Promise<User> => {
-      const user = await loginWithGoogle();
+  const loginWithEmail = async (email: string, pass: string): Promise<User> => {
+     const { user } = await signInWithEmailAndPassword(auth, email, pass);
+     return user;
+  };
+  
+  const loginWithGoogle = async (): Promise<User> => {
+      const provider = new GoogleAuthProvider();
+      const { user } = await signInWithPopup(auth, provider);
       await createUserProfileDocument(user);
       const userSnap = await getDoc(doc(db, 'users', user.uid));
       setUserDoc(userSnap.exists() ? userSnap.data() as UserDocument : null);
       return user;
   };
 
+  const sendPasswordReset = async(email: string): Promise<void> => {
+    await sendPasswordResetEmail(auth, email);
+  }
+
   const openAuthModal = () => setIsAuthModalOpen(true);
   const closeAuthModal = () => setIsAuthModalOpen(false);
 
-  const value = { 
-    user, 
-    userDoc, 
-    loading, 
-    logout, 
-    signupWithEmail: handleSignupWithEmail, 
-    loginWithEmail, 
-    loginWithGoogle: handleLoginWithGoogle, 
-    sendPasswordReset: resetPassword, 
-    isAuthModalOpen, 
-    openAuthModal, 
-    closeAuthModal 
-  };
+
+  const value = { user, userDoc, loading, logout, signupWithEmail, loginWithEmail, loginWithGoogle, sendPasswordReset, isAuthModalOpen, openAuthModal, closeAuthModal };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

@@ -4,15 +4,15 @@ type ButtonVariant = 'primary' | 'secondary' | 'tertiary';
 type ButtonSize = 'sm' | 'md' | 'lg';
 
 const variantClasses = {
-  primary: 'bg-brand-black text-brand-white hover:bg-black/90 dark:bg-brand-white dark:text-brand-black dark:hover:bg-white/90 shadow-md hover:shadow-lg',
-  secondary: 'bg-brand-gold text-brand-black hover:bg-yellow-500 shadow-sm',
-  tertiary: 'bg-white/10 dark:bg-black/10 border border-brand-black/10 dark:border-white/10 text-brand-black dark:text-brand-white hover:bg-black/5 dark:hover:bg-white/10 backdrop-blur-sm',
+  primary: 'bg-brand-black text-brand-white hover:bg-black/80 dark:bg-brand-white dark:text-brand-black dark:hover:bg-white/80',
+  secondary: 'bg-brand-gold text-brand-black hover:bg-yellow-500',
+  tertiary: 'bg-transparent border border-brand-black/20 hover:bg-black/10 text-brand-black dark:bg-transparent dark:text-brand-white dark:border-brand-white/20 dark:hover:bg-white/20',
 };
 
 const sizeClasses = {
-  sm: 'px-3 py-1.5 text-xs tracking-wide',
-  md: 'px-6 py-2.5 text-sm tracking-wide',
-  lg: 'px-8 py-3 text-base tracking-wider',
+  sm: 'px-3 py-1.5 text-sm',
+  md: 'px-5 py-2.5 text-sm',
+  lg: 'px-8 py-3 text-base',
 };
 
 type AsProp<C extends React.ElementType> = {
@@ -48,7 +48,7 @@ const Button = forwardRef(<C extends React.ElementType = 'button'>(
   ref: React.Ref<any>
 ) => {
   const Component = as || 'button';
-  const baseClasses = 'inline-flex items-center justify-center gap-2 font-semibold rounded-md transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-gold disabled:opacity-50 disabled:cursor-not-allowed';
+  const baseClasses = 'inline-flex items-center justify-center gap-2 font-semibold rounded-sm transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-gold disabled:opacity-50 disabled:cursor-not-allowed';
 
   return (
     <Component

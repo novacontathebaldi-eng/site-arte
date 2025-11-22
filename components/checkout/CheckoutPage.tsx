@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { collection, addDoc, serverTimestamp, Timestamp, writeBatch, doc, runTransaction, increment, updateDoc } from 'firebase/firestore';
-import { db } from '../../lib/firebase/config';
+import { db } from '../../lib/firebase';
 import { useCart } from '../../hooks/useCart';
 import { useAuth } from '../../hooks/useAuth';
 import { useRouter } from '../../hooks/useRouter';

@@ -1,6 +1,6 @@
 import React, { createContext, useState, useEffect, ReactNode, useCallback } from 'react';
-import { doc, getDoc, collection, getDocs, writeBatch, deleteDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '../lib/firebase/config';
+import { doc, setDoc, getDoc, collection, getDocs, writeBatch, deleteDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
+import { db } from '../lib/firebase';
 import { ProductDocument, CartItemDocument } from '../firebase-types';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../hooks/useToast';

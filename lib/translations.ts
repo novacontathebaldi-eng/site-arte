@@ -13,17 +13,10 @@ export const translations: Record<Language, Record<string, any>> = {
       title: "L'Art de Melissa Pelussi",
       subtitle: "Découvrez des créations uniques de Luxembourg",
       button: "Explorer la collection",
-      featured: {
-          tag: "Chef-d'œuvre en vedette",
-          title: "Rêverie Éthérée",
-          description: "Découvrez la profondeur de l'émotion dans cette pièce exclusive, huile sur toile. Un voyage à travers des paysages oniriques abstraits qui défie la perception.",
-          button: "Voir l'œuvre"
-      }
     },
     productGrid: {
       title: 'Nos Œuvres',
       featuredTitle: 'En Vedette',
-      viewCatalog: 'Voir le Catalogue Complet'
     },
     newsletter: {
         title: "Rejoignez notre univers",
@@ -360,17 +353,10 @@ export const translations: Record<Language, Record<string, any>> = {
       title: "The Art of Melissa Pelussi",
       subtitle: "Discover unique creations from Luxembourg",
       button: "Explore the collection",
-      featured: {
-          tag: "Featured Masterpiece",
-          title: "Ethereal Reverie",
-          description: "Experience the depth of emotion in this exclusive oil on canvas piece. A journey through abstract dreamscapes that challenges perception.",
-          button: "View Artwork"
-      }
     },
     productGrid: {
       title: 'Our Artworks',
       featuredTitle: 'Featured Works',
-      viewCatalog: 'View Full Catalog'
     },
     newsletter: {
         title: "Join our world",
@@ -707,17 +693,10 @@ export const translations: Record<Language, Record<string, any>> = {
       title: "Die Kunst von Melissa Pelussi",
       subtitle: "Entdecken Sie einzigartige Kreationen aus Luxemburg",
       button: "Kollektion entdecken",
-      featured: {
-          tag: "Ausgewähltes Meisterwerk",
-          title: "Ätherische Träumerei",
-          description: "Erleben Sie die Tiefe der Gefühle in diesem exklusiven Öl auf Leinwand. Eine Reise durch abstrakte Traumlandschaften, die die Wahrnehmung herausfordert.",
-          button: "Kunstwerk ansehen"
-      }
     },
     productGrid: {
       title: 'Unsere Kunstwerke',
       featuredTitle: 'Ausgewählte Werke',
-      viewCatalog: 'Gesamtkatalog ansehen'
     },
     newsletter: {
         title: "Treten Sie unserer Welt bei",
@@ -851,17 +830,10 @@ export const translations: Record<Language, Record<string, any>> = {
       title: 'A Arte de Melissa Pelussi',
       subtitle: 'Descubra criações únicas de Luxemburgo',
       button: 'Explorar a coleção',
-      featured: {
-          tag: "Obra-prima em Destaque",
-          title: "Devaneio Etéreo",
-          description: "Experimente a profundidade da emoção nesta peça exclusiva em óleo sobre tela. Uma jornada por paisagens oníricas abstratas que desafiam a percepção.",
-          button: "Ver Obra"
-      }
     },
     productGrid: {
       title: 'Nossas Obras',
       featuredTitle: 'Obras em Destaque',
-      viewCatalog: 'Ver Catálogo Completo'
     },
     newsletter: {
       title: 'Junte-se ao nosso mundo',
@@ -1106,7 +1078,7 @@ export const translations: Record<Language, Record<string, any>> = {
         totalSpent: 'Total Gasto',
         orderHistory: 'Histórico de Pedidos',
         noOrders: 'Nenhum pedido encontrado para este cliente.',
-        internalNotes: 'Notas Internes',
+        internalNotes: 'Notas Internas',
         saveNotes: 'Salvar Notas',
         notesSaved: 'Notas salvas com sucesso.',
         sendEmail: 'Enviar Email',

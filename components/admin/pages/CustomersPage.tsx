@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { collection, query, where, getDocs } from 'firebase/firestore';
-import { db } from '../../../lib/firebase/config';
+import { db } from '../../../lib/firebase';
 import { UserDocument } from '../../../firebase-types';
 import Spinner from '../../common/Spinner';
 import { useI18n } from '../../../hooks/useI18n';

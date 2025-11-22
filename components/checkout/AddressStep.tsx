@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { collection, query, where, onSnapshot, addDoc, Unsubscribe } from 'firebase/firestore';
-import { db } from '../../lib/firebase/config';
+import { db } from '../../lib/firebase';
 import { useAuth } from '../../hooks/useAuth';
 import { Address, AddressDocument } from '../../firebase-types';
 import Button from '../common/Button';
