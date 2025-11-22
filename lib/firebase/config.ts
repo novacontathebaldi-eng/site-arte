@@ -2,17 +2,27 @@ import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
-// Configuração Hardcoded conforme solicitado
 const firebaseConfig = {
-  apiKey: "AIzaSyAWVI9VHvxARMSM3JV-bXs_73UjKh25mn4",
-  authDomain: "thebaldi-me.firebaseapp.com",
-  projectId: "thebaldi-me",
-  storageBucket: "thebaldi-me.firebasestorage.app",
-  messagingSenderId: "794996190135",
-  appId: "1:794996190135:web:ec7ac21c07fc58847d5632"
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID
 };
 
-// Singleton pattern para evitar inicialização múltipla
+// Validação de segurança para DX (Developer Experience)
+const missingKeys = Object.entries(firebaseConfig)
+  .filter(([_, value]) => !value)
+  .map(([key]) => key);
+
+if (missingKeys.length > 0 && typeof window !== 'undefined') {
+  console.warn(
+    `[Firebase] Missing environment variables: ${missingKeys.join(', ')}. Check your .env.local file.`
+  );
+}
+
+// Singleton pattern
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const auth = getAuth(app);
 const db = getFirestore(app);

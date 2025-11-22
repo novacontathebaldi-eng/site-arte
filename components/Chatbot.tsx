@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageCircle, X, Send, Loader2, Sparkles } from 'lucide-react';
 import { useUIStore } from '../store';
-import { generateChatResponse } from '../geminiService';
+import { generateChatResponse } from '../app/actions/chat'; // Importando Server Action
 import { ChatMessage } from '../types';
 import { useLanguage } from '../hooks/useLanguage';
 
@@ -58,6 +58,7 @@ export const Chatbot: React.FC = () => {
         parts: [{ text: m.text }]
     }));
 
+    // Call Server Action
     const responseText = await generateChatResponse(userMsg.text, history);
 
     const botMsg: ChatMessage = {
@@ -82,7 +83,6 @@ export const Chatbot: React.FC = () => {
     <>
       {/* Floating Button */}
       <motion.button
-        // Alterado: dark:bg-accent para manter consistência e visibilidade, em vez de branco
         className="fixed bottom-8 left-8 z-40 w-16 h-16 bg-primary text-white dark:bg-accent dark:text-white rounded-full shadow-2xl flex items-center justify-center border-2 border-accent hover:brightness-110 transition-all"
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
