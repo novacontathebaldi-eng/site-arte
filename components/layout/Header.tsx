@@ -1,16 +1,23 @@
 import React, { useEffect, useState } from 'react';
-import { ShoppingBag, User, Search, Menu, X } from 'lucide-react';
+import { ShoppingBag, User, Search, Menu, X, Lock } from 'lucide-react';
 import { useUIStore, useCartStore, useAuthStore } from '../../store';
 import { useLanguage } from '../../hooks/useLanguage';
 import { motion } from 'framer-motion';
+import { useAdmin } from '../../hooks/useAdmin';
+import dynamic from 'next/dynamic';
+
+// Lazy load Admin Dashboard trigger to save bundle size
+const AdminDashboard = dynamic(() => import('../AdminDashboard').then(mod => mod.AdminDashboard), { ssr: false });
 
 export const Header: React.FC = () => {
   const { isCartOpen, toggleCart, isMobileMenuOpen, toggleMobileMenu, toggleSearch, openAuthModal, toggleDashboard } = useUIStore();
   const { items } = useCartStore();
-  const { user, logout } = useAuthStore();
+  const { user } = useAuthStore();
+  const { isAdmin } = useAdmin();
   const { t } = useLanguage();
   const [scrolled, setScrolled] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [showAdminPanel, setShowAdminPanel] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -36,6 +43,7 @@ export const Header: React.FC = () => {
   };
 
   return (
+    <>
     <motion.header
       className={`fixed top-0 w-full z-50 transition-all duration-300 border-b ${headerClasses}`}
       initial={{ y: -100 }}
@@ -55,6 +63,17 @@ export const Header: React.FC = () => {
 
         {/* Desktop Icons */}
         <div className={`hidden md:flex items-center gap-6 ${contentColorClass}`}>
+          {/* Admin Toggle */}
+          {isAdmin && (
+            <button 
+                onClick={() => setShowAdminPanel(true)} 
+                className="hover:text-red-500 transition-colors" 
+                title="Painel Administrativo"
+            >
+                <Lock size={18} />
+            </button>
+          )}
+
           <button onClick={toggleSearch} className="hover:text-accent transition-colors" aria-label={t('common.search')}>
             <Search size={20} />
           </button>
@@ -83,5 +102,8 @@ export const Header: React.FC = () => {
         </button>
       </div>
     </motion.header>
+    
+    <AdminDashboard isOpen={showAdminPanel} onClose={() => setShowAdminPanel(false)} />
+    </>
   );
 };

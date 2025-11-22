@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Product, ProductCategory } from '../types/product';
@@ -27,7 +28,7 @@ export const Catalog: React.FC = () => {
     const categories: string[] = useMemo(() => {
         if (!products) return [];
         
-        const uniqueCats = Array.from(new Set(products.map(p => p.category)));
+        const uniqueCats = Array.from(new Set(products.map(p => p.category))) as string[];
         
         // Sort based on preferred order, then alphabetical
         return uniqueCats.sort((a, b) => {
@@ -37,7 +38,7 @@ export const Catalog: React.FC = () => {
             if (idxA !== -1 && idxB !== -1) return idxA - idxB;
             if (idxA !== -1) return -1;
             if (idxB !== -1) return 1;
-            return (a as string).localeCompare(b as string);
+            return a.localeCompare(b);
         });
     }, [products]);
 

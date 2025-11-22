@@ -11,6 +11,7 @@ export interface ProductTranslation {
   title: string;
   description: string;
   material?: string;
+  tags?: string[];
 }
 
 export interface Product {
@@ -26,6 +27,7 @@ export interface Product {
   stock: number;
   dimensions?: string;
   featured?: boolean;
+  displayOrder?: number; // For manual sorting
   createdAt: string; // ISO String
 }
 
