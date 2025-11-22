@@ -37,7 +37,7 @@ export const Catalog: React.FC = () => {
             if (idxA !== -1 && idxB !== -1) return idxA - idxB;
             if (idxA !== -1) return -1;
             if (idxB !== -1) return 1;
-            return a.localeCompare(b);
+            return (a as string).localeCompare(b as string);
         });
     }, [products]);
 
