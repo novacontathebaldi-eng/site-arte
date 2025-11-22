@@ -1,0 +1,178 @@
+import React from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { X, Trash2, ShoppingBag, CreditCard, Plus, Minus } from 'lucide-react';
+import { useUIStore, useCartStore, useAuthStore } from '../store';
+import { useLanguage } from '../hooks/useLanguage';
+import { ProductCategory } from '../types';
+import { formatPrice } from '../lib/utils';
+
+export const CartSidebar: React.FC = () => {
+  const { isCartOpen, toggleCart } = useUIStore();
+  const { items, removeItem, updateQuantity, total } = useCartStore();
+  const { user, login } = useAuthStore();
+  const { t, language } = useLanguage();
+
+  const handleCheckout = () => {
+    if (!user) {
+        login();
+    } else {
+        alert("Proceeding to checkout flow...");
+    }
+  };
+
+  return (
+    <AnimatePresence>
+      {isCartOpen && (
+        <>
+          {/* Backdrop */}
+          <motion.div
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[60]"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={toggleCart}
+          />
+          
+          {/* Glass Sidebar */}
+          <motion.div
+            // FIX: Ajustado para bg-white/70 e bg-black/70 conforme pedido rigoroso
+            className="fixed top-0 right-0 h-full w-full sm:w-[480px] bg-white/70 dark:bg-black/70 backdrop-blur-2xl border-l border-white/20 z-[70] shadow-2xl flex flex-col"
+            initial={{ x: '100%' }}
+            animate={{ x: 0, transition: { type: 'spring', damping: 25, stiffness: 300 } }}
+            exit={{ x: '100%', transition: { type: 'spring', damping: 25, stiffness: 300 } }}
+          >
+            {/* Header */}
+            <div className="p-6 border-b border-gray-200/50 dark:border-white/10 flex justify-between items-center bg-white/5">
+              <div>
+                <h2 className="font-serif text-2xl font-bold text-primary dark:text-white tracking-tight">
+                    {t('cart.title')}
+                </h2>
+                <span className="text-xs text-accent font-bold uppercase tracking-widest">
+                    {items.length} items selected
+                </span>
+              </div>
+              <button 
+                onClick={toggleCart} 
+                className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-primary dark:text-white transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Items List */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-6">
+              {items.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-full text-gray-400 space-y-6">
+                    <div className="w-24 h-24 bg-gray-100 dark:bg-white/5 rounded-full flex items-center justify-center">
+                        <ShoppingBag size={48} className="opacity-20" />
+                    </div>
+                    <p className="text-lg font-medium">{t('cart.empty')}</p>
+                    <button onClick={toggleCart} className="text-accent hover:underline uppercase tracking-widest text-xs font-bold">
+                        {t('cart.start_shopping')}
+                    </button>
+                </div>
+              ) : (
+                <AnimatePresence>
+                    {items.map((item) => {
+                        const isUnique = item.category === ProductCategory.PAINTINGS || item.category === ProductCategory.SCULPTURES;
+                        const translation = item.translations[language] || item.translations['fr'];
+
+                        return (
+                            <motion.div 
+                                layout
+                                key={item.id}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, x: -100 }}
+                                className="flex gap-4 group"
+                            >
+                                {/* Thumbnail */}
+                                <div className="relative w-24 h-24 rounded-lg overflow-hidden flex-shrink-0 shadow-sm">
+                                    <img 
+                                        src={item.images[0]} 
+                                        alt={translation.title} 
+                                        className="w-full h-full object-cover" 
+                                    />
+                                </div>
+
+                                {/* Info */}
+                                <div className="flex-1 flex flex-col justify-between py-1">
+                                    <div>
+                                        <h3 className="font-serif text-base font-bold text-primary dark:text-white leading-tight mb-1">
+                                            {translation.title}
+                                        </h3>
+                                        <span className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                            {item.category}
+                                        </span>
+                                    </div>
+
+                                    <div className="flex justify-between items-end">
+                                        {/* Smart Quantity Control */}
+                                        {isUnique ? (
+                                            <span className="text-[10px] bg-accent/10 text-accent px-2 py-1 rounded border border-accent/20 uppercase tracking-wide font-bold">
+                                                Unique Piece
+                                            </span>
+                                        ) : (
+                                            <div className="flex items-center gap-3 bg-gray-100 dark:bg-white/10 rounded-full px-3 py-1">
+                                                <button 
+                                                    onClick={() => updateQuantity(item.id, -1)}
+                                                    className="w-6 h-6 flex items-center justify-center hover:text-accent transition-colors"
+                                                >
+                                                    <Minus size={12} />
+                                                </button>
+                                                <span className="text-xs font-mono w-4 text-center">{item.quantity}</span>
+                                                <button 
+                                                    onClick={() => updateQuantity(item.id, 1)}
+                                                    className="w-6 h-6 flex items-center justify-center hover:text-accent transition-colors"
+                                                >
+                                                    <Plus size={12} />
+                                                </button>
+                                            </div>
+                                        )}
+
+                                        <div className="text-right">
+                                            <div className="font-serif font-bold text-primary dark:text-white">
+                                                {formatPrice(item.price * item.quantity)}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Delete Action */}
+                                <button 
+                                    onClick={() => removeItem(item.id)}
+                                    className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-red-500 self-start p-1"
+                                >
+                                    <Trash2 size={18} />
+                                </button>
+                            </motion.div>
+                        );
+                    })}
+                </AnimatePresence>
+              )}
+            </div>
+
+            {/* Footer */}
+            {items.length > 0 && (
+                <div className="p-8 border-t border-gray-200 dark:border-white/10 bg-white/50 dark:bg-black/50 backdrop-blur-md">
+                    <div className="flex justify-between items-center mb-2 text-sm">
+                        <span className="text-gray-500 uppercase tracking-widest text-xs">{t('cart.subtotal')}</span>
+                        <span className="font-serif text-xl font-bold dark:text-white">{formatPrice(total())}</span>
+                    </div>
+                    <p className="text-[10px] text-gray-400 mb-6 text-center">{t('cart.shipping_note')}</p>
+                    
+                    <button 
+                        onClick={handleCheckout}
+                        className="w-full bg-primary dark:bg-white text-white dark:text-primary py-4 font-bold uppercase tracking-[0.2em] text-xs hover:bg-accent dark:hover:bg-gray-200 transition-colors flex items-center justify-center gap-3 shadow-xl"
+                    >
+                        <CreditCard size={16} />
+                        {t('cart.checkout')}
+                    </button>
+                </div>
+            )}
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  );
+};

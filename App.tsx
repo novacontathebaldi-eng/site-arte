@@ -8,15 +8,21 @@ import { Footer } from './components/layout/Footer';
 import { Hero } from './components/Hero';
 import { Catalog } from './components/Catalog';
 import { Newsletter } from './components/Newsletter';
-import { motion } from 'framer-motion';
 import { Theme } from './types';
 import { useLanguage } from './hooks/useLanguage';
+import { motion } from 'framer-motion';
 
-// Componentes pesados ou interativos carregados sob demanda para não travar a renderização inicial
-const Cart = dynamic(() => import('./components/Cart').then(mod => mod.Cart), { 
+// Lazy Loaded Components
+const CartSidebar = dynamic(() => import('./components/CartSidebar').then(mod => mod.CartSidebar), { 
   ssr: false 
 });
 const Chatbot = dynamic(() => import('./components/Chatbot').then(mod => mod.Chatbot), { 
+  ssr: false 
+});
+const AddToCartAnimation = dynamic(() => import('./components/AddToCartAnimation').then(mod => mod.AddToCartAnimation), { 
+  ssr: false 
+});
+const FloatingCartButton = dynamic(() => import('./components/FloatingCartButton').then(mod => mod.FloatingCartButton), { 
   ssr: false 
 });
 
@@ -55,7 +61,7 @@ const App: React.FC = () => {
                         transition={{ duration: 0.8 }}
                         className="relative"
                     >
-                        {/* Imagem FIXA e elegante da artista/arte */}
+                        {/* Image */}
                         <div className="aspect-[3/4] w-full overflow-hidden rounded-sm shadow-2xl">
                              <img 
                                 src="https://images.unsplash.com/photo-1551024709-8f23befc6f87?q=80&w=1000&auto=format&fit=crop" 
@@ -94,9 +100,11 @@ const App: React.FC = () => {
 
         <Footer />
 
-        {/* Global Overlays - Carregados de forma Lazy */}
-        <Cart />
+        {/* Global Interactive Elements */}
+        <CartSidebar />
         <Chatbot />
+        <FloatingCartButton />
+        <AddToCartAnimation />
     </div>
   );
 };

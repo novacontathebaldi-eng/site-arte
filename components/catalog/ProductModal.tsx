@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ShoppingBag, Heart, Check, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Product } from '../../types/product';
 import { useLanguage } from '../../hooks/useLanguage';
-import { useCartStore } from '../../store';
+import { useCart } from '../../hooks/useCart';
+import { useWishlist } from '../../hooks/useWishlist';
 import { formatPrice, cn } from '../../lib/utils';
 
 interface ProductModalProps {
@@ -14,9 +15,13 @@ interface ProductModalProps {
 
 export const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onClose }) => {
   const { t, language } = useLanguage();
-  const { addItem } = useCartStore();
+  const { addToCart } = useCart();
+  const { isInWishlist, toggleWishlist } = useWishlist();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isAdded, setIsAdded] = useState(false);
+  
+  // Ref for animation target (main image in modal)
+  const imageRef = useRef<HTMLImageElement>(null);
 
   if (!product || !isOpen) return null;
 
@@ -26,9 +31,17 @@ export const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onC
                       { title: 'Untitled', description: '', material: '' };
 
   const isSoldOut = product.status === 'sold' || product.stock <= 0;
+  const inWishlist = isInWishlist(product.id);
 
   const handleAddToCart = () => {
-    addItem(product);
+    // Feature: Remove from Wishlist if present
+    if (inWishlist) {
+        toggleWishlist(product.id);
+    }
+
+    const rect = imageRef.current?.getBoundingClientRect();
+    addToCart(product, rect);
+    
     setIsAdded(true);
     setTimeout(() => setIsAdded(false), 2000);
   };
@@ -79,6 +92,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onC
             {/* Left: Image Gallery */}
             <div className="w-full md:w-3/5 bg-gray-100 dark:bg-black/20 relative group h-[40vh] md:h-auto md:min-h-[500px]">
               <motion.img
+                ref={imageRef}
                 key={currentImageIndex}
                 src={product.images[currentImageIndex]}
                 alt={translation.title}
@@ -176,8 +190,15 @@ export const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onC
                     )}
                  </button>
                  
-                 <button className="w-full py-3 text-gray-400 hover:text-primary dark:hover:text-white text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-colors">
-                    <Heart size={16} /> Add to Wishlist
+                 <button 
+                    onClick={() => toggleWishlist(product.id)}
+                    className={cn(
+                        "w-full py-3 text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-colors",
+                        inWishlist ? "text-accent hover:text-accent/80" : "text-gray-400 hover:text-primary dark:hover:text-white"
+                    )}
+                 >
+                    <Heart size={16} fill={inWishlist ? "currentColor" : "none"} /> 
+                    {inWishlist ? "Remove from Wishlist" : "Add to Wishlist"}
                  </button>
               </div>
             </div>
