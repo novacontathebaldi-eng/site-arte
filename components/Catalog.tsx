@@ -24,7 +24,7 @@ export const Catalog: React.FC = () => {
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     
     // 1. Extract Dynamic Categories from Data
-    const categories = useMemo(() => {
+    const categories: string[] = useMemo(() => {
         if (!products) return [];
         
         const uniqueCats = Array.from(new Set(products.map(p => p.category)));
@@ -55,7 +55,7 @@ export const Catalog: React.FC = () => {
     // Initialize active category when data loads
     useEffect(() => {
         // Cast activeCategory to ProductCategory to match the array type
-        if (categories.length > 0 && !categories.includes(activeCategory as ProductCategory)) {
+        if (categories.length > 0 && !categories.includes(activeCategory)) {
             setActiveCategory(categories[0]);
         }
     }, [categories, activeCategory]);

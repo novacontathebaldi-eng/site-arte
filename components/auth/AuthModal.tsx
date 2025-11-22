@@ -42,7 +42,8 @@ const FloatingInput = ({ label, type, value, onChange, icon: Icon, error }: any)
 );
 
 export const AuthModal: React.FC = () => {
-  const { isAuthOpen, closeAuthModal, authView, openAuthModal } = useUIStore();
+  const { isAuthOpen, closeAuthModal, authView, openAuthModal, toggleDashboard } = useUIStore();
+  const { loginWithGoogle } = useAuthStore();
   const { t } = useLanguage();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -61,6 +62,7 @@ export const AuthModal: React.FC = () => {
       if (authView === 'login') {
         await signInWithEmail(email, password);
         closeAuthModal();
+        toggleDashboard(); // Redirect to dashboard on success
       } else {
         // Register Logic
         const user = await signUpWithEmail(email, password, name);
@@ -76,6 +78,7 @@ export const AuthModal: React.FC = () => {
                 colors: ['#D4AF37', '#ffffff', '#000000']
             });
             closeAuthModal();
+            toggleDashboard();
         }
       }
     } catch (err: any) {
@@ -87,6 +90,16 @@ export const AuthModal: React.FC = () => {
         setError(msg);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+        await loginWithGoogle();
+        closeAuthModal();
+        toggleDashboard();
+    } catch (e) {
+        setError("Falha ao conectar com Google.");
     }
   };
 
@@ -150,6 +163,21 @@ export const AuthModal: React.FC = () => {
 
                 {/* Content */}
                 <div className="p-8 md:p-10">
+                    {/* Google Login Button */}
+                    <button
+                        onClick={handleGoogleLogin}
+                        className="w-full py-3 bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 rounded-sm flex items-center justify-center gap-3 text-sm font-medium hover:bg-gray-50 dark:hover:bg-white/20 transition-colors mb-6 group"
+                    >
+                        <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="w-5 h-5" />
+                        <span className="text-gray-700 dark:text-white">Continuar com Google</span>
+                    </button>
+
+                    <div className="relative flex items-center gap-4 mb-6">
+                        <div className="flex-1 h-[1px] bg-gray-200 dark:bg-white/10"></div>
+                        <span className="text-xs text-gray-400 uppercase">Ou com email</span>
+                        <div className="flex-1 h-[1px] bg-gray-200 dark:bg-white/10"></div>
+                    </div>
+
                     <form onSubmit={handleSubmit}>
                         <AnimatePresence mode="wait">
                             <motion.div

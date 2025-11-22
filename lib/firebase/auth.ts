@@ -1,16 +1,47 @@
-
 import firebase from 'firebase/compat/app';
-import { auth } from './config';
+import { auth, db } from './config';
 import { User } from 'firebase/auth';
-
-// Re-export types if needed, though typically handled by compat
-// Note: We use firebase.auth.* for providers in compat mode
+import { registerClientToBrevo } from '../../app/actions/registerClient';
 
 export const signInWithGoogle = async () => {
   try {
     const provider = new firebase.auth.GoogleAuthProvider();
     const result = await auth.signInWithPopup(provider);
-    return result.user;
+    const user = result.user;
+    
+    if (user) {
+        const userRef = db.collection('users').doc(user.uid);
+        const doc = await userRef.get();
+
+        if (!doc.exists) {
+            // New User: Create Profile + Register to Brevo
+            const userData = {
+                uid: user.uid,
+                email: user.email,
+                displayName: user.displayName,
+                photoURL: user.photoURL,
+                role: 'user',
+                createdAt: new Date().toISOString(),
+                lastLogin: new Date().toISOString(),
+                preferences: {
+                    language: 'fr',
+                    theme: 'system'
+                }
+            };
+            await userRef.set(userData);
+            
+            // Server Action for Email Marketing
+            if (user.email && user.displayName) {
+                await registerClientToBrevo(user.email, user.displayName);
+            }
+        } else {
+            // Existing User: Update Login Time
+            await userRef.update({
+                lastLogin: new Date().toISOString()
+            });
+        }
+    }
+    return user;
   } catch (error) {
     console.error("Error signing in with Google", error);
     throw error;
@@ -20,6 +51,12 @@ export const signInWithGoogle = async () => {
 export const signInWithEmail = async (email: string, pass: string) => {
   try {
     const result = await auth.signInWithEmailAndPassword(email, pass);
+    // Update last login
+    if (result.user) {
+        await db.collection('users').doc(result.user.uid).set({
+            lastLogin: new Date().toISOString()
+        }, { merge: true }); // merge avoids error if doc missing
+    }
     return result.user;
   } catch (error) {
     throw error;
@@ -31,6 +68,16 @@ export const signUpWithEmail = async (email: string, pass: string, displayName: 
     const result = await auth.createUserWithEmailAndPassword(email, pass);
     if (result.user) {
       await result.user.updateProfile({ displayName });
+      
+      // Create Firestore Doc manually for Email Auth
+      await db.collection('users').doc(result.user.uid).set({
+          uid: result.user.uid,
+          email: email,
+          displayName: displayName,
+          role: 'user',
+          createdAt: new Date().toISOString(),
+          lastLogin: new Date().toISOString()
+      });
     }
     return result.user;
   } catch (error) {
