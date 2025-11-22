@@ -16,9 +16,6 @@ import { ProductDocument } from '../firebase-types';
 
 export interface ProductFilters {
   searchTerm?: string;
-  minPrice?: number;
-  maxPrice?: number;
-  status?: string[];
 }
 
 const PAGE_SIZE = 8;
@@ -49,10 +46,6 @@ export const useProducts = (filters: ProductFilters) => {
       if (filters.searchTerm) {
         q = query(q, where('keywords', 'array-contains', filters.searchTerm.toLowerCase()));
       }
-      
-      // Note: Adding filters for price/status with orderBy('createdAt') requires composite indexes.
-      // For simplicity in this fix, we define the interface but don't apply complex filters 
-      // that would break without indexes unless the user sets them up.
       
       q = query(q, orderBy('createdAt', 'desc'));
       

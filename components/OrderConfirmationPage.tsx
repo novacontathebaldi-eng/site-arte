@@ -70,13 +70,13 @@ const OrderConfirmationPage: React.FC = () => {
             {/* Item List */}
             <div className="divide-y divide-black/10 mt-6">
                 {order.items.map(item => (
-                    <div key={item.productId} className="flex items-center py-4">
-                        <img src={item.snapshot.imageUrl} alt={item.snapshot.title} className="w-16 h-16 rounded object-cover"/>
+                    <div key={item.id} className="flex items-center py-4">
+                        <img src={item.images[0]?.thumbnailUrl} alt={item.translations[language]?.title} className="w-16 h-16 rounded object-cover"/>
                         <div className="ml-4 flex-grow">
-                            <p className="font-semibold">{item.snapshot.title}</p>
+                            <p className="font-semibold">{item.translations[language]?.title}</p>
                             <p className="text-sm text-brand-black/60">Qty: {item.quantity}</p>
                         </div>
-                        <p className="font-medium">€{(item.snapshot.price * item.quantity / 100).toFixed(2)}</p>
+                        <p className="font-medium">€{(item.price.amount * item.quantity / 100).toFixed(2)}</p>
                     </div>
                 ))}
             </div>

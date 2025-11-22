@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useRouter } from './hooks/useRouter';
 import AdminPanel from './components/admin/AdminPanel';
 import Header from './components/Header';
@@ -11,9 +11,6 @@ import DashboardLayout from './components/dashboard/DashboardLayout';
 import CartSidebar from './components/CartSidebar';
 import FloatingCartButton from './components/FloatingCartButton';
 import CatalogPage from './components/CatalogPage';
-import Lenis from '@studio-freight/lenis';
-import { HelmetProvider } from 'react-helmet-async';
-import SEO from './components/common/SEO';
 
 const PageContent: React.FC = () => {
     const { path } = useRouter();
@@ -48,50 +45,20 @@ const PageContent: React.FC = () => {
 const App: React.FC = () => {
   const { route } = useRouter();
 
-  useEffect(() => {
-    // Initialize Lenis for smooth scrolling
-    const lenis = new Lenis({
-      duration: 1.2,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      orientation: 'vertical',
-      gestureOrientation: 'vertical',
-      smoothWheel: true,
-    });
-
-    function raf(time: number) {
-      lenis.raf(time);
-      requestAnimationFrame(raf);
-    }
-
-    requestAnimationFrame(raf);
-
-    return () => {
-      lenis.destroy();
-    };
-  }, []);
-
   if (route.startsWith('/admin')) {
-    return (
-      <HelmetProvider>
-        <SEO title="Admin Panel | Meeh" robots="noindex, nofollow" />
-        <AdminPanel />
-      </HelmetProvider>
-    );
+    return <AdminPanel />;
   }
   
   return (
-    <HelmetProvider>
-      <SEO />
-      <div className="flex flex-col min-h-screen font-sans">
-        <Header />
-        <main className="flex-grow">
-          <PageContent />
-        </main>
-        <CartSidebar />
-        <FloatingCartButton />
-        <Footer />
-      </div>
-    </HelmetProvider>
+    <div className="flex flex-col min-h-screen">
+      <Header />
+      <main className="flex-grow">
+        <PageContent />
+      </main>
+      <CartSidebar />
+      <FloatingCartButton />
+      <Footer />
+    </div>
   );
 };
 

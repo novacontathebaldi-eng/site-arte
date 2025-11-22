@@ -140,7 +140,7 @@ const CatalogPage: React.FC = () => {
                     <section
                         key={category.id}
                         id={`category-section-${category.id}`}
-                        ref={(el) => { if (el) categoryRefs.current.set(category.id, el); }}
+                        ref={(el) => categoryRefs.current.set(category.id, el)}
                         aria-labelledby={`category-title-${category.id}`}
                     >
                         <h3 id={`category-title-${category.id}`} className="text-3xl font-bold font-serif text-brand-black mb-6 border-l-4 border-brand-gold pl-4">

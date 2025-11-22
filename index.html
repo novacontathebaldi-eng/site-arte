@@ -53,13 +53,6 @@
         font-family: 'Playfair Display', serif;
       }
       
-      /* Smooth Theme Transition */
-      body, div, nav, button, a, span, p, h1, h2, h3, h4, h5, h6, input, textarea, select {
-        transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
-        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-        transition-duration: 300ms;
-      }
-
       /* Custom Scrollbar */
       ::-webkit-scrollbar {
         width: 8px;
@@ -82,26 +75,6 @@
           -ms-overflow-style: none;
           scrollbar-width: none;
       }
-      
-      html.lenis, html.lenis body {
-        height: auto;
-      }
-      
-      .lenis.lenis-smooth {
-        scroll-behavior: auto !important;
-      }
-      
-      .lenis.lenis-smooth [data-lenis-prevent] {
-        overscroll-behavior: contain;
-      }
-      
-      .lenis.lenis-stopped {
-        overflow: hidden;
-      }
-      
-      .lenis.lenis-scrolling iframe {
-        pointer-events: none;
-      }
 
       @keyframes pulse-strong {
         0%, 100% {
@@ -118,22 +91,13 @@
   <script type="importmap">
 {
   "imports": {
-    "react/": "https://aistudiocdn.com/react@^18.2.0/",
-    "react": "https://aistudiocdn.com/react@^18.2.0",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^18.2.0/",
-    "react-dom": "https://aistudiocdn.com/react-dom@^18.2.0",
-    "firebase/": "https://aistudiocdn.com/firebase@^10.8.0/",
-    "firebase/app": "https://aistudiocdn.com/firebase@^10.8.0/app",
-    "firebase/auth": "https://aistudiocdn.com/firebase@^10.8.0/auth",
-    "firebase/firestore": "https://aistudiocdn.com/firebase@^10.8.0/firestore",
-    "@firebase/app": "https://aistudiocdn.com/@firebase/app@^0.9.25",
-    "@supabase/supabase-js": "https://aistudiocdn.com/@supabase/supabase-js@^2.39.3",
-    "use-debounce": "https://aistudiocdn.com/use-debounce@^10.0.0",
-    "framer-motion": "https://aistudiocdn.com/framer-motion@^11.0.3",
-    "@studio-freight/lenis": "https://aistudiocdn.com/@studio-freight/lenis@^1.0.33",
-    "react-helmet-async": "https://aistudiocdn.com/react-helmet-async@^2.0.4",
-    "clsx": "https://aistudiocdn.com/clsx@^2.1.0",
-    "tailwind-merge": "https://aistudiocdn.com/tailwind-merge@^2.2.1"
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "firebase/": "https://aistudiocdn.com/firebase@^12.6.0/",
+    "@firebase/app": "https://aistudiocdn.com/@firebase/app@^0.14.6",
+    "@supabase/supabase-js": "https://aistudiocdn.com/@supabase/supabase-js@^2.44.0",
+    "use-debounce": "https://aistudiocdn.com/use-debounce@^10.0.6"
   }
 }
 </script>

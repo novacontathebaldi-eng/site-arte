@@ -6,91 +6,59 @@ import InstagramIcon from './icons/InstagramIcon';
 import FacebookIcon from './icons/FacebookIcon';
 import { useSettings } from '../hooks/useSettings';
 import ThemeSelector from './ThemeSelector';
-import Reveal from './common/Reveal';
 
 const Footer: React.FC = () => {
     const { t } = useI18n();
     const { settings } = useSettings();
-    const year = new Date().getFullYear();
     
   return (
-    <footer className="bg-brand-white dark:bg-brand-gray-900 border-t border-black/5 dark:border-white/5 text-brand-black/70 dark:text-brand-white/70 pt-16 pb-8">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
-          
-          {/* Brand & Bio */}
-          <Reveal animation="fade-in-up" delay="0ms">
-             <div className="flex flex-col items-start">
-                <a href="#" className="text-3xl font-serif font-bold text-brand-black dark:text-brand-white mb-4">Meeh</a>
-                <p className="text-sm leading-relaxed mb-6 max-w-xs">
-                   Showcasing unique art from Luxembourg. Paintings, jewelry, digital art, and prints created with passion and precision.
-                </p>
-                <div className="flex space-x-4">
-                     <a href={settings?.socialLinks?.instagram || '#'} target="_blank" rel="noopener noreferrer" className="text-brand-black/60 dark:text-brand-white/60 hover:text-brand-gold transition-colors p-2 hover:bg-black/5 dark:hover:bg-white/5 rounded-full">
-                        <InstagramIcon className="w-5 h-5"/>
-                     </a>
-                     <a href={settings?.socialLinks?.facebook || '#'} target="_blank" rel="noopener noreferrer" className="text-brand-black/60 dark:text-brand-white/60 hover:text-brand-gold transition-colors p-2 hover:bg-black/5 dark:hover:bg-white/5 rounded-full">
-                        <FacebookIcon className="w-5 h-5"/>
-                     </a>
-                 </div>
+    <footer className="bg-black/5 dark:bg-white/5 text-brand-black/70 dark:text-brand-white/70">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
+          <div className="col-span-2 md:col-span-1">
+             <a href="#" className="text-2xl font-serif font-bold text-brand-black dark:text-brand-white">Meeh</a>
+          </div>
+          <div>
+            <h3 className="font-semibold text-brand-black dark:text-brand-white tracking-wider uppercase">{t('footer.shop')}</h3>
+            <ul className="mt-4 space-y-2">
+              {NAV_LINKS.map(link => (
+                <li key={link.href}><a href={link.href} className="hover:text-brand-gold">{t(link.labelKey)}</a></li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <h3 className="font-semibold text-brand-black dark:text-brand-white tracking-wider uppercase">{t('footer.info')}</h3>
+            <ul className="mt-4 space-y-2">
+              <li><a href="#" className="hover:text-brand-gold">{t('footer.about')}</a></li>
+              <li><a href="#" className="hover:text-brand-gold">{t('footer.contact')}</a></li>
+              <li><a href="#" className="hover:text-brand-gold">{t('footer.terms')}</a></li>
+              <li><a href="#" className="hover:text-brand-gold">{t('footer.privacy')}</a></li>
+            </ul>
+          </div>
+          <div className="col-span-2 md:col-span-1">
+             <h3 className="font-semibold text-brand-black dark:text-brand-white tracking-wider uppercase">{t('footer.contactInfo')}</h3>
+             <ul className="mt-4 space-y-2">
+                 <li><a href={`mailto:${settings?.contactEmail || 'hello@meeh.lu'}`} className="hover:text-brand-gold">{settings?.contactEmail || 'hello@meeh.lu'}</a></li>
+                 <li>Luxembourg</li>
+             </ul>
+             <div className="mt-4 flex space-x-4">
+                 <a href={settings?.socialLinks?.instagram || '#'} target="_blank" rel="noopener noreferrer" className="hover:text-brand-gold"><InstagramIcon className="w-6 h-6"/></a>
+                 <a href={settings?.socialLinks?.facebook || '#'} target="_blank" rel="noopener noreferrer" className="hover:text-brand-gold"><FacebookIcon className="w-6 h-6"/></a>
              </div>
-          </Reveal>
-
-          {/* Quick Links */}
-          <Reveal animation="fade-in-up" delay="100ms">
-            <div>
-                <h3 className="text-sm font-bold text-brand-black dark:text-brand-white tracking-widest uppercase mb-6">{t('footer.shop')}</h3>
-                <ul className="space-y-3">
-                {NAV_LINKS.map(link => (
-                    <li key={link.href}>
-                        <a href={link.href} className="text-sm hover:text-brand-gold transition-colors">{t(link.labelKey)}</a>
-                    </li>
-                ))}
-                </ul>
+          </div>
+          <div className="col-span-2 md:col-span-1">
+            <h3 className="font-semibold text-brand-black dark:text-brand-white tracking-wider uppercase">{t('footer.language')}</h3>
+            <div className="mt-4">
+                <LanguageSelector />
             </div>
-          </Reveal>
-
-          {/* Info & Legal */}
-          <Reveal animation="fade-in-up" delay="200ms">
-            <div>
-                <h3 className="text-sm font-bold text-brand-black dark:text-brand-white tracking-widest uppercase mb-6">{t('footer.info')}</h3>
-                <ul className="space-y-3">
-                <li><a href="#" className="text-sm hover:text-brand-gold transition-colors">{t('footer.about')}</a></li>
-                <li><a href="#" className="text-sm hover:text-brand-gold transition-colors">{t('footer.contact')}</a></li>
-                <li><a href="#" className="text-sm hover:text-brand-gold transition-colors">{t('footer.terms')}</a></li>
-                <li><a href="#" className="text-sm hover:text-brand-gold transition-colors">{t('footer.privacy')}</a></li>
-                </ul>
+            <div className="mt-4">
+                <ThemeSelector />
             </div>
-          </Reveal>
-
-          {/* Settings & Contact */}
-          <Reveal animation="fade-in-up" delay="300ms">
-            <div>
-                <h3 className="text-sm font-bold text-brand-black dark:text-brand-white tracking-widest uppercase mb-6">{t('footer.contactInfo')}</h3>
-                <ul className="space-y-3 mb-6">
-                     <li className="text-sm"><a href={`mailto:${settings?.contactEmail || 'hello@meeh.lu'}`} className="hover:text-brand-gold transition-colors">{settings?.contactEmail || 'hello@meeh.lu'}</a></li>
-                     <li className="text-sm">Luxembourg</li>
-                </ul>
-                
-                <div className="pt-6 border-t border-black/5 dark:border-white/5">
-                    <div className="flex flex-col gap-4">
-                        <div className="flex items-center justify-between">
-                            <span className="text-xs uppercase tracking-wide font-semibold opacity-70">{t('footer.language')}</span>
-                            <LanguageSelector />
-                        </div>
-                        <div className="flex items-center justify-between">
-                             <span className="text-xs uppercase tracking-wide font-semibold opacity-70">Theme</span>
-                             <ThemeSelector />
-                        </div>
-                    </div>
-                </div>
-            </div>
-          </Reveal>
+          </div>
         </div>
 
-        <div className="border-t border-black/10 dark:border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center text-xs text-brand-black/50 dark:text-brand-white/50">
-          <p>&copy; {year} Melissa "Meeh" Pelussi. {t('footer.rights')}</p>
-          <p className="mt-2 md:mt-0">Designed & Developed with ❤️</p>
+        <div className="mt-12 border-t border-black/10 dark:border-white/10 pt-8 text-center text-sm">
+          <p>&copy; {new Date().getFullYear()} Melissa "Meeh" Pelussi. {t('footer.rights')}</p>
         </div>
       </div>
     </footer>

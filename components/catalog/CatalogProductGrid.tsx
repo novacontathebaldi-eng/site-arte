@@ -12,7 +12,7 @@ interface CatalogProductGridProps {
 
 const CatalogProductGrid: React.FC<CatalogProductGridProps> = ({ filters }) => {
     const { products, loading, loadingMore, error, hasMore, loadMore } = useProducts(filters);
-    const observer = useRef<IntersectionObserver | null>(null);
+    const observer = useRef<IntersectionObserver>();
     const { t } = useI18n();
 
     const lastProductElementRef = useCallback(node => {

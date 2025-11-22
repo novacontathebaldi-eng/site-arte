@@ -127,11 +127,7 @@ const ProductsPage: React.FC = () => {
                                     className="h-4 w-4 rounded border-gray-300 text-brand-gold focus:ring-brand-gold"
                                     onChange={handleSelectAll}
                                     checked={products.length > 0 && selectedProducts.length === products.length}
-                                    ref={(el) => {
-                                        if (el) {
-                                            el.indeterminate = selectedProducts.length > 0 && selectedProducts.length < products.length;
-                                        }
-                                    }}
+                                    indeterminate={selectedProducts.length > 0 && selectedProducts.length < products.length}
                                 />
                             </th>
                             <th className="p-3">{t('admin.products.table.image')}</th>

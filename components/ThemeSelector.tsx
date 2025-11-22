@@ -26,26 +26,25 @@ const ThemeSelector: React.FC = () => {
   const { themeSetting, setThemeSetting } = useTheme();
 
   const options: { value: ThemeSetting; icon: React.ReactNode; label: string }[] = [
-    { value: 'light', icon: <SunIcon className="w-4 h-4" />, label: 'Light' },
-    { value: 'dark', icon: <MoonIcon className="w-4 h-4" />, label: 'Dark' },
-    { value: 'system', icon: <SystemIcon className="w-4 h-4" />, label: 'Auto' },
+    { value: 'light', icon: <SunIcon className="w-5 h-5" />, label: 'Light' },
+    { value: 'dark', icon: <MoonIcon className="w-5 h-5" />, label: 'Dark' },
+    { value: 'system', icon: <SystemIcon className="w-5 h-5" />, label: 'System' },
   ];
 
   return (
-    <div className="inline-flex bg-black/5 dark:bg-white/10 rounded-lg p-1">
+    <div className="flex items-center space-x-1 p-1 bg-black/5 dark:bg-white/10 rounded-md">
       {options.map((opt) => (
         <button
           key={opt.value}
           onClick={() => setThemeSetting(opt.value)}
-          className={`relative flex items-center justify-center px-3 py-1.5 rounded-md transition-all duration-200 text-xs font-medium
+          className={`flex items-center justify-center w-9 h-8 rounded-md transition-colors
             ${themeSetting === opt.value
-              ? 'bg-brand-white dark:bg-brand-gray-800 text-brand-black dark:text-brand-white shadow-sm'
-              : 'text-brand-black/60 dark:text-brand-white/60 hover:text-brand-black dark:hover:text-brand-white'
+              ? 'bg-brand-white dark:bg-gray-700 ring-1 ring-black/10 dark:ring-white/10 shadow-sm'
+              : 'hover:bg-black/5 dark:hover:bg-white/10 text-brand-black/60 dark:text-brand-white/60'
             }`}
-          title={`Switch to ${opt.label} theme`}
+          aria-label={`Switch to ${opt.label} theme`}
         >
-          <span className="mr-1.5">{opt.icon}</span>
-          {opt.label}
+          {opt.icon}
         </button>
       ))}
     </div>
