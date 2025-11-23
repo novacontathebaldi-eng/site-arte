@@ -56,7 +56,7 @@ const InputField = ({ label, value, onChange, placeholder, required = false, typ
 );
 
 export const Dashboard: React.FC = () => {
-    const { isDashboardOpen, toggleDashboard } = useUIStore();
+    const { isDashboardOpen, toggleDashboard, closeAllOverlays } = useUIStore();
     const { user, logout, setUser } = useAuthStore();
     const { items: wishlistIds } = useWishlistStore();
     const { t } = useLanguage();
@@ -87,6 +87,17 @@ export const Dashboard: React.FC = () => {
         displayName: '',
         phoneNumber: ''
     });
+
+    // --- Critical Fix: Auto-close if user is missing but dashboard is open ---
+    useEffect(() => {
+        if (isDashboardOpen && !user) {
+            // Pequeno delay para evitar flash se o user estiver carregando
+            const timer = setTimeout(() => {
+                if (!user) closeAllOverlays();
+            }, 500);
+            return () => clearTimeout(timer);
+        }
+    }, [isDashboardOpen, user, closeAllOverlays]);
 
     // --- Effects ---
 
@@ -168,7 +179,7 @@ export const Dashboard: React.FC = () => {
 
     const handleLogout = async () => {
         await logout();
-        toggleDashboard();
+        closeAllOverlays(); // Ensures Dashboard closes immediately and cleans UI state
     };
 
     const handleSaveProfile = async () => {
@@ -222,9 +233,6 @@ export const Dashboard: React.FC = () => {
         }
     };
 
-    // Removed the early return "if (!user) return null" to allow the AnimatePresence to work 
-    // and show a loading state if user is being fetched.
-
     return (
         <AnimatePresence>
             {isDashboardOpen && (
@@ -253,7 +261,7 @@ export const Dashboard: React.FC = () => {
                         {!user ? (
                             <div className="w-full h-full flex items-center justify-center flex-col gap-4 text-white">
                                 <Loader2 size={48} className="animate-spin text-accent" />
-                                <p className="text-sm uppercase tracking-widest animate-pulse">Carregando Perfil...</p>
+                                <p className="text-sm uppercase tracking-widest animate-pulse">Sincronizando...</p>
                             </div>
                         ) : (
                             <>
