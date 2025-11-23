@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Mail, Lock, User, ArrowRight, Loader2, AlertCircle } from 'lucide-react';
@@ -43,7 +44,7 @@ const FloatingInput = ({ label, type, value, onChange, icon: Icon, error }: any)
 
 export const AuthModal: React.FC = () => {
   const { isAuthOpen, closeAuthModal, authView, openAuthModal, toggleDashboard } = useUIStore();
-  const { loginWithGoogle } = useAuthStore();
+  const { loginWithGoogle, setUser } = useAuthStore();
   const { t } = useLanguage();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -53,6 +54,14 @@ export const AuthModal: React.FC = () => {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
 
+  const onSuccess = () => {
+    closeAuthModal();
+    // Delay slightly to allow modal closing animation to start before dashboard enters
+    setTimeout(() => {
+        toggleDashboard();
+    }, 150);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -60,33 +69,48 @@ export const AuthModal: React.FC = () => {
 
     try {
       if (authView === 'login') {
-        await signInWithEmail(email, password);
-        closeAuthModal();
-        toggleDashboard(); // Redirect to dashboard on success
+        const userCred = await signInWithEmail(email, password);
+        if (userCred) {
+            // IMMEDIATE STORE UPDATE: Fix race condition
+             setUser({
+                uid: userCred.uid,
+                email: userCred.email || '',
+                displayName: userCred.displayName || 'User',
+                role: 'user' // Default to user, store will refine later
+             });
+             onSuccess();
+        }
       } else {
         // Register Logic
-        const user = await signUpWithEmail(email, password, name);
-        if (user) {
+        const userCred = await signUpWithEmail(email, password, name);
+        if (userCred) {
+             // IMMEDIATE STORE UPDATE
+             setUser({
+                uid: userCred.uid,
+                email: userCred.email || '',
+                displayName: name,
+                role: 'user'
+             });
+             
             // Trigger Server Action for Brevo
             await registerClientToBrevo(email, name);
             
             // Celebration
             confetti({
-                particleCount: 100,
-                spread: 70,
+                particleCount: 150,
+                spread: 100,
                 origin: { y: 0.6 },
                 colors: ['#D4AF37', '#ffffff', '#000000']
             });
-            closeAuthModal();
-            toggleDashboard();
+            onSuccess();
         }
       }
     } catch (err: any) {
         console.error(err);
         let msg = 'Ocorreu um erro.';
-        if (err.code === 'auth/invalid-credential') msg = 'Email ou senha incorretos.';
+        if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') msg = 'Email ou senha incorretos.';
         if (err.code === 'auth/email-already-in-use') msg = 'Este email já está em uso.';
-        if (err.code === 'auth/weak-password') msg = 'A senha é muito fraca.';
+        if (err.code === 'auth/weak-password') msg = 'A senha é muito fraca (min 6 caracteres).';
         setError(msg);
     } finally {
       setIsLoading(false);
@@ -96,8 +120,8 @@ export const AuthModal: React.FC = () => {
   const handleGoogleLogin = async () => {
     try {
         await loginWithGoogle();
-        closeAuthModal();
-        toggleDashboard();
+        // loginWithGoogle in store already handles persistence, but we ensure redirection
+        onSuccess();
     } catch (e) {
         setError("Falha ao conectar com Google.");
     }

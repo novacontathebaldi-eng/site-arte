@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { ShoppingBag, User, Search, Menu, X, Lock } from 'lucide-react';
 import { useUIStore, useCartStore, useAuthStore } from '../../store';
@@ -10,7 +11,7 @@ import dynamic from 'next/dynamic';
 const AdminDashboard = dynamic(() => import('../AdminDashboard').then(mod => mod.AdminDashboard), { ssr: false });
 
 export const Header: React.FC = () => {
-  const { isCartOpen, toggleCart, isMobileMenuOpen, toggleMobileMenu, toggleSearch, openAuthModal, toggleDashboard } = useUIStore();
+  const { isCartOpen, toggleCart, isMobileMenuOpen, toggleMobileMenu, toggleSearch, openAuthModal, toggleDashboard, isDashboardOpen } = useUIStore();
   const { items } = useCartStore();
   const { user } = useAuthStore();
   const { isAdmin } = useAdmin();
@@ -34,9 +35,10 @@ export const Header: React.FC = () => {
     ? 'text-primary dark:text-white' 
     : 'text-white';
 
-  const handleUserClick = () => {
+  const handleUserClick = (e: React.MouseEvent) => {
+    e.preventDefault();
     if (user) {
-        toggleDashboard();
+        if (!isDashboardOpen) toggleDashboard();
     } else {
         openAuthModal('login');
     }
@@ -45,7 +47,7 @@ export const Header: React.FC = () => {
   return (
     <>
     <motion.header
-      className={`fixed top-0 w-full z-50 transition-all duration-300 border-b ${headerClasses}`}
+      className={`fixed top-0 w-full z-[60] transition-all duration-300 border-b ${headerClasses}`}
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ duration: 0.5 }}
@@ -74,19 +76,19 @@ export const Header: React.FC = () => {
             </button>
           )}
 
-          <button onClick={toggleSearch} className="hover:text-accent transition-colors" aria-label={t('common.search')}>
+          <button onClick={toggleSearch} className="hover:text-accent transition-colors cursor-pointer" aria-label={t('common.search')}>
             <Search size={20} />
           </button>
           
           <button 
             onClick={handleUserClick}
-            className="hover:text-accent transition-colors flex items-center gap-2"
+            className="hover:text-accent transition-colors flex items-center gap-2 cursor-pointer"
           >
             <User size={20} />
             {mounted && user && <span className="text-xs uppercase tracking-wider">{user.displayName?.split(' ')[0]}</span>}
           </button>
 
-          <button id="header-cart-btn" onClick={toggleCart} className="relative hover:text-accent transition-colors" aria-label={t('cart.title')}>
+          <button id="header-cart-btn" onClick={toggleCart} className="relative hover:text-accent transition-colors cursor-pointer" aria-label={t('cart.title')}>
             <ShoppingBag size={20} />
             {mounted && items.length > 0 && (
               <span className="absolute -top-2 -right-2 bg-accent text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center animate-pulse">
