@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useEffect } from 'react';
@@ -59,11 +60,13 @@ const App: React.FC = () => {
             <section className="min-h-[80vh] flex items-center justify-center bg-white dark:bg-[#1a1a1a] py-20 px-6">
                 <div className="container mx-auto grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
                     <motion.div 
-                        initial={{ opacity: 0, x: -50 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.8 }}
                         className="relative"
+                        {...({
+                            initial: { opacity: 0, x: -50 },
+                            whileInView: { opacity: 1, x: 0 },
+                            viewport: { once: true },
+                            transition: { duration: 0.8 }
+                        } as any)}
                     >
                         {/* Image */}
                         <div className="aspect-[3/4] w-full overflow-hidden rounded-sm shadow-2xl">
@@ -77,11 +80,13 @@ const App: React.FC = () => {
                         <div className="absolute -bottom-6 -right-6 w-32 h-32 border-2 border-accent z-[-1]" />
                     </motion.div>
                     <motion.div 
-                         initial={{ opacity: 0, x: 50 }}
-                         whileInView={{ opacity: 1, x: 0 }}
-                         viewport={{ once: true }}
-                         transition={{ duration: 0.8, delay: 0.2 }}
                          className="space-y-6"
+                         {...({
+                            initial: { opacity: 0, x: 50 },
+                            whileInView: { opacity: 1, x: 0 },
+                            viewport: { once: true },
+                            transition: { duration: 0.8, delay: 0.2 }
+                         } as any)}
                     >
                         <h2 className="font-serif text-4xl md:text-5xl text-primary dark:text-white">{t('about.title')}</h2>
                         <div className="w-20 h-1 bg-accent" />

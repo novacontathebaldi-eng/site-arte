@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, createContext, useContext } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircle, AlertCircle, X, Info } from 'lucide-react';
@@ -41,15 +42,17 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           {toasts.map((t) => (
             <motion.div
               key={t.id}
-              initial={{ opacity: 0, y: 20, scale: 0.9 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, x: 20, scale: 0.9 }}
               className={cn(
                 "flex items-center gap-3 min-w-[300px] p-4 rounded-lg shadow-lg border backdrop-blur-md",
                 t.type === 'success' && "bg-white/90 dark:bg-[#1a1a1a]/90 border-green-500/20 text-green-600 dark:text-green-400",
                 t.type === 'error' && "bg-white/90 dark:bg-[#1a1a1a]/90 border-red-500/20 text-red-600 dark:text-red-400",
                 t.type === 'info' && "bg-white/90 dark:bg-[#1a1a1a]/90 border-blue-500/20 text-blue-600 dark:text-blue-400"
               )}
+              {...({
+                  initial: { opacity: 0, y: 20, scale: 0.9 },
+                  animate: { opacity: 1, y: 0, scale: 1 },
+                  exit: { opacity: 0, x: 20, scale: 0.9 }
+              } as any)}
             >
               {t.type === 'success' && <CheckCircle size={20} />}
               {t.type === 'error' && <AlertCircle size={20} />}

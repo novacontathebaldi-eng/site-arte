@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCartStore } from '../store/cartStore';
@@ -37,30 +38,32 @@ export const AddToCartAnimation: React.FC = () => {
       {flyAnimation.isActive && flyAnimation.startRect && targetRect && (
         <motion.img
             src={flyAnimation.image}
-            initial={{ 
-                position: 'fixed',
-                top: flyAnimation.startRect.top,
-                left: flyAnimation.startRect.left,
-                width: flyAnimation.startRect.width,
-                height: flyAnimation.startRect.height,
-                opacity: 1,
-                zIndex: 9999,
-                borderRadius: '0px'
-            }}
-            animate={{
-                top: targetRect.y - 10, // Center adjustment
-                left: targetRect.x - 10,
-                width: 20,
-                height: 20,
-                opacity: 0,
-                borderRadius: '50%',
-                rotate: 360
-            }}
-            transition={{
-                duration: 0.8,
-                ease: [0.16, 1, 0.3, 1], // Bezier ease out
-            }}
             className="pointer-events-none shadow-2xl object-cover"
+            {...({
+                initial: { 
+                    position: 'fixed',
+                    top: flyAnimation.startRect.top,
+                    left: flyAnimation.startRect.left,
+                    width: flyAnimation.startRect.width,
+                    height: flyAnimation.startRect.height,
+                    opacity: 1,
+                    zIndex: 9999,
+                    borderRadius: '0px'
+                },
+                animate: {
+                    top: targetRect.y - 10, // Center adjustment
+                    left: targetRect.x - 10,
+                    width: 20,
+                    height: 20,
+                    opacity: 0,
+                    borderRadius: '50%',
+                    rotate: 360
+                },
+                transition: {
+                    duration: 0.8,
+                    ease: [0.16, 1, 0.3, 1], // Bezier ease out
+                }
+            } as any)}
         />
       )}
     </AnimatePresence>

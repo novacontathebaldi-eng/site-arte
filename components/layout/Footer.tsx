@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useRef } from 'react';
 import { Globe, Sun, Moon, Monitor } from 'lucide-react';
 import { useThemeStore } from '../../store';
@@ -86,11 +87,13 @@ export const Footer: React.FC = () => {
                     <AnimatePresence>
                         {isLangOpen && (
                             <motion.div
-                                initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                                animate={{ opacity: 1, y: 0, scale: 1 }}
-                                exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                                transition={{ duration: 0.2 }}
                                 className="absolute bottom-full mb-2 left-0 w-full bg-[#252525] border border-white/10 rounded-lg shadow-2xl overflow-hidden z-30 p-1"
+                                {...({
+                                    initial: { opacity: 0, y: 10, scale: 0.95 },
+                                    animate: { opacity: 1, y: 0, scale: 1 },
+                                    exit: { opacity: 0, y: 10, scale: 0.95 },
+                                    transition: { duration: 0.2 }
+                                } as any)}
                             >
                                 {languages.map((lang) => (
                                     <button

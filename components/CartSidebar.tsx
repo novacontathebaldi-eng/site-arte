@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Trash2, ShoppingBag, CreditCard, Plus, Minus } from 'lucide-react';
@@ -27,19 +28,23 @@ export const CartSidebar: React.FC = () => {
           {/* Backdrop */}
           <motion.div
             className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[60]"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
             onClick={toggleCart}
+            {...({
+                initial: { opacity: 0 },
+                animate: { opacity: 1 },
+                exit: { opacity: 0 }
+            } as any)}
           />
           
           {/* Glass Sidebar */}
           <motion.div
             // FIX: Ajustado para bg-white/70 e bg-black/70 conforme pedido rigoroso
             className="fixed top-0 right-0 h-full w-full sm:w-[480px] bg-white/70 dark:bg-black/70 backdrop-blur-2xl border-l border-white/20 z-[70] shadow-2xl flex flex-col"
-            initial={{ x: '100%' }}
-            animate={{ x: 0, transition: { type: 'spring', damping: 25, stiffness: 300 } }}
-            exit={{ x: '100%', transition: { type: 'spring', damping: 25, stiffness: 300 } }}
+            {...({
+                initial: { x: '100%' },
+                animate: { x: 0, transition: { type: 'spring', damping: 25, stiffness: 300 } },
+                exit: { x: '100%', transition: { type: 'spring', damping: 25, stiffness: 300 } }
+            } as any)}
           >
             {/* Header */}
             <div className="p-6 border-b border-gray-200/50 dark:border-white/10 flex justify-between items-center bg-white/5">
@@ -79,12 +84,14 @@ export const CartSidebar: React.FC = () => {
 
                         return (
                             <motion.div 
-                                layout
                                 key={item.id}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, x: -100 }}
                                 className="flex gap-4 group"
+                                {...({
+                                    layout: true,
+                                    initial: { opacity: 0, y: 20 },
+                                    animate: { opacity: 1, y: 0 },
+                                    exit: { opacity: 0, x: -100 }
+                                } as any)}
                             >
                                 {/* Thumbnail */}
                                 <div className="relative w-24 h-24 rounded-lg overflow-hidden flex-shrink-0 shadow-sm">

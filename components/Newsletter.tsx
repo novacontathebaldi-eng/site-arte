@@ -1,31 +1,10 @@
+
 import React, { useState, useTransition } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight, Loader2 } from 'lucide-react';
 import { useLanguage } from '../hooks/useLanguage';
 import { subscribeToNewsletter } from '../app/actions/newsletter';
-
-// Componente de Partículas (Confete Minimalista)
-const SuccessParticles = () => {
-  const particles = Array.from({ length: 20 });
-  return (
-    <div className="absolute inset-0 pointer-events-none overflow-hidden flex items-center justify-center z-0">
-      {particles.map((_, i) => (
-        <motion.div
-          key={i}
-          className="absolute w-1 h-1 bg-accent rounded-full"
-          initial={{ opacity: 1, x: 0, y: 0, scale: 1 }}
-          animate={{
-            opacity: 0,
-            x: (Math.random() - 0.5) * 400,
-            y: (Math.random() - 0.5) * 400,
-            scale: 0,
-          }}
-          transition={{ duration: 1.5, ease: "easeOut" }}
-        />
-      ))}
-    </div>
-  );
-};
+import { SuccessCheck } from './ui/SuccessCheck';
 
 const InputField: React.FC<{
   name: string;
@@ -85,25 +64,32 @@ export const Newsletter: React.FC = () => {
           {state?.success ? (
             <motion.div
               key="success"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0 }}
               className="min-h-[400px] flex flex-col items-center justify-center text-center relative"
+              {...({
+                  initial: { opacity: 0, scale: 0.95 },
+                  animate: { opacity: 1, scale: 1 },
+                  exit: { opacity: 0 }
+              } as any)}
             >
-              <SuccessParticles />
+              <SuccessCheck size={120} className="mb-8" />
+              
               <motion.h3 
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.2 }}
                 className="font-serif text-4xl md:text-6xl text-primary dark:text-white mb-4"
+                {...({
+                    initial: { y: 20, opacity: 0 },
+                    animate: { y: 0, opacity: 1 },
+                    transition: { delay: 0.6 }
+                } as any)}
               >
                 {t('newsletter.success.title')} <span className="text-accent italic">{userName}</span>.
               </motion.h3>
               <motion.p 
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.4 }}
                 className="text-gray-500 uppercase tracking-widest text-sm"
+                {...({
+                    initial: { y: 20, opacity: 0 },
+                    animate: { y: 0, opacity: 1 },
+                    transition: { delay: 0.8 }
+                } as any)}
               >
                 {t('newsletter.success.msg')}
               </motion.p>
@@ -112,11 +98,13 @@ export const Newsletter: React.FC = () => {
             <div className="max-w-4xl mx-auto">
               {/* Header Text */}
               <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.8 }}
                 className="mb-16 md:mb-24"
+                {...({
+                    initial: { opacity: 0, y: 30 },
+                    whileInView: { opacity: 1, y: 0 },
+                    viewport: { once: true },
+                    transition: { duration: 0.8 }
+                } as any)}
               >
                 <span className="block text-accent text-xs font-bold uppercase tracking-[0.3em] mb-4">
                   {t('newsletter.section_label')}
@@ -132,11 +120,13 @@ export const Newsletter: React.FC = () => {
               {/* Form */}
               <motion.form
                 onSubmit={handleSubmit}
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 1, delay: 0.2 }}
                 className="space-y-12 md:space-y-16"
+                {...({
+                    initial: { opacity: 0 },
+                    whileInView: { opacity: 1 },
+                    viewport: { once: true },
+                    transition: { duration: 1, delay: 0.2 }
+                } as any)}
               >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16">
                   <InputField 
@@ -161,10 +151,12 @@ export const Newsletter: React.FC = () => {
                   </p>
                   
                   <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
                     disabled={isPending}
                     className="group relative order-1 md:order-2 px-8 py-4 bg-primary dark:bg-white text-white dark:text-black font-bold uppercase tracking-[0.2em] text-xs rounded-sm overflow-hidden"
+                    {...({
+                        whileHover: { scale: 1.02 },
+                        whileTap: { scale: 0.98 }
+                    } as any)}
                   >
                     <span className="relative z-10 flex items-center gap-4">
                       {isPending ? t('newsletter.sending') : t('newsletter.button')}
@@ -176,9 +168,11 @@ export const Newsletter: React.FC = () => {
                 
                 {state?.success === false && (
                   <motion.p 
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
                     className="text-red-500 text-xs uppercase tracking-wider mt-4"
+                    {...({
+                        initial: { opacity: 0, y: 10 },
+                        animate: { opacity: 1, y: 0 }
+                    } as any)}
                   >
                     {state.message || t('newsletter.error')}
                   </motion.p>

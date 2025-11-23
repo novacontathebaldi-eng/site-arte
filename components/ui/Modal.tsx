@@ -1,3 +1,4 @@
+
 import React from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
@@ -21,10 +22,12 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, 
              {/* Overlay */}
              <Dialog.Overlay asChild>
                 <motion.div 
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
                     className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm" 
+                    {...({
+                        initial: { opacity: 0 },
+                        animate: { opacity: 1 },
+                        exit: { opacity: 0 }
+                    } as any)}
                 />
              </Dialog.Overlay>
             
@@ -32,14 +35,16 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, 
             <Dialog.Content asChild>
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
                     <motion.div
-                        initial={{ scale: 0.95, opacity: 0, y: 20 }}
-                        animate={{ scale: 1, opacity: 1, y: 0 }}
-                        exit={{ scale: 0.95, opacity: 0, y: 20 }}
-                        transition={{ type: "spring", duration: 0.5 }}
                         className={cn(
                             "pointer-events-auto relative w-full max-w-lg overflow-hidden rounded-lg bg-white p-6 shadow-2xl dark:bg-[#1a1a1a] dark:border dark:border-white/10 focus:outline-none",
                             className
                         )}
+                        {...({
+                            initial: { scale: 0.95, opacity: 0, y: 20 },
+                            animate: { scale: 1, opacity: 1, y: 0 },
+                            exit: { scale: 0.95, opacity: 0, y: 20 },
+                            transition: { type: "spring", duration: 0.5 }
+                        } as any)}
                     >
                         <div className="flex items-center justify-between mb-6">
                             {title && (

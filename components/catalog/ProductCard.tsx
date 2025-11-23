@@ -1,3 +1,4 @@
+
 import React, { useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Product } from '../../types/product';
@@ -47,13 +48,15 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onClick, inde
 
   return (
     <motion.div
-      layoutId={`product-${product.id}`}
-      initial={{ opacity: 0, y: 50 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.5, delay: index * 0.05 }}
       className="group relative cursor-pointer"
       onClick={onClick}
+      {...({
+          layoutId: `product-${product.id}`,
+          initial: { opacity: 0, y: 50 },
+          whileInView: { opacity: 1, y: 0 },
+          viewport: { once: true, margin: "-50px" },
+          transition: { duration: 0.5, delay: index * 0.05 }
+      } as any)}
     >
       {/* Image Container */}
       <div className="aspect-square overflow-hidden relative bg-gray-100 dark:bg-white/5 rounded-sm shadow-sm transition-all duration-500 group-hover:shadow-2xl">
@@ -63,8 +66,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onClick, inde
             src={product.images[0]}
             alt={translation.title}
             className="w-full h-full object-cover"
-            whileHover={{ scale: 1.1 }}
-            transition={{ duration: 0.7, ease: "easeOut" }}
+            {...({
+                whileHover: { scale: 1.1 },
+                transition: { duration: 0.7, ease: "easeOut" }
+            } as any)}
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs uppercase">
@@ -84,13 +89,15 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onClick, inde
             )}
              {/* ANIMATION: Pulse/Beat on click */}
              <motion.button 
-                whileTap={{ scale: 0.8, rotate: -10 }}
-                animate={{ scale: inWishlist ? [1, 1.2, 1] : 1 }}
                 onClick={handleWishlist}
                 className={cn(
                     "p-1.5 rounded-full backdrop-blur transition-colors",
                     inWishlist ? "bg-accent text-white" : "bg-black/20 text-white hover:bg-white/20"
                 )}
+                {...({
+                    whileTap: { scale: 0.8, rotate: -10 },
+                    animate: { scale: inWishlist ? [1, 1.2, 1] : 1 }
+                } as any)}
              >
                 <Heart size={14} fill={inWishlist ? "currentColor" : "none"} />
              </motion.button>

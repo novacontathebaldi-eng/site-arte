@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, LayoutDashboard, Package, Users, MessageSquare, Plus, Edit, Trash2, Save, Upload, Search, Filter, TrendingUp, DollarSign, RefreshCw, Lock, Globe, MoveUp, MoveDown, Check } from 'lucide-react';
@@ -177,8 +178,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
         <div className="fixed inset-0 z-[100] flex bg-black/80 backdrop-blur-md overflow-hidden text-white font-sans">
             {/* SIDEBAR */}
             <motion.div 
-                initial={{ x: -100 }} animate={{ x: 0 }}
                 className="w-20 md:w-64 bg-[#121212] border-r border-white/10 flex flex-col items-center md:items-stretch py-8"
+                {...({
+                    initial: { x: -100 },
+                    animate: { x: 0 }
+                } as any)}
             >
                 <div className="mb-12 text-center">
                     <div className="w-10 h-10 bg-red-600 rounded-lg mx-auto flex items-center justify-center text-white shadow-red-500/20 shadow-lg">
@@ -234,7 +238,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
                         
                         {/* 1. ANALYTICS TAB */}
                         {activeTab === 'analytics' && (
-                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-8">
+                            <motion.div 
+                                className="space-y-8"
+                                {...({
+                                    initial: { opacity: 0 },
+                                    animate: { opacity: 1 },
+                                    exit: { opacity: 0 }
+                                } as any)}
+                            >
                                 {/* KPI Cards */}
                                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                                     {[
@@ -298,7 +309,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
 
                         {/* 2. PRODUCTS TAB */}
                         {activeTab === 'products' && (
-                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                            <motion.div 
+                                {...({
+                                    initial: { opacity: 0 },
+                                    animate: { opacity: 1 },
+                                    exit: { opacity: 0 }
+                                } as any)}
+                            >
                                 <div className="flex justify-between items-center mb-6">
                                     <div className="flex gap-4 bg-[#151515] p-2 rounded-lg border border-white/10 w-96">
                                         <Search className="text-gray-500" size={20} />
@@ -390,7 +407,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
                         
                         {/* 3. CRM TAB */}
                         {activeTab === 'crm' && (
-                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center min-h-[50vh] text-center space-y-6">
+                            <motion.div 
+                                className="flex flex-col items-center justify-center min-h-[50vh] text-center space-y-6"
+                                {...({
+                                    initial: { opacity: 0 },
+                                    animate: { opacity: 1 }
+                                } as any)}
+                            >
                                 <Users size={64} className="text-accent opacity-50" />
                                 <h3 className="text-2xl font-serif">Gestão de Clientes e Newsletter</h3>
                                 <p className="text-gray-400 max-w-md">Gerencie seus contatos e campanhas diretamente pelo painel do Brevo.</p>
@@ -411,7 +434,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
                          
                          {/* 4. CHATBOT TAB */}
                         {activeTab === 'chatbot' && (
-                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center min-h-[50vh] text-center space-y-6">
+                            <motion.div 
+                                className="flex flex-col items-center justify-center min-h-[50vh] text-center space-y-6"
+                                {...({
+                                    initial: { opacity: 0 },
+                                    animate: { opacity: 1 }
+                                } as any)}
+                            >
                                 <MessageSquare size={64} className="text-accent opacity-50" />
                                 <h3 className="text-2xl font-serif">Base de Conhecimento IA</h3>
                                 <p className="text-gray-400 max-w-md">O chatbot utiliza as informações dos produtos e configurações gerais. Para adicionar FAQs específicas, edite abaixo.</p>
@@ -429,8 +458,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
             <AnimatePresence>
                 {isProductModalOpen && editingProduct && (
                     <motion.div 
-                        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                         className="fixed inset-0 z-[110] bg-black/90 backdrop-blur-xl flex items-center justify-center p-4"
+                        {...({
+                            initial: { opacity: 0 },
+                            animate: { opacity: 1 },
+                            exit: { opacity: 0 }
+                        } as any)}
                     >
                         <div className="w-full max-w-6xl h-[90vh] bg-[#121212] border border-white/10 rounded-2xl overflow-hidden flex flex-col md:flex-row shadow-2xl">
                             {/* Form Side */}

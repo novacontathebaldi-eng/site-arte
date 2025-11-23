@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Trash2, ShoppingBag, CreditCard } from 'lucide-react';
@@ -25,17 +26,21 @@ export const Cart: React.FC = () => {
         <>
           <motion.div
             className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
             onClick={toggleCart}
+            {...({
+                initial: { opacity: 0 },
+                animate: { opacity: 1 },
+                exit: { opacity: 0 }
+            } as any)}
           />
           <motion.div
             className="fixed top-0 right-0 h-full w-full sm:w-[450px] bg-white dark:bg-[#1a1a1a] z-[60] shadow-2xl flex flex-col"
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{ type: 'tween', duration: 0.3 }}
+            {...({
+                initial: { x: '100%' },
+                animate: { x: 0 },
+                exit: { x: '100%' },
+                transition: { type: 'tween', duration: 0.3 }
+            } as any)}
           >
             {/* Header */}
             <div className="p-6 border-b border-gray-200 dark:border-white/10 flex justify-between items-center">
@@ -56,9 +61,9 @@ export const Cart: React.FC = () => {
               ) : (
                 items.map((item) => (
                   <motion.div 
-                    layout
                     key={item.id} 
                     className="flex gap-4 bg-gray-50 dark:bg-white/5 p-4 rounded-lg"
+                    {...({ layout: true } as any)}
                   >
                     <img 
                         src={item.images[0]} 

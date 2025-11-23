@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ShoppingBag, Heart, Check, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -64,22 +65,26 @@ export const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onC
         <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
           {/* Heavy Blur Backdrop */}
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
             onClick={onClose}
             className="absolute inset-0 bg-black/60 backdrop-blur-xl"
+            {...({
+                initial: { opacity: 0 },
+                animate: { opacity: 1 },
+                exit: { opacity: 0 }
+            } as any)}
           />
 
           {/* Modal Content */}
           <motion.div
-            layoutId={`product-${product.id}`}
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             className="relative w-full max-w-5xl bg-white dark:bg-[#1a1a1a] shadow-2xl overflow-hidden flex flex-col md:flex-row rounded-lg max-h-[90vh] md:h-auto"
             onClick={(e) => e.stopPropagation()}
+            {...({
+                layoutId: `product-${product.id}`,
+                initial: { opacity: 0, scale: 0.95, y: 20 },
+                animate: { opacity: 1, scale: 1, y: 0 },
+                exit: { opacity: 0, scale: 0.95, y: 20 },
+                transition: { type: 'spring', damping: 25, stiffness: 300 }
+            } as any)}
           >
             {/* Close Button */}
             <button
@@ -96,10 +101,12 @@ export const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onC
                 key={currentImageIndex}
                 src={product.images[currentImageIndex]}
                 alt={translation.title}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.4 }}
                 className="w-full h-full object-cover"
+                {...({
+                    initial: { opacity: 0 },
+                    animate: { opacity: 1 },
+                    transition: { duration: 0.4 }
+                } as any)}
               />
               
               {/* Navigation Arrows */}

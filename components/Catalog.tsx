@@ -139,9 +139,11 @@ export const Catalog: React.FC = () => {
                                 {cat}
                                 {activeCategory === cat && (
                                     <motion.div 
-                                        layoutId="activeTab"
+                                        {...({
+                                            layoutId: "activeTab",
+                                            transition: { type: "spring", stiffness: 500, damping: 30 }
+                                        } as any)}
                                         className="absolute bottom-0 left-0 w-full h-[2px] bg-accent"
-                                        transition={{ type: "spring", stiffness: 500, damping: 30 }}
                                     />
                                 )}
                             </button>
@@ -160,9 +162,11 @@ export const Catalog: React.FC = () => {
                         <motion.div 
                             key={cat} 
                             id={`category-${cat}`}
-                            initial={{ opacity: 0 }}
-                            whileInView={{ opacity: 1 }}
-                            viewport={{ once: true, margin: "-100px" }}
+                            {...({
+                                initial: { opacity: 0 },
+                                whileInView: { opacity: 1 },
+                                viewport: { once: true, margin: "-100px" }
+                            } as any)}
                             className="scroll-mt-40"
                         >
                             {/* Category Title */}

@@ -48,9 +48,11 @@ export const Header: React.FC = () => {
     <>
     <motion.header
       className={`fixed top-0 w-full z-[60] transition-all duration-300 border-b ${headerClasses}`}
-      initial={{ y: -100 }}
-      animate={{ y: 0 }}
-      transition={{ duration: 0.5 }}
+      {...({
+          initial: { y: -100 },
+          animate: { y: 0 },
+          transition: { duration: 0.5 }
+      } as any)}
     >
       <div className="container mx-auto px-6 flex justify-between items-center">
         {/* Logo */}

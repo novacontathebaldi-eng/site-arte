@@ -39,9 +39,11 @@ export const Hero: React.FC = () => {
         style={{ opacity }}
       >
         <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
+            {...({
+                initial: { opacity: 0, y: 20 },
+                animate: { opacity: 1, y: 0 },
+                transition: { duration: 0.8, delay: 0.2 }
+            } as any)}
         >
             <h2 className="text-accent text-sm md:text-base tracking-[0.3em] uppercase mb-4">
                 {t('hero.subtitle')}
@@ -50,18 +52,22 @@ export const Hero: React.FC = () => {
         
         <motion.h1 
             className="font-serif text-5xl md:text-7xl lg:text-8xl text-white mb-8 font-bold tracking-tight"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
+            {...({
+                initial: { opacity: 0, y: 30 },
+                animate: { opacity: 1, y: 0 },
+                transition: { duration: 0.8, delay: 0.4 }
+            } as any)}
         >
             {t('hero.title')}
         </motion.h1>
 
         <motion.button
             className="px-8 py-4 border border-accent text-accent hover:bg-accent hover:text-white transition-all duration-300 uppercase tracking-widest text-sm rounded-sm"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.6 }}
+            {...({
+                initial: { opacity: 0, y: 20 },
+                animate: { opacity: 1, y: 0 },
+                transition: { duration: 0.8, delay: 0.6 }
+            } as any)}
             onClick={() => {
                 document.getElementById('catalog')?.scrollIntoView({ behavior: 'smooth' });
             }}
@@ -73,8 +79,10 @@ export const Hero: React.FC = () => {
       {/* Scroll Indicator */}
       <motion.div 
         className="absolute bottom-10 left-1/2 -translate-x-1/2 text-white/50 flex flex-col items-center gap-2"
-        animate={{ y: [0, 10, 0] }}
-        transition={{ duration: 2, repeat: Infinity }}
+        {...({
+            animate: { y: [0, 10, 0] },
+            transition: { duration: 2, repeat: Infinity }
+        } as any)}
       >
         <span className="text-[10px] tracking-widest uppercase">{t('hero.scroll')}</span>
         <div className="w-[1px] h-12 bg-gradient-to-b from-white/0 via-white/50 to-white/0" />

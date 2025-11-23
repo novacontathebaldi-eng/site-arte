@@ -34,8 +34,8 @@ const DashboardTab: React.FC<{
         
         {active && (
             <motion.div 
-                layoutId="activeDashboardTabIndicator"
                 className="absolute left-0 top-0 bottom-0 w-[3px] bg-accent"
+                {...({ layoutId: "activeDashboardTabIndicator" } as any)}
             />
         )}
     </button>
@@ -231,20 +231,24 @@ export const Dashboard: React.FC = () => {
                 <div className="fixed inset-0 z-[100] overflow-hidden font-sans">
                     {/* Backdrop */}
                     <motion.div 
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
                         className="absolute inset-0 bg-black/80 backdrop-blur-md"
                         onClick={toggleDashboard}
+                        {...({
+                            initial: { opacity: 0 },
+                            animate: { opacity: 1 },
+                            exit: { opacity: 0 }
+                        } as any)}
                     />
 
                     {/* Main Content Slide-in */}
                     <motion.div
-                        initial={{ x: '100%' }}
-                        animate={{ x: 0 }}
-                        exit={{ x: '100%' }}
-                        transition={{ type: 'spring', damping: 30, stiffness: 300 }}
                         className="absolute inset-y-0 right-0 w-full md:w-[90%] lg:w-[80%] bg-[#121212] flex shadow-2xl"
+                        {...({
+                            initial: { x: '100%' },
+                            animate: { x: 0 },
+                            exit: { x: '100%' },
+                            transition: { type: 'spring', damping: 30, stiffness: 300 }
+                        } as any)}
                     >
                         {!user ? (
                             <div className="w-full h-full flex items-center justify-center flex-col gap-4 text-white">
@@ -295,11 +299,13 @@ export const Dashboard: React.FC = () => {
                                         <AnimatePresence mode="wait">
                                             <motion.div
                                                 key={activeTab}
-                                                initial={{ opacity: 0, y: 20 }}
-                                                animate={{ opacity: 1, y: 0 }}
-                                                exit={{ opacity: 0, y: -20 }}
-                                                transition={{ duration: 0.3 }}
                                                 className="max-w-5xl"
+                                                {...({
+                                                    initial: { opacity: 0, y: 20 },
+                                                    animate: { opacity: 1, y: 0 },
+                                                    exit: { opacity: 0, y: -20 },
+                                                    transition: { duration: 0.3 }
+                                                } as any)}
                                             >
                                                 {/* --- OVERVIEW --- */}
                                                 {activeTab === 'overview' && (
@@ -485,9 +491,11 @@ export const Dashboard: React.FC = () => {
                                                             </div>
                                                         ) : (
                                                             <motion.div 
-                                                                initial={{ opacity: 0, x: 20 }}
-                                                                animate={{ opacity: 1, x: 0 }}
                                                                 className="bg-[#1a1a1a] p-8 rounded-xl border border-white/10"
+                                                                {...({
+                                                                    initial: { opacity: 0, x: 20 },
+                                                                    animate: { opacity: 1, x: 0 }
+                                                                } as any)}
                                                             >
                                                                 <div className="flex justify-between items-center mb-8 pb-4 border-b border-white/10">
                                                                     <h3 className="text-white font-serif text-xl">
