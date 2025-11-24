@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { User } from '../types';
 import { signInWithGoogle, logout as firebaseLogout, getCurrentUser } from '../lib/firebase/auth';
 import { auth } from '../lib/firebase/config';
+import { onAuthStateChanged } from 'firebase/auth';
 
 interface AuthState {
   user: User | null;
@@ -56,7 +57,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   checkAuth: async () => {
     set({ isLoading: true });
     // Subscribe to Auth Changes for robustness against refreshes
-    auth.onAuthStateChanged(async (firebaseUser) => {
+    onAuthStateChanged(auth, async (firebaseUser) => {
         if (firebaseUser) {
              const appUser: User = {
                 uid: firebaseUser.uid,

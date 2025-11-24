@@ -1,19 +1,29 @@
-import firebase from 'firebase/compat/app';
+import { 
+  GoogleAuthProvider, 
+  signInWithPopup, 
+  signInWithEmailAndPassword, 
+  createUserWithEmailAndPassword, 
+  sendPasswordResetEmail, 
+  signOut, 
+  onAuthStateChanged,
+  updateProfile,
+  User
+} from 'firebase/auth';
+import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { auth, db } from './config';
-import { User } from 'firebase/auth';
 import { registerClientToBrevo } from '../../app/actions/registerClient';
 
 export const signInWithGoogle = async () => {
   try {
-    const provider = new firebase.auth.GoogleAuthProvider();
-    const result = await auth.signInWithPopup(provider);
+    const provider = new GoogleAuthProvider();
+    const result = await signInWithPopup(auth, provider);
     const user = result.user;
     
     if (user) {
-        const userRef = db.collection('users').doc(user.uid);
-        const doc = await userRef.get();
+        const userRef = doc(db, 'users', user.uid);
+        const docSnap = await getDoc(userRef);
 
-        if (!doc.exists) {
+        if (!docSnap.exists()) {
             // New User: Create Profile + Register to Brevo
             const userData = {
                 uid: user.uid,
@@ -28,7 +38,7 @@ export const signInWithGoogle = async () => {
                     theme: 'system'
                 }
             };
-            await userRef.set(userData);
+            await setDoc(userRef, userData);
             
             // Server Action for Email Marketing
             if (user.email && user.displayName) {
@@ -36,7 +46,7 @@ export const signInWithGoogle = async () => {
             }
         } else {
             // Existing User: Update Login Time
-            await userRef.update({
+            await updateDoc(userRef, {
                 lastLogin: new Date().toISOString()
             });
         }
@@ -50,12 +60,14 @@ export const signInWithGoogle = async () => {
 
 export const signInWithEmail = async (email: string, pass: string) => {
   try {
-    const result = await auth.signInWithEmailAndPassword(email, pass);
+    const result = await signInWithEmailAndPassword(auth, email, pass);
     // Update last login
     if (result.user) {
-        await db.collection('users').doc(result.user.uid).set({
+        const userRef = doc(db, 'users', result.user.uid);
+        // Using setDoc with merge to ensure doc exists or update it safely
+        await setDoc(userRef, {
             lastLogin: new Date().toISOString()
-        }, { merge: true }); // merge avoids error if doc missing
+        }, { merge: true });
     }
     return result.user;
   } catch (error) {
@@ -65,12 +77,12 @@ export const signInWithEmail = async (email: string, pass: string) => {
 
 export const signUpWithEmail = async (email: string, pass: string, displayName: string) => {
   try {
-    const result = await auth.createUserWithEmailAndPassword(email, pass);
+    const result = await createUserWithEmailAndPassword(auth, email, pass);
     if (result.user) {
-      await result.user.updateProfile({ displayName });
+      await updateProfile(result.user, { displayName });
       
       // Create Firestore Doc manually for Email Auth
-      await db.collection('users').doc(result.user.uid).set({
+      await setDoc(doc(db, 'users', result.user.uid), {
           uid: result.user.uid,
           email: email,
           displayName: displayName,
@@ -87,7 +99,7 @@ export const signUpWithEmail = async (email: string, pass: string, displayName: 
 
 export const resetPassword = async (email: string) => {
   try {
-    await auth.sendPasswordResetEmail(email);
+    await sendPasswordResetEmail(auth, email);
   } catch (error) {
     throw error;
   }
@@ -95,7 +107,7 @@ export const resetPassword = async (email: string) => {
 
 export const logout = async () => {
   try {
-    await auth.signOut();
+    await signOut(auth);
   } catch (error) {
     console.error("Error signing out", error);
   }
@@ -103,9 +115,9 @@ export const logout = async () => {
 
 export const getCurrentUser = (): Promise<User | null> => {
   return new Promise((resolve) => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
       unsubscribe();
-      resolve(user as User);
+      resolve(user);
     });
   });
 };

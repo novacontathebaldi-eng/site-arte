@@ -1,7 +1,6 @@
-
-import firebase from 'firebase/compat/app';
-import 'firebase/compat/auth';
-import 'firebase/compat/firestore';
+import { initializeApp, getApps, getApp } from 'firebase/app';
+import { getAuth } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -23,9 +22,9 @@ if (missingKeys.length > 0 && typeof window !== 'undefined') {
   );
 }
 
-// Singleton pattern
-const app = !firebase.apps.length ? firebase.initializeApp(firebaseConfig) : firebase.app();
-const auth = firebase.auth();
-const db = firebase.firestore();
+// Singleton pattern using Modular SDK
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-export { app, auth, db, firebase };
+export { app, auth, db };

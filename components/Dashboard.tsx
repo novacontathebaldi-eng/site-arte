@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, LayoutDashboard, Package, Heart, LogOut, MapPin, User, Plus, Edit, Save, Trash2, Phone, Globe, CheckCircle, Loader2 } from 'lucide-react';
@@ -8,6 +7,8 @@ import { useLanguage } from '../hooks/useLanguage';
 import { cn, formatPrice } from '../lib/utils';
 import { updateDocument } from '../lib/firebase/firestore';
 import { auth, db } from '../lib/firebase/config';
+import { collection, query, where, orderBy, getDocs, doc, getDoc, addDoc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { updateProfile } from 'firebase/auth';
 import { Address, Product } from '../types';
 import { useToast } from './ui/Toast';
 
@@ -75,11 +76,9 @@ export const Dashboard: React.FC = () => {
     const [profileForm, setProfileForm] = useState({ displayName: '', phoneNumber: '' });
 
     // --- SCROLL LOCK ---
-    // Impede a rolagem do body quando o dashboard está aberto
     useEffect(() => {
         if (isDashboardOpen && user) {
             document.body.style.overflow = 'hidden';
-            // Para Lenis (Smooth Scroll) se estiver ativo
             document.documentElement.classList.add('lenis-stopped');
         } else {
             document.body.style.overflow = '';
@@ -104,8 +103,12 @@ export const Dashboard: React.FC = () => {
             const fetchOrders = async () => {
                 setLoadingOrders(true);
                 try {
-                    const ordersRef = db.collection('orders').where('userId', '==', user.uid).orderBy('createdAt', 'desc');
-                    const snapshot = await ordersRef.get();
+                    const q = query(
+                        collection(db, 'orders'),
+                        where('userId', '==', user.uid),
+                        orderBy('createdAt', 'desc')
+                    );
+                    const snapshot = await getDocs(q);
                     const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                     setOrders(data);
                 } catch (e) {
@@ -126,8 +129,9 @@ export const Dashboard: React.FC = () => {
                 try {
                     const products: Product[] = [];
                     for (const id of wishlistIds) {
-                        const doc = await db.collection('products').doc(id).get();
-                        if (doc.exists) products.push({ id: doc.id, ...doc.data() } as Product);
+                        const docRef = doc(db, 'products', id);
+                        const docSnap = await getDoc(docRef);
+                        if (docSnap.exists()) products.push({ id: docSnap.id, ...docSnap.data() } as Product);
                     }
                     setWishlistProducts(products);
                 } catch (e) {
@@ -148,7 +152,8 @@ export const Dashboard: React.FC = () => {
             const fetchAddresses = async () => {
                 setLoadingAddresses(true);
                 try {
-                    const snapshot = await db.collection('users').doc(user.uid).collection('addresses').get();
+                    const colRef = collection(db, 'users', user.uid, 'addresses');
+                    const snapshot = await getDocs(colRef);
                     const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Address[];
                     setAddresses(data);
                 } catch (e) {
@@ -181,7 +186,9 @@ export const Dashboard: React.FC = () => {
         setIsSavingProfile(true);
         
         try {
-            await auth.currentUser?.updateProfile({ displayName: profileForm.displayName });
+            if (auth.currentUser) {
+                await updateProfile(auth.currentUser, { displayName: profileForm.displayName });
+            }
             await updateDocument('users', user.uid, { 
                 displayName: profileForm.displayName,
                 phoneNumber: profileForm.phoneNumber 
@@ -202,17 +209,20 @@ export const Dashboard: React.FC = () => {
         e.preventDefault();
         if (!user) return;
         try {
+            const addressesRef = collection(db, 'users', user.uid, 'addresses');
+            
             if (editingAddress) {
-                await db.collection('users').doc(user.uid).collection('addresses').doc(editingAddress.id).update(addressForm);
+                const docRef = doc(db, 'users', user.uid, 'addresses', editingAddress.id);
+                await updateDoc(docRef, addressForm);
                 toast("Endereço atualizado", "success");
             } else {
-                await db.collection('users').doc(user.uid).collection('addresses').add({
+                await addDoc(addressesRef, {
                     ...addressForm,
                     createdAt: new Date().toISOString()
                 });
                 toast("Endereço adicionado", "success");
             }
-            const snapshot = await db.collection('users').doc(user.uid).collection('addresses').get();
+            const snapshot = await getDocs(addressesRef);
             setAddresses(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Address[]);
             setIsAddressFormOpen(false);
             setEditingAddress(null);
@@ -226,7 +236,8 @@ export const Dashboard: React.FC = () => {
     const handleDeleteAddress = async (id: string) => {
         if (!user || !confirm("Confirmar exclusão?")) return;
         try {
-            await db.collection('users').doc(user.uid).collection('addresses').doc(id).delete();
+            const docRef = doc(db, 'users', user.uid, 'addresses', id);
+            await deleteDoc(docRef);
             setAddresses(addresses.filter(a => a.id !== id));
             toast("Endereço removido", "info");
         } catch (e) {

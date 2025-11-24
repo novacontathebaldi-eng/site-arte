@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAuthStore } from '../store/authStore';
 import { db } from '../lib/firebase/config';
+import { doc, getDoc } from 'firebase/firestore';
 import { useUIStore } from '../store/uiStore';
 
 export const useAdmin = () => {
@@ -18,9 +19,10 @@ export const useAdmin = () => {
       }
 
       try {
-        // Double check Firestore for security (client-side UI only, server actions verify internally)
-        const doc = await db.collection('users').doc(user.uid).get();
-        const role = doc.data()?.role;
+        // Double check Firestore for security
+        const docRef = doc(db, 'users', user.uid);
+        const docSnap = await getDoc(docRef);
+        const role = docSnap.data()?.role;
         
         if (role === 'admin') {
           setIsAdmin(true);

@@ -1,8 +1,8 @@
-
 import { useEffect } from 'react';
 import { useWishlistStore } from '../store/wishlistStore';
 import { useAuthStore } from '../store/authStore';
 import { db } from '../lib/firebase/config';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { debounce } from '../lib/utils';
 
 export const useWishlist = () => {
@@ -15,9 +15,9 @@ export const useWishlist = () => {
 
     const fetchWishlist = async () => {
         try {
-            const docRef = db.collection('users').doc(user.uid).collection('wishlist').doc('active');
-            const docSnap = await docRef.get();
-            if (docSnap.exists) {
+            const docRef = doc(db, 'users', user.uid, 'wishlist', 'active');
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists()) {
                 setItems(docSnap.data()?.items || []);
             }
         } catch (e) {
@@ -33,8 +33,8 @@ export const useWishlist = () => {
 
     const saveWishlist = async () => {
         try {
-            const docRef = db.collection('users').doc(user.uid).collection('wishlist').doc('active');
-            await docRef.set({ items }, { merge: true });
+            const docRef = doc(db, 'users', user.uid, 'wishlist', 'active');
+            await setDoc(docRef, { items }, { merge: true });
         } catch (e) {
             console.error("Save wishlist error", e);
         }

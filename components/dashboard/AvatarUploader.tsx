@@ -1,10 +1,10 @@
-
 import React, { useState, useRef } from 'react';
 import { Camera, Loader2, Trash2, Upload, Check, X } from 'lucide-react';
 import { useAuthStore } from '../../store';
 import { uploadImage, deleteImage, getPublicUrl } from '../../lib/supabase/storage';
 import { updateDocument } from '../../lib/firebase/firestore';
 import { auth } from '../../lib/firebase/config';
+import { updateProfile } from 'firebase/auth';
 import { cn } from '../../lib/utils';
 
 const DEFAULT_AVATAR = "https://pycvlkcxgfwsquzolkzw.supabase.co/storage/v1/object/public/storage-arte/img_perfil.jpg";
@@ -54,7 +54,7 @@ export const AvatarUploader: React.FC = () => {
 
         // 4. Update Auth & Firestore
         if (auth.currentUser) {
-            await auth.currentUser.updateProfile({ photoURL: publicUrl });
+            await updateProfile(auth.currentUser, { photoURL: publicUrl });
             await updateDocument('users', user.uid, { photoURL: publicUrl });
             
             // Update Local Store
@@ -90,7 +90,7 @@ export const AvatarUploader: React.FC = () => {
 
         // 2. Reset to Default
         if (auth.currentUser) {
-            await auth.currentUser.updateProfile({ photoURL: DEFAULT_AVATAR });
+            await updateProfile(auth.currentUser, { photoURL: DEFAULT_AVATAR });
             await updateDocument('users', user.uid, { photoURL: DEFAULT_AVATAR });
             setUser({ ...user, photoURL: DEFAULT_AVATAR });
         }

@@ -1,9 +1,9 @@
-
 import { useEffect, useRef } from 'react';
 import { useCartStore } from '../store/cartStore';
 import { useUIStore } from '../store/uiStore';
 import { useAuthStore } from '../store/authStore';
 import { db } from '../lib/firebase/config';
+import { doc, onSnapshot, setDoc, collection } from 'firebase/firestore';
 import { debounce } from '../lib/utils';
 import { Product } from '../types';
 
@@ -28,10 +28,12 @@ export const useCart = () => {
   useEffect(() => {
     if (!user) return;
 
-    const docRef = db.collection('users').doc(user.uid).collection('cart').doc('active');
+    // Modular Syntax: db.collection('users').doc(uid).collection('cart').doc('active')
+    // Becomes: doc(db, 'users', uid, 'cart', 'active')
+    const docRef = doc(db, 'users', user.uid, 'cart', 'active');
 
-    const unsubscribe = docRef.onSnapshot((docSnap: any) => {
-      if (docSnap.exists && !isMerging.current) {
+    const unsubscribe = onSnapshot(docRef, (docSnap) => {
+      if (docSnap.exists() && !isMerging.current) {
         // const data = docSnap.data();
         // Handle remote update logic if needed
       }
@@ -49,8 +51,8 @@ export const useCart = () => {
 
         if (items.length > 0) {
             try {
-                const docRef = db.collection('users').doc(user.uid).collection('cart').doc('active');
-                await docRef.set({
+                const docRef = doc(db, 'users', user.uid, 'cart', 'active');
+                await setDoc(docRef, {
                     items: items,
                     updatedAt: new Date().toISOString(),
                     total: total(),
@@ -74,8 +76,8 @@ export const useCart = () => {
 
     const saveToCloud = async () => {
       try {
-        const docRef = db.collection('users').doc(user.uid).collection('cart').doc('active');
-        await docRef.set({
+        const docRef = doc(db, 'users', user.uid, 'cart', 'active');
+        await setDoc(docRef, {
           items: items,
           updatedAt: new Date().toISOString(),
           total: total(),
