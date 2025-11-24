@@ -1,9 +1,13 @@
 'use server';
 
 import { GoogleGenAI, FunctionDeclaration, Tool, SchemaType } from "@google/genai";
-import { getCollection } from "@/lib/firebase/firestore";
+import { getCollection, createDocument } from "@/lib/firebase/firestore";
 import { registerClientToBrevo } from "./registerClient";
 import { Product } from "@/types";
+import { getChatConfig } from "./admin";
+import { db } from "@/lib/firebase/config";
+import { collection, query, where, getDocs, Timestamp, addDoc } from "firebase/firestore";
+import { headers } from "next/headers";
 
 const API_KEY = process.env.GEMINI_API_KEY;
 
@@ -43,6 +47,23 @@ const tools: Tool[] = [
 ];
 
 // --- 2. HELPER FUNCTIONS ---
+
+async function checkRateLimit(ip: string): Promise<boolean> {
+    const config = await getChatConfig();
+    const { maxMessages, windowMinutes } = config.rateLimit;
+    
+    const now = new Date();
+    const windowStart = new Date(now.getTime() - windowMinutes * 60000);
+
+    const q = query(
+        collection(db, 'chat_logs'),
+        where('ip', '==', ip),
+        where('timestamp', '>=', windowStart.toISOString())
+    );
+
+    const snapshot = await getDocs(q);
+    return snapshot.size < maxMessages;
+}
 
 async function executeProductSearch(args: any): Promise<{ info: string, products: Product[] }> {
   try {
@@ -94,40 +115,38 @@ async function executeProductSearch(args: any): Promise<{ info: string, products
 export async function generateChatResponse(
   message: string, 
   history: { role: 'user' | 'model', parts: { text: string }[] }[]
-): Promise<{ text: string, products?: Product[] }> {
+): Promise<{ text: string, products?: Product[], messageId?: string }> {
   
   if (!API_KEY) {
     return { text: "Erro de configuração: API Key ausente." };
   }
 
+  // Rate Limiting
+  const headersList = headers();
+  const ip = headersList.get('x-forwarded-for') || 'unknown';
+  
+  const allowed = await checkRateLimit(ip);
+  if (!allowed) {
+      return { text: "Você atingiu o limite de mensagens por agora. Por favor, aguarde alguns minutos." };
+  }
+
+  // Load Config
+  const chatConfig = await getChatConfig();
   const ai = new GoogleGenAI({ apiKey: API_KEY });
   let foundProducts: Product[] = [];
 
   try {
     const model = ai.getGenerativeModel({
-      model: 'gemini-2.0-flash', // Using latest efficient model
-      tools: tools
+      model: 'gemini-2.0-flash', 
+      tools: tools,
+      generationConfig: {
+          temperature: chatConfig.modelTemperature
+      }
     });
 
     const chat = model.startChat({
       history: history,
-      systemInstruction: `You are 'Meeh Assistant', a luxury art concierge for Melissa Pelussi.
-      tone: Sophisticated, warm, minimalist, professional.
-      
-      GOALS:
-      1. Help users find art (Use 'searchProducts').
-      2. Capture leads. If the user seems interested, gently suggest joining the 'VIP Circle' for private views. If they give an email, use 'subscribeNewsletter'.
-      
-      CONTEXT:
-      - The artist is based in Luxembourg.
-      - Ships worldwide.
-      - Accepts Revolut and Cards.
-      - Respond in the USER'S LANGUAGE (detect automatically).
-      
-      FORMATTING:
-      - Keep responses short and elegant (max 3 sentences usually).
-      - Use emojis sparingly but effectively (✨, 🎨, 🥂).
-      `
+      systemInstruction: chatConfig.systemPrompt + `\n\nAdditional Context: Respond concisely.`
     });
 
     // 1. Send User Message
@@ -144,7 +163,6 @@ export async function generateChatResponse(
           const searchResult = await executeProductSearch(call.args);
           foundProducts = searchResult.products;
           
-          // Send result back to Gemini to generate natural text
           const nextResult = await chat.sendMessage([
             {
               functionResponse: {
@@ -158,9 +176,6 @@ export async function generateChatResponse(
         else if (call.name === "subscribeNewsletter") {
           const args = call.args as any;
           await registerClientToBrevo(args.email, args.name || 'Art Lover');
-          
-          // List ID 5 is implied logic for this context, handled in registerClientToBrevo or we can update it
-          // Assuming registerClientToBrevo handles default list or we update it.
           
           const nextResult = await chat.sendMessage([
              {
@@ -177,13 +192,40 @@ export async function generateChatResponse(
       finalText = response.text();
     }
 
+    // 3. Log Interaction
+    const logRef = await addDoc(collection(db, 'chat_logs'), {
+        ip,
+        userMessage: message,
+        aiResponse: finalText,
+        timestamp: new Date().toISOString()
+    });
+
     return { 
       text: finalText || "Desculpe, não entendi.",
-      products: foundProducts.length > 0 ? foundProducts : undefined
+      products: foundProducts.length > 0 ? foundProducts : undefined,
+      messageId: logRef.id // Return ID for feedback mapping
     };
 
   } catch (error) {
     console.error("Gemini Error:", error);
-    return { text: "O assistente está momentaneamente indisponível. Tente recarregar." };
+    return { text: "O assistente está momentaneamente indisponível." };
   }
+}
+
+// Action to save feedback (Like/Dislike)
+export async function submitChatFeedback(messageId: string, userMessage: string, aiResponse: string, feedback: 'like' | 'dislike') {
+    try {
+        await addDoc(collection(db, 'chat_feedback'), {
+            messageId,
+            userMessage,
+            aiResponse,
+            feedback,
+            resolved: false,
+            timestamp: new Date().toISOString()
+        });
+        return { success: true };
+    } catch (e) {
+        console.error("Feedback Error", e);
+        return { success: false };
+    }
 }

@@ -1,13 +1,15 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageCircle, X, Send, Loader2, Sparkles, ThumbsUp, ThumbsDown, Copy, ChevronRight, ShoppingBag, Minimize2 } from 'lucide-react';
+import { MessageCircle, X, Send, Loader2, Sparkles, ThumbsUp, ThumbsDown, Copy, Minimize2 } from 'lucide-react';
 import { useUIStore } from '../store';
-import { generateChatResponse } from '../app/actions/chat';
+import { generateChatResponse, submitChatFeedback } from '../app/actions/chat';
 import { ChatMessage, Product } from '../types';
 import { useLanguage } from '../hooks/useLanguage';
 import { useCart } from '../hooks/useCart';
 import { formatPrice, cn } from '../lib/utils';
 import { ProductModal } from './catalog/ProductModal';
+import { getChatConfig } from '../app/actions/admin';
+import { ChatStarter } from '../types/admin';
 
 // --- SUB-COMPONENTS ---
 
@@ -34,18 +36,12 @@ const ProductCarousel = ({ products, onSelect }: { products: Product[], onSelect
   </div>
 );
 
-const PromptChips = ({ onSelect }: { onSelect: (text: string) => void }) => {
-    const starters = [
-        { label: "📦 Meus Pedidos", text: "Gostaria de saber o status do meu pedido." },
-        { label: "🎨 Sugira Obras", text: "Pode me sugerir obras abstratas em azul?" },
-        { label: "✈️ Envios", text: "Como funciona o envio internacional?" },
-    ];
-
+const PromptChips = ({ starters, onSelect }: { starters: ChatStarter[], onSelect: (text: string) => void }) => {
     return (
         <div className="flex gap-2 overflow-x-auto py-2 px-4 no-scrollbar">
-            {starters.map((s, i) => (
+            {starters.sort((a,b) => a.order - b.order).map((s) => (
                 <button
-                    key={i}
+                    key={s.id}
                     onClick={() => onSelect(s.text)}
                     className="whitespace-nowrap px-4 py-2 rounded-full bg-white dark:bg-[#252525] border border-gray-200 dark:border-white/10 text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-accent hover:text-white hover:border-accent transition-all shadow-sm"
                 >
@@ -59,16 +55,25 @@ const PromptChips = ({ onSelect }: { onSelect: (text: string) => void }) => {
 export const Chatbot: React.FC = () => {
   const { isChatOpen, toggleChat } = useUIStore();
   const { t, language } = useLanguage();
-  const { addToCart } = useCart();
   
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null); // For modal
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [hasInteracted, setHasInteracted] = useState(false);
+  const [starters, setStarters] = useState<ChatStarter[]>([]);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Load Config (Starters)
+  useEffect(() => {
+    const loadConfig = async () => {
+        const config = await getChatConfig();
+        setStarters(config.starters || []);
+    };
+    if (isChatOpen) loadConfig();
+  }, [isChatOpen]);
 
   // Initial Welcome
   useEffect(() => {
@@ -84,7 +89,6 @@ export const Chatbot: React.FC = () => {
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    // Auto focus input when opened
     if (isChatOpen) {
         setTimeout(() => inputRef.current?.focus(), 300);
     }
@@ -96,7 +100,6 @@ export const Chatbot: React.FC = () => {
     setHasInteracted(true);
     setInputValue('');
 
-    // Optimistic UI
     const userMsg: ChatMessage = {
         id: Date.now().toString(),
         role: 'user',
@@ -107,7 +110,6 @@ export const Chatbot: React.FC = () => {
     setIsLoading(true);
 
     try {
-        // Convert history for Gemini
         const history = messages.map(m => ({
             role: m.role,
             parts: [{ text: m.text }]
@@ -116,20 +118,35 @@ export const Chatbot: React.FC = () => {
         const response = await generateChatResponse(text, history);
 
         const botMsg: ChatMessage = {
-            id: (Date.now() + 1).toString(),
+            id: response.messageId || (Date.now() + 1).toString(), // Capture server log ID
             role: 'model',
             text: response.text,
-            products: response.products, // Rich Content
+            products: response.products,
             timestamp: Date.now()
         };
         setMessages(prev => [...prev, botMsg]);
 
     } catch (error) {
         console.error(error);
-        // Fallback handled by UI state
     } finally {
         setIsLoading(false);
     }
+  };
+
+  const handleFeedback = async (msg: ChatMessage, type: 'like' | 'dislike') => {
+      // Find the user message before this bot message
+      const msgIndex = messages.findIndex(m => m.id === msg.id);
+      const userMsg = messages[msgIndex - 1];
+      
+      // Update UI state
+      setMessages(prev => prev.map(m => 
+          m.id === msg.id ? { ...m, feedback: type } : m
+      ));
+
+      // Send to server
+      if (userMsg && msg.id) {
+          await submitChatFeedback(msg.id, userMsg.text, msg.text, type);
+      }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -139,14 +156,9 @@ export const Chatbot: React.FC = () => {
     }
   };
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    // Could add toast here
-  };
-
   return (
     <>
-      {/* Floating Button (Bottom Left) */}
+      {/* Floating Button */}
       <motion.button
         className="fixed bottom-8 left-8 z-[90] w-14 h-14 bg-white dark:bg-[#1a1a1a] text-primary dark:text-white rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.12)] flex items-center justify-center border border-white/20 hover:scale-105 transition-transform group"
         onClick={toggleChat}
@@ -183,7 +195,7 @@ export const Chatbot: React.FC = () => {
                         <h3 className="font-serif font-bold text-sm text-primary dark:text-white">Meeh Assistant</h3>
                         <div className="flex items-center gap-1.5">
                             <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
-                            <span className="text-[10px] text-gray-500 font-medium tracking-wide">Always Online</span>
+                            <span className="text-[10px] text-gray-500 font-medium tracking-wide">Online</span>
                         </div>
                     </div>
                 </div>
@@ -213,24 +225,35 @@ export const Chatbot: React.FC = () => {
                         )}>
                             {msg.text}
 
-                            {/* Micro-interactions Footer (Only for bot) */}
+                            {/* Interactions Footer (Only for bot) */}
                             {msg.role === 'model' && (
-                                <div className="absolute -bottom-6 left-0 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2 pt-1 px-1">
-                                    <button className="text-gray-400 hover:text-green-500 transition-colors"><ThumbsUp size={12}/></button>
-                                    <button className="text-gray-400 hover:text-red-500 transition-colors"><ThumbsDown size={12}/></button>
-                                    <button onClick={() => copyToClipboard(msg.text)} className="text-gray-400 hover:text-accent transition-colors"><Copy size={12}/></button>
+                                <div className={cn(
+                                    "absolute -bottom-6 left-0 flex gap-2 pt-1 px-1 transition-opacity",
+                                    msg.feedback ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                                )}>
+                                    <button 
+                                        onClick={() => handleFeedback(msg, 'like')}
+                                        className={cn("transition-colors", msg.feedback === 'like' ? "text-green-500" : "text-gray-400 hover:text-green-500")}
+                                    >
+                                        <ThumbsUp size={12}/>
+                                    </button>
+                                    <button 
+                                        onClick={() => handleFeedback(msg, 'dislike')}
+                                        className={cn("transition-colors", msg.feedback === 'dislike' ? "text-red-500" : "text-gray-400 hover:text-red-500")}
+                                    >
+                                        <ThumbsDown size={12}/>
+                                    </button>
                                 </div>
                             )}
                         </div>
 
-                        {/* Product Carousel (Rich Content) */}
+                        {/* Product Carousel */}
                         {msg.products && msg.products.length > 0 && (
                             <div className="w-full mt-2 ml-1">
                                 <ProductCarousel products={msg.products} onSelect={setSelectedProduct} />
                             </div>
                         )}
                         
-                        {/* Timestamp */}
                         <span className="text-[10px] text-gray-400 mt-1 px-1">
                             {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </span>
@@ -251,10 +274,10 @@ export const Chatbot: React.FC = () => {
 
             {/* Input Area */}
             <div className="p-4 bg-white dark:bg-[#1a1a1a] border-t border-gray-100 dark:border-white/5">
-                {/* Prompt Starters */}
-                {!isLoading && messages.length < 3 && (
+                {/* Dynamic Prompt Starters */}
+                {!isLoading && messages.length < 3 && starters.length > 0 && (
                     <div className="mb-3">
-                         <PromptChips onSelect={handleSend} />
+                         <PromptChips starters={starters} onSelect={handleSend} />
                     </div>
                 )}
 
@@ -276,15 +299,11 @@ export const Chatbot: React.FC = () => {
                         {isLoading ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
                     </button>
                 </div>
-                <div className="text-center mt-2">
-                    <p className="text-[9px] text-gray-400 uppercase tracking-widest">Powered by Gemini AI</p>
-                </div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Product Modal Triggered by Chat */}
       <ProductModal 
         product={selectedProduct} 
         isOpen={!!selectedProduct} 
