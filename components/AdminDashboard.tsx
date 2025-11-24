@@ -677,9 +677,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
                     <div className="fixed inset-0 z-[110] bg-black/80 backdrop-blur flex items-center justify-center p-4">
                         <motion.div 
                             className="bg-[#151515] p-8 rounded-xl max-w-lg w-full border border-white/10 shadow-2xl"
-                            initial={{ scale: 0.9, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0.9, opacity: 0 }}
+                            {...({
+                                initial: { scale: 0.9, opacity: 0 },
+                                animate: { scale: 1, opacity: 1 },
+                                exit: { scale: 0.9, opacity: 0 }
+                            } as any)}
                         >
                             <h3 className="text-xl font-serif mb-4">Ensinar o Chatbot</h3>
                             <div className="bg-black/30 p-4 rounded mb-4 text-sm text-gray-400">

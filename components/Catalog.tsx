@@ -6,7 +6,7 @@ import { useProducts } from '../hooks/useProducts';
 import { useLanguage } from '../hooks/useLanguage';
 import { ProductCard } from './catalog/ProductCard';
 import { ProductModal } from './catalog/ProductModal';
-import { Loader2, AlertCircle } from 'lucide-react';
+import { Loader2, AlertCircle, Sparkles } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 // Preferred visual order, but not exclusive.
@@ -121,6 +121,30 @@ export const Catalog: React.FC = () => {
     return (
         <section id="catalog" className="min-h-screen bg-light dark:bg-[#252525] relative">
             
+            {/* Catalog Header - NEW SECTION */}
+            <div className="bg-light dark:bg-[#252525] pt-24 pb-12 px-6">
+                <motion.div 
+                    className="container mx-auto text-center"
+                    {...({
+                        initial: { opacity: 0, y: 20 },
+                        whileInView: { opacity: 1, y: 0 },
+                        viewport: { once: true },
+                        transition: { duration: 0.8 }
+                    } as any)}
+                >
+                    <div className="flex justify-center mb-4">
+                        <Sparkles className="text-accent w-6 h-6 animate-pulse" />
+                    </div>
+                    <h2 className="font-serif text-3xl md:text-5xl text-primary dark:text-white mb-3">
+                        {t('catalog.section_title')}
+                    </h2>
+                    <div className="h-[2px] w-24 bg-accent mx-auto mb-4" />
+                    <p className="text-gray-500 text-sm md:text-base tracking-widest uppercase max-w-lg mx-auto">
+                        {t('catalog.section_subtitle')}
+                    </p>
+                </motion.div>
+            </div>
+
             {/* Sticky Tabs Header */}
             {/* Adjusted to top-[64px] to match Header height exactly */}
             <div className="sticky top-[64px] z-30 w-full bg-white/80 dark:bg-[#1e1e1e]/80 backdrop-blur-md border-b border-gray-200 dark:border-white/5 shadow-sm transition-all">

@@ -182,9 +182,11 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, onClose, 
   return (
     <div className="fixed inset-0 z-[120] bg-black/90 backdrop-blur-xl flex items-center justify-center p-4">
         <motion.div 
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
+            {...({
+                initial: { opacity: 0, scale: 0.95 },
+                animate: { opacity: 1, scale: 1 },
+                exit: { opacity: 0, scale: 0.95 }
+            } as any)}
             className="w-full max-w-6xl bg-[#121212] border border-white/10 rounded-2xl flex flex-col h-[90vh] shadow-2xl"
         >
             {/* Header */}
