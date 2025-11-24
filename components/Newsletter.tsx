@@ -24,7 +24,7 @@ const InputField: React.FC<{
         className="peer w-full bg-transparent border-b border-gray-300 dark:border-white/20 py-4 text-2xl md:text-4xl font-serif text-primary dark:text-white focus:outline-none focus:border-transparent transition-all placeholder-transparent"
       />
       <label
-        className="absolute left-0 top-4 text-xl md:text-2xl text-gray-400 dark:text-gray-500 transition-all duration-300 peer-focus:-top-4 peer-focus:text-xs peer-focus:text-accent peer-focus:font-bold peer-focus:tracking-widest peer-[:not(:placeholder-shown)]:-top-4 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:text-accent uppercase tracking-normal cursor-text"
+        className="pointer-events-none absolute left-0 top-4 text-xl md:text-2xl text-gray-400 dark:text-gray-500 transition-all duration-300 peer-focus:-top-4 peer-focus:text-xs peer-focus:text-accent peer-focus:font-bold peer-focus:tracking-widest peer-[:not(:placeholder-shown)]:-top-4 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:text-accent uppercase tracking-normal"
       >
         {placeholder}
       </label>

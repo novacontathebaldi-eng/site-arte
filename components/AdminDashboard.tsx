@@ -40,6 +40,21 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
     const [feedbackList, setFeedbackList] = useState<ChatFeedback[]>([]);
     const [isSavingChat, setIsSavingChat] = useState(false);
 
+    // --- SCROLL LOCK ---
+    useEffect(() => {
+        if (isOpen) {
+            document.body.style.overflow = 'hidden';
+            document.documentElement.classList.add('lenis-stopped');
+        } else {
+            document.body.style.overflow = '';
+            document.documentElement.classList.remove('lenis-stopped');
+        }
+        return () => {
+            document.body.style.overflow = '';
+            document.documentElement.classList.remove('lenis-stopped');
+        };
+    }, [isOpen]);
+
     // --- DATA FETCHING ---
     useEffect(() => {
         if (!isOpen) return;
