@@ -1,63 +1,83 @@
 
-import { useQuery } from '@tanstack/react-query';
-import { getCollection } from '../lib/firebase/firestore';
+import { useState, useEffect } from 'react';
+import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { db } from '../lib/firebase/config';
 import { Product, ProductCategory } from '../types/product';
 
 export const useProducts = () => {
-  return useQuery<Product[]>({
-    queryKey: ['products'],
-    queryFn: async () => {
-      const data = await getCollection('products');
-      
-      // Map and validate data robustly
-      const products = data.map((doc: any) => {
-        // Handle legacy images (string[]) vs new images (ProductImage[])
-        const rawImages = doc.images || [];
-        const processedImages = Array.isArray(rawImages) 
-            ? rawImages.map((img: any, idx: number) => {
-                if (typeof img === 'string') {
-                    return { id: idx.toString(), url: img, alt: doc.title || 'Artwork', isThumbnail: idx === 0 };
-                }
-                return img;
-            })
-            : [];
+  const [data, setData] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
-        return {
-          id: doc.id,
-          sku: doc.sku || '',
-          slug: doc.slug || '',
-          
-          translations: doc.translations || { 
-            fr: { title: doc.title || 'Untitled', description: doc.description || '' },
-            en: { title: doc.title || 'Untitled', description: doc.description || '' }
-          },
-          
-          price: doc.price || 0,
-          category: doc.category || ProductCategory.PAINTINGS,
-          
-          images: processedImages,
-          
-          available: doc.available ?? true,
-          status: doc.status || (doc.available ? 'active' : 'sold'),
-          stock: doc.stock || 1,
-          
-          dimensions: doc.dimensions || { height: 0, width: 0, depth: 0, unit: 'cm' },
-          weight: doc.weight || 0,
-          medium: doc.medium || '',
-          year: doc.year || new Date().getFullYear(),
-          framing: doc.framing || 'unframed',
-          authenticity_certificate: doc.authenticity_certificate ?? true,
-          signature: doc.signature ?? true,
-          
-          featured: doc.featured || false,
-          displayOrder: doc.displayOrder || 0,
-          createdAt: doc.createdAt,
-          tags: doc.tags || []
-        };
-      }) as Product[];
+  useEffect(() => {
+    setIsLoading(true);
+    
+    // Real-time listener using onSnapshot
+    // This ensures that any change in Admin immediately reflects here
+    const q = query(collection(db, 'products'), orderBy('displayOrder', 'asc'));
 
-      return products;
-    },
-    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
-  });
+    const unsubscribe = onSnapshot(q, 
+      (snapshot) => {
+        const products = snapshot.docs.map((doc) => {
+          const data = doc.data();
+          
+          // Data validation and mapping
+          const rawImages = data.images || [];
+          const processedImages = Array.isArray(rawImages) 
+              ? rawImages.map((img: any, idx: number) => {
+                  if (typeof img === 'string') {
+                      return { id: idx.toString(), url: img, alt: data.title || 'Artwork', isThumbnail: idx === 0 };
+                  }
+                  return img;
+              })
+              : [];
+
+          return {
+            id: doc.id,
+            sku: data.sku || '',
+            slug: data.slug || '',
+            
+            translations: data.translations || { 
+              fr: { title: data.title || 'Untitled', description: data.description || '' },
+              en: { title: data.title || 'Untitled', description: data.description || '' }
+            },
+            
+            price: data.price || 0,
+            category: data.category || ProductCategory.PAINTINGS,
+            
+            images: processedImages,
+            
+            status: data.status || 'active',
+            stock: data.stock || 1,
+            
+            dimensions: data.dimensions || { height: 0, width: 0, depth: 0, unit: 'cm' },
+            weight: data.weight || 0,
+            medium: data.medium || '',
+            year: data.year || new Date().getFullYear(),
+            framing: data.framing || 'unframed',
+            authenticity_certificate: data.authenticity_certificate ?? true,
+            signature: data.signature ?? true,
+            
+            featured: data.featured || false,
+            displayOrder: data.displayOrder || 0,
+            createdAt: data.createdAt,
+            tags: data.tags || []
+          } as Product;
+        });
+
+        setData(products);
+        setIsLoading(false);
+      },
+      (err) => {
+        console.error("Error fetching products:", err);
+        setError(err);
+        setIsLoading(false);
+      }
+    );
+
+    // Cleanup listener on unmount
+    return () => unsubscribe();
+  }, []);
+
+  return { data, isLoading, error };
 };
