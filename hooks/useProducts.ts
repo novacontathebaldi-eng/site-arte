@@ -13,7 +13,8 @@ export const useProducts = () => {
     setIsLoading(true);
     
     // Real-time listener using onSnapshot
-    // This ensures that any change in Admin immediately reflects here
+    // We order by 'displayOrder' to match the Admin's drag-and-drop order
+    // This ensures full synchronization between Admin and Catalog
     const q = query(collection(db, 'products'), orderBy('displayOrder', 'asc'));
 
     const unsubscribe = onSnapshot(q, 
@@ -32,14 +33,20 @@ export const useProducts = () => {
               })
               : [];
 
+          // Robust fallback for translations
+          const defaultTrans = { title: 'Untitled', description: '' };
+          const trans = data.translations || {};
+
           return {
             id: doc.id,
             sku: data.sku || '',
             slug: data.slug || '',
             
-            translations: data.translations || { 
-              fr: { title: data.title || 'Untitled', description: data.description || '' },
-              en: { title: data.title || 'Untitled', description: data.description || '' }
+            translations: { 
+              fr: trans.fr || defaultTrans,
+              en: trans.en || defaultTrans,
+              pt: trans.pt || defaultTrans,
+              de: trans.de || defaultTrans
             },
             
             price: data.price || 0,

@@ -76,10 +76,16 @@ const App: React.FC = () => {
                     >
                         {/* Image */}
                         <div className="aspect-[3/4] w-full overflow-hidden rounded-sm shadow-2xl">
-                             <img 
+                             <motion.img 
                                 src="https://images.unsplash.com/photo-1551024709-8f23befc6f87?q=80&w=1000&auto=format&fit=crop" 
                                 alt="Melissa Pelussi Art Studio" 
-                                className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700"
+                                className="w-full h-full object-cover"
+                                {...({
+                                    initial: { filter: "grayscale(100%)" },
+                                    whileInView: { filter: "grayscale(0%)" },
+                                    viewport: { once: true, amount: 0.3 }, // Changed: once: true ensures it stays colored
+                                    transition: { duration: 1.5, ease: "easeInOut" }
+                                } as any)}
                             />
                         </div>
                         {/* Decorative Element */}

@@ -3,7 +3,7 @@
 import { adminDb } from '../../lib/firebase/admin';
 import { ProductCategory } from '../../types/product';
 
-// Imagens de Arte Abstrata/Luxo do Unsplash
+// High-quality Unsplash Art Images
 const ART_IMAGES = [
   "https://images.unsplash.com/photo-1541963463532-d68292c34b19?auto=format&fit=crop&q=80&w=1000",
   "https://images.unsplash.com/photo-1549490349874-1f9d34246505?auto=format&fit=crop&q=80&w=1000",

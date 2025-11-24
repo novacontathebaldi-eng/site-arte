@@ -247,8 +247,10 @@ export const Chatbot: React.FC = () => {
       <motion.button
         className="fixed bottom-8 left-8 z-[90] w-14 h-14 bg-white/80 dark:bg-black/80 backdrop-blur-md text-primary dark:text-white rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.12)] flex items-center justify-center border border-white/20 hover:scale-105 transition-transform group"
         onClick={toggleChat}
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
+        {...({
+            whileHover: { scale: 1.05 },
+            whileTap: { scale: 0.95 }
+        } as any)}
       >
         {isChatOpen ? <Minimize2 size={24} /> : <MessageCircle size={24} className="group-hover:text-accent transition-colors" />}
         {!isChatOpen && messages.length > 1 && (
@@ -261,10 +263,12 @@ export const Chatbot: React.FC = () => {
         {isChatOpen && (
           <motion.div
             className="fixed bottom-24 left-4 md:left-8 w-[calc(100vw-32px)] md:w-[380px] h-[650px] max-h-[80vh] bg-white/95 dark:bg-[#121212]/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 dark:border-white/10 z-[90] flex flex-col overflow-hidden"
-            initial={{ opacity: 0, scale: 0.9, y: 50, transformOrigin: "bottom left" }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 50 }}
-            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            {...({
+                initial: { opacity: 0, scale: 0.9, y: 50, transformOrigin: "bottom left" },
+                animate: { opacity: 1, scale: 1, y: 0 },
+                exit: { opacity: 0, scale: 0.9, y: 50 },
+                transition: { type: "spring", stiffness: 300, damping: 30 }
+            } as any)}
           >
             {/* Header */}
             <div className="p-4 border-b border-gray-100 dark:border-white/5 flex justify-between items-center bg-white/50 dark:bg-black/20 backdrop-blur-md absolute top-0 w-full z-10">
@@ -301,8 +305,10 @@ export const Chatbot: React.FC = () => {
                     return (
                         <motion.div 
                             key={msg.id} 
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
+                            {...({
+                                initial: { opacity: 0, y: 10 },
+                                animate: { opacity: 1, y: 0 }
+                            } as any)}
                             className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}
                         >
                             <div className={cn(

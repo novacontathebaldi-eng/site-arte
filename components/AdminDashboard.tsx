@@ -287,8 +287,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
             {/* SIDEBAR */}
             <motion.div 
                 className="w-20 md:w-64 bg-[#121212] border-r border-white/10 flex flex-col items-center md:items-stretch py-8"
-                initial={{ x: -100 }}
-                animate={{ x: 0 }}
+                {...({
+                    initial: { x: -100 },
+                    animate: { x: 0 }
+                } as any)}
             >
                 <div className="mb-12 text-center">
                     <div className="w-10 h-10 bg-red-600 rounded-lg mx-auto flex items-center justify-center text-white shadow-red-500/20 shadow-lg">
@@ -323,310 +325,352 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
                     </div>
                 </header>
 
-                <div 
-                    className="flex-1 overflow-y-auto p-8 overscroll-contain"
-                    data-lenis-prevent // CRITICAL FIX: Allows internal scrolling in Admin Panel
-                >
-                    <AnimatePresence mode="wait">
-                        
-                        {/* 1. ANALYTICS */}
-                        {activeTab === 'analytics' && (
-                            <motion.div className="space-y-8" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                                    {[
-                                        { label: 'Vendas Hoje', value: `€ ${stats.salesToday}`, icon: DollarSign, trend: '+12%', color: '#10B981' },
-                                        { label: 'Novos Pedidos', value: stats.newOrders, icon: Package, trend: '+3', color: '#3B82F6' },
-                                        { label: 'Inscritos Brevo', value: stats.brevoSubs, icon: Users, trend: 'Lista 5', color: '#D4AF37' },
-                                        { label: 'Clientes Brevo', value: stats.brevoClients, icon: Users, trend: 'Lista 7', color: '#8B5CF6' },
-                                    ].map((stat, i) => (
-                                        <div key={i} className="bg-[#151515] p-6 rounded-xl border border-white/10 relative overflow-hidden">
-                                            <div className="flex justify-between items-start mb-4">
-                                                <div className={`p-2 rounded-lg bg-[${stat.color}]/10`}><stat.icon size={20} style={{ color: stat.color }} /></div>
-                                                <span className="text-xs font-bold bg-white/5 px-2 py-1 rounded text-green-400">{stat.trend}</span>
-                                            </div>
-                                            <h3 className="text-2xl font-bold font-serif">{stat.value}</h3>
-                                            <p className="text-gray-500 text-xs uppercase tracking-widest mt-1">{stat.label}</p>
+                <main className="flex-1 overflow-y-auto p-8" data-lenis-prevent>
+                    {activeTab === 'analytics' && (
+                        <div className="space-y-8 animate-fade-in">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                                {[
+                                    { label: 'Vendas Hoje', value: formatPrice(stats.salesToday), icon: TrendingUp, color: 'text-green-500' },
+                                    { label: 'Receita Mensal', value: formatPrice(stats.salesMonth), icon: DollarSign, color: 'text-accent' },
+                                    { label: 'Novos Pedidos', value: stats.newOrders, icon: Package, color: 'text-blue-500' },
+                                    { label: 'Usuários Ativos', value: stats.activeUsers, icon: Users, color: 'text-purple-500' },
+                                ].map((stat, i) => (
+                                    <div key={i} className="bg-[#151515] p-6 rounded-xl border border-white/5">
+                                        <div className="flex justify-between items-start mb-4">
+                                            <span className="text-gray-500 text-xs uppercase">{stat.label}</span>
+                                            <stat.icon className={stat.color} size={20} />
                                         </div>
-                                    ))}
-                                </div>
-                                <div className="bg-[#151515] p-6 rounded-xl border border-white/10 h-[400px]">
-                                    <h3 className="text-lg font-serif mb-6">Desempenho de Vendas</h3>
-                                    <ResponsiveContainer width="100%" height="100%">
-                                        <AreaChart data={salesData}>
-                                            <defs>
-                                                <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
-                                                    <stop offset="5%" stopColor="#D4AF37" stopOpacity={0.3}/>
-                                                    <stop offset="95%" stopColor="#D4AF37" stopOpacity={0}/>
-                                                </linearGradient>
-                                            </defs>
-                                            <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-                                            <XAxis dataKey="name" stroke="#666" />
-                                            <YAxis stroke="#666" />
-                                            <Tooltip contentStyle={{ backgroundColor: '#000', border: '1px solid #333' }} />
-                                            <Area type="monotone" dataKey="value" stroke="#D4AF37" fillOpacity={1} fill="url(#colorSales)" />
-                                        </AreaChart>
-                                    </ResponsiveContainer>
-                                </div>
-                            </motion.div>
-                        )}
-
-                        {/* 2. PRODUCTS */}
-                        {activeTab === 'products' && (
-                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                                <div className="flex justify-between items-center mb-6">
-                                    <div className="flex gap-4 bg-[#151515] p-2 rounded-lg border border-white/10 w-96">
-                                        <Search className="text-gray-500" size={20} />
-                                        <input type="text" placeholder="Buscar produtos..." className="bg-transparent outline-none text-sm w-full" value={productSearch} onChange={(e) => setProductSearch(e.target.value)} />
+                                        <div className="text-3xl font-serif">{stat.value}</div>
                                     </div>
-                                    <button onClick={() => { setEditingProduct(null); setIsProductModalOpen(true); }} className="bg-accent text-white px-6 py-2 rounded-full text-xs font-bold uppercase tracking-widest flex items-center gap-2 hover:bg-accent/80">
-                                        <Plus size={16} /> Novo Produto
-                                    </button>
+                                ))}
+                            </div>
+
+                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                                <div className="lg:col-span-2 bg-[#151515] p-6 rounded-xl border border-white/5">
+                                    <h3 className="text-lg font-serif mb-6">Performance de Vendas</h3>
+                                    <div className="h-[300px]">
+                                        <ResponsiveContainer width="100%" height="100%">
+                                            <AreaChart data={salesData}>
+                                                <defs>
+                                                    <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
+                                                        <stop offset="5%" stopColor="#D4AF37" stopOpacity={0.3}/>
+                                                        <stop offset="95%" stopColor="#D4AF37" stopOpacity={0}/>
+                                                    </linearGradient>
+                                                </defs>
+                                                <XAxis dataKey="name" stroke="#555" tick={{fill: '#888'}} />
+                                                <YAxis stroke="#555" tick={{fill: '#888'}} />
+                                                <CartesianGrid strokeDasharray="3 3" stroke="#333" />
+                                                <Tooltip contentStyle={{backgroundColor: '#1a1a1a', border: '1px solid #333'}} />
+                                                <Area type="monotone" dataKey="value" stroke="#D4AF37" fillOpacity={1} fill="url(#colorSales)" />
+                                            </AreaChart>
+                                        </ResponsiveContainer>
+                                    </div>
                                 </div>
-                                <div className="bg-[#151515] rounded-xl border border-white/10 overflow-hidden">
-                                    <table className="w-full text-sm">
-                                        <thead className="bg-white/5 text-gray-400">
-                                            <tr><th className="p-4 text-left w-20">Ord.</th><th className="p-4 text-left">Produto</th><th className="p-4 text-left">Preço</th><th className="p-4 text-right">Ações</th></tr>
-                                        </thead>
-                                        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEndProducts}>
-                                            <tbody className="divide-y divide-white/5">
-                                                <SortableContext items={products.map(p => p.id)} strategy={verticalListSortingStrategy}>
-                                                    {products.filter(p => p.translations?.fr?.title?.toLowerCase().includes(productSearch.toLowerCase())).map((product, index) => (
+                                <div className="bg-[#151515] p-6 rounded-xl border border-white/5">
+                                    <h3 className="text-lg font-serif mb-6">Marketing (Brevo)</h3>
+                                    <div className="space-y-6">
+                                        <div className="p-4 bg-white/5 rounded-lg">
+                                            <div className="flex justify-between mb-2">
+                                                <span className="text-gray-400 text-sm">Newsletter</span>
+                                                <span className="text-accent font-bold">{stats.brevoSubs}</span>
+                                            </div>
+                                            <div className="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
+                                                <div className="h-full bg-accent w-[70%]"></div>
+                                            </div>
+                                        </div>
+                                        <div className="p-4 bg-white/5 rounded-lg">
+                                            <div className="flex justify-between mb-2">
+                                                <span className="text-gray-400 text-sm">Clientes</span>
+                                                <span className="text-green-500 font-bold">{stats.brevoClients}</span>
+                                            </div>
+                                            <div className="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
+                                                <div className="h-full bg-green-500 w-[45%]"></div>
+                                            </div>
+                                        </div>
+                                        <button onClick={handleSyncBrevo} className="w-full py-3 bg-blue-600/20 text-blue-400 hover:bg-blue-600/30 rounded border border-blue-600/30 flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-widest transition-colors">
+                                            <RefreshCw size={14} className={isSyncing ? "animate-spin" : ""} /> Sincronizar Agora
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {activeTab === 'products' && (
+                        <div className="space-y-6 animate-fade-in">
+                            <div className="flex justify-between items-center">
+                                <div className="relative">
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
+                                    <input 
+                                        type="text" 
+                                        placeholder="Buscar obra..." 
+                                        value={productSearch}
+                                        onChange={(e) => setProductSearch(e.target.value)}
+                                        className="bg-[#151515] border border-white/10 rounded-full pl-10 pr-4 py-2 text-sm focus:border-accent outline-none w-64"
+                                    />
+                                </div>
+                                <button onClick={() => { setEditingProduct(null); setIsProductModalOpen(true); }} className="bg-accent text-white px-6 py-2 rounded-full font-bold uppercase text-xs tracking-widest hover:bg-accent/80 flex items-center gap-2">
+                                    <Plus size={16} /> Nova Obra
+                                </button>
+                            </div>
+
+                            <div className="bg-[#151515] rounded-xl border border-white/10 overflow-hidden">
+                                <table className="w-full text-sm">
+                                    <thead className="bg-white/5 text-gray-400 uppercase text-xs font-medium">
+                                        <tr>
+                                            <th className="px-4 py-3 text-left w-16">Ord</th>
+                                            <th className="px-4 py-3 text-left">Obra</th>
+                                            <th className="px-4 py-3 text-left">Preço</th>
+                                            <th className="px-4 py-3 text-right">Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEndProducts}>
+                                        <tbody className="divide-y divide-white/5">
+                                            <SortableContext items={products.map(p => p.id)} strategy={verticalListSortingStrategy}>
+                                                {products
+                                                    .filter(p => p.translations?.fr?.title?.toLowerCase().includes(productSearch.toLowerCase()))
+                                                    .map((product, index) => (
                                                         <SortableRow 
                                                             key={product.id} 
                                                             product={product} 
                                                             index={index} 
-                                                            onEdit={(p) => { setEditingProduct(p); setIsProductModalOpen(true); }} 
-                                                            onDelete={handleDeleteProduct} 
+                                                            onEdit={(p) => { setEditingProduct(p); setIsProductModalOpen(true); }}
+                                                            onDelete={handleDeleteProduct}
                                                         />
                                                     ))}
-                                                </SortableContext>
-                                            </tbody>
-                                        </DndContext>
-                                    </table>
-                                </div>
-                            </motion.div>
-                        )}
-                        
-                        {/* 3. CRM */}
-                        {activeTab === 'crm' && (
-                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                                {loadingContacts ? <div className="text-center py-20 flex flex-col items-center"><Loader2 className="animate-spin mb-4" /> Carregando...</div> : (
-                                    <div className="bg-[#151515] rounded-xl border border-white/10 overflow-hidden">
-                                        <div className="p-4 border-b border-white/10 flex justify-between items-center">
-                                            <div className="flex items-center gap-4">
-                                                <h3 className="font-serif text-lg">Contatos Brevo</h3>
-                                                <span className="bg-green-500/10 text-green-500 text-xs px-2 py-1 rounded">Listas 5 & 7</span>
-                                            </div>
-                                            <div className="flex gap-3">
-                                                <button onClick={handleSyncBrevo} disabled={isSyncing} className="flex items-center gap-2 bg-white/10 text-white px-4 py-2 rounded text-xs uppercase font-bold hover:bg-white/20 disabled:opacity-50">
-                                                    <RefreshCw size={14} className={isSyncing ? "animate-spin" : ""} /> Sync Firestore
-                                                </button>
-                                                <a href="https://app.brevo.com" target="_blank" className="text-accent text-xs uppercase font-bold hover:underline flex items-center gap-1">
-                                                    Dashboard Externo <Globe size={12}/>
-                                                </a>
-                                            </div>
-                                        </div>
-                                        <table className="w-full text-sm">
-                                            <thead className="bg-white/5 text-gray-400">
-                                                <tr><th className="p-4 text-left">Email</th><th className="p-4 text-left">Nome</th><th className="p-4 text-left">Status</th><th className="p-4 text-right">Data</th></tr>
-                                            </thead>
-                                            <tbody className="divide-y divide-white/5">
-                                                {brevoContacts.map((c) => (
-                                                    <tr key={c.id} className="hover:bg-white/5">
-                                                        <td className="p-4">{c.email}</td>
-                                                        <td className="p-4">{c.attributes.FIRSTNAME} {c.attributes.NOME}</td>
-                                                        <td className="p-4"><span className={cn("px-2 py-1 rounded text-[10px]", c.emailBlacklisted ? "bg-red-500/20 text-red-500" : "bg-green-500/20 text-green-500")}>{c.emailBlacklisted ? 'Blacklisted' : 'Ativo'}</span></td>
-                                                        <td className="p-4 text-right">{new Date(c.createdAt).toLocaleDateString()}</td>
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
+                                            </SortableContext>
+                                        </tbody>
+                                    </DndContext>
+                                </table>
+                                {products.length === 0 && (
+                                    <div className="p-8 text-center text-gray-500">
+                                        Nenhum produto encontrado. Vá em Configurações > Seed para adicionar exemplos.
                                     </div>
                                 )}
-                            </motion.div>
-                        )}
-
-                        {/* 4. CHATBOT IA */}
-                        {activeTab === 'chatbot' && chatConfig && (
-                             <motion.div className="space-y-6" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                    <div className="bg-[#151515] p-6 rounded-xl border border-white/10 space-y-4">
-                                        <h3 className="font-serif text-lg text-accent mb-4">Cérebro da IA (System Prompt)</h3>
-                                        <textarea 
-                                            value={chatConfig.systemPrompt}
-                                            onChange={(e) => setChatConfig({...chatConfig, systemPrompt: e.target.value})}
-                                            className="w-full h-48 bg-black/30 border border-white/10 rounded p-3 text-sm focus:border-accent outline-none text-white/80"
-                                            placeholder="Instruções do sistema..."
-                                        />
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div>
-                                                <label className="text-xs uppercase text-gray-500">Temperatura</label>
-                                                <input type="range" min="0" max="1" step="0.1" value={chatConfig.modelTemperature} onChange={e => setChatConfig({...chatConfig, modelTemperature: parseFloat(e.target.value)})} className="w-full mt-2" />
-                                                <div className="text-right text-xs text-accent">{chatConfig.modelTemperature}</div>
-                                            </div>
-                                            <div>
-                                                 <label className="text-xs uppercase text-gray-500">Rate Limit (0=Ilimitado)</label>
-                                                 <div className="flex gap-2 mt-1">
-                                                     <input type="number" value={chatConfig.rateLimit?.maxMessages} onChange={e => setChatConfig({...chatConfig, rateLimit: {...chatConfig.rateLimit, maxMessages: parseInt(e.target.value)}})} className="w-1/2 bg-black/30 border border-white/10 rounded p-2 text-sm text-white" />
-                                                     <input type="number" value={chatConfig.rateLimit?.windowMinutes} onChange={e => setChatConfig({...chatConfig, rateLimit: {...chatConfig.rateLimit, windowMinutes: parseInt(e.target.value)}})} className="w-1/2 bg-black/30 border border-white/10 rounded p-2 text-sm text-white" />
-                                                 </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div className="bg-[#151515] p-6 rounded-xl border border-white/10">
-                                        <div className="flex justify-between items-center mb-4">
-                                            <h3 className="font-serif text-lg text-accent">Prompt Starters (Drag & Drop)</h3>
-                                            <button onClick={() => setChatConfig({...chatConfig, starters: [...chatConfig.starters, { id: Date.now().toString(), label: 'Nova', text: '', order: chatConfig.starters.length + 1 }]})} className="text-xs bg-white/10 p-1 rounded hover:bg-white/20"><Plus size={14}/></button>
-                                        </div>
-                                        
-                                        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEndStarters}>
-                                            <SortableContext items={chatConfig.starters.map(s => s.id)} strategy={verticalListSortingStrategy}>
-                                                {chatConfig.starters.map((starter, idx) => (
-                                                    <SortableStarter 
-                                                        key={starter.id} 
-                                                        starter={starter} 
-                                                        onChange={(s) => {
-                                                            const newS = [...chatConfig.starters];
-                                                            const idx = newS.findIndex(x => x.id === s.id);
-                                                            newS[idx] = s;
-                                                            setChatConfig({...chatConfig, starters: newS});
-                                                        }}
-                                                        onDelete={(id) => setChatConfig({...chatConfig, starters: chatConfig.starters.filter(s => s.id !== id)})}
-                                                    />
-                                                ))}
-                                            </SortableContext>
-                                        </DndContext>
-                                    </div>
-                                </div>
-
-                                <div className="flex justify-end">
-                                    <button 
-                                        onClick={handleSaveChatConfig} 
-                                        disabled={isSavingChat} 
-                                        className="bg-accent text-white px-8 py-3 rounded font-bold uppercase tracking-widest text-xs hover:bg-accent/80 flex items-center gap-2 shadow-lg hover:shadow-accent/20 transition-all disabled:opacity-50"
-                                    >
-                                        {isSavingChat ? <Loader2 size={16} className="animate-spin" /> : <Save size={16}/>} 
-                                        {isSavingChat ? 'Salvando...' : 'Salvar Configurações'}
-                                    </button>
-                                </div>
-
-                                <div className="bg-[#151515] rounded-xl border border-white/10 overflow-hidden">
-                                    <div className="p-4 border-b border-white/10 bg-red-500/5">
-                                        <h3 className="font-serif text-lg text-red-400 flex items-center gap-2"><AlertCircle size={18}/> Feedback Negativo</h3>
-                                    </div>
-                                    <table className="w-full text-sm">
-                                        <thead className="bg-white/5 text-gray-400">
-                                            <tr><th className="p-4 text-left">Pergunta</th><th className="p-4 text-left">Resposta da IA</th><th className="p-4 text-right">Ação</th></tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-white/5">
-                                            {feedbackList.length === 0 ? (
-                                                <tr><td colSpan={3} className="p-8 text-center text-gray-500">Nenhum feedback negativo pendente.</td></tr>
-                                            ) : feedbackList.map(f => (
-                                                <tr key={f.id} className="hover:bg-white/5">
-                                                    <td className="p-4 max-w-xs truncate" title={f.userMessage}>{f.userMessage}</td>
-                                                    <td className="p-4 max-w-xs truncate text-gray-400" title={f.aiResponse}>{f.aiResponse}</td>
-                                                    <td className="p-4 text-right">
-                                                        <button onClick={() => setShowFeedbackModal(f)} className="bg-white/10 hover:bg-accent hover:text-white px-3 py-1 rounded text-xs uppercase font-bold transition-colors">Corrigir</button>
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                             </motion.div>
-                        )}
-
-                        {/* 5. SETTINGS / SEED */}
-                        {activeTab === 'settings' && (
-                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="max-w-3xl space-y-8">
-                                <div className="bg-[#151515] border border-red-900/30 p-8 rounded-xl shadow-lg relative overflow-hidden">
-                                    <div className="absolute top-0 right-0 w-32 h-32 bg-red-500/5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2"></div>
-                                    
-                                    <h3 className="text-xl font-serif text-white mb-2 flex items-center gap-2">
-                                        <Database size={24} className="text-red-500" /> 
-                                        Popular Banco de Dados
-                                    </h3>
-                                    <p className="text-gray-400 text-sm mb-6 max-w-lg">
-                                        Use esta ferramenta para gerar dados de exemplo (Seed) para o catálogo. Isso é útil para alinhar o que você vê no Admin com o que aparece no site público.
-                                    </p>
-
-                                    <div className="bg-black/30 p-4 rounded-lg border border-red-500/20 mb-8 flex gap-4 items-start">
-                                        <AlertTriangle className="text-yellow-500 shrink-0" size={20} />
-                                        <div className="text-xs text-gray-300">
-                                            <strong className="block text-yellow-500 mb-1 uppercase tracking-wider">Atenção</strong>
-                                            Esta ação irá adicionar cerca 8 produtos de luxo fictícios, com imagens e traduções completas. Se você escolher "Limpar Tudo", todos os produtos atuais serão deletados permanentemente.
-                                        </div>
-                                    </div>
-
-                                    <div className="flex flex-wrap gap-4">
-                                        <button 
-                                            onClick={() => handleSeedDatabase(false)} 
-                                            disabled={isSeeding}
-                                            className="bg-white/10 hover:bg-white/20 text-white px-6 py-3 rounded font-bold uppercase tracking-widest text-xs flex items-center gap-2 transition-all"
-                                        >
-                                            {isSeeding ? <Loader2 className="animate-spin" size={16}/> : <Plus size={16}/>}
-                                            Adicionar Exemplos
-                                        </button>
-
-                                        <button 
-                                            onClick={() => handleSeedDatabase(true)} 
-                                            disabled={isSeeding}
-                                            className="bg-red-600/20 hover:bg-red-600 hover:text-white text-red-500 px-6 py-3 rounded font-bold uppercase tracking-widest text-xs flex items-center gap-2 transition-all border border-red-600/30"
-                                        >
-                                            {isSeeding ? <Loader2 className="animate-spin" size={16}/> : <Trash2 size={16}/>}
-                                            Limpar Tudo & Popular
-                                        </button>
-                                    </div>
-                                </div>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-                </div>
-            </div>
-
-            {/* PRODUCT FORM MODAL - REPLACED WITH NEW COMPONENT */}
-            <AnimatePresence>
-                {isProductModalOpen && (
-                    <ProductForm 
-                        initialData={editingProduct} 
-                        onClose={() => setIsProductModalOpen(false)}
-                        onSuccess={() => {
-                            setIsProductModalOpen(false);
-                            setEditingProduct(null);
-                        }}
-                    />
-                )}
-            </AnimatePresence>
-
-            {/* FEEDBACK FIX MODAL */}
-            <AnimatePresence>
-                {showFeedbackModal && (
-                    <motion.div 
-                        className="fixed inset-0 z-[110] bg-black/90 backdrop-blur-xl flex items-center justify-center p-4" 
-                        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                    >
-                        <div className="w-full max-w-lg bg-[#121212] border border-white/10 rounded-2xl p-8">
-                            <h2 className="text-2xl font-serif mb-4 text-accent">Corrigir Conhecimento</h2>
-                            <p className="text-gray-400 text-sm mb-4">
-                                O usuário perguntou: <span className="text-white italic">"{showFeedbackModal.userMessage}"</span>
-                                <br/>A IA respondeu: <span className="text-red-400 italic">"{showFeedbackModal.aiResponse}"</span>
-                            </p>
-                            
-                            <label className="block text-xs uppercase text-gray-500 mb-2">Qual a resposta correta?</label>
-                            <textarea 
-                                className="w-full bg-black/30 border border-white/10 rounded p-3 text-sm h-32 focus:border-accent outline-none text-white"
-                                value={fixAnswer}
-                                onChange={(e) => setFixAnswer(e.target.value)}
-                                placeholder="Digite a informação correta para a IA aprender..."
-                            />
-                            
-                            <div className="mt-6 flex justify-end gap-4">
-                                <button onClick={() => setShowFeedbackModal(null)} className="px-6 py-2 border border-white/10 rounded">Cancelar</button>
-                                <button onClick={handleResolveFeedback} className="bg-accent text-white px-6 py-2 rounded font-bold">Salvar & Ensinar</button>
                             </div>
                         </div>
-                    </motion.div>
+                    )}
+
+                    {activeTab === 'crm' && (
+                        <div className="space-y-6 animate-fade-in">
+                             <div className="flex justify-between items-center bg-[#151515] p-6 rounded-xl border border-white/10">
+                                <div>
+                                    <h3 className="text-xl font-serif">Contatos Brevo</h3>
+                                    <p className="text-gray-500 text-sm">Sincronizado com lista de Newsletter e Clientes.</p>
+                                </div>
+                                <button onClick={handleSyncBrevo} disabled={isSyncing} className="bg-white/10 hover:bg-white/20 px-4 py-2 rounded flex items-center gap-2 text-sm transition-colors">
+                                    <RefreshCw size={16} className={isSyncing ? "animate-spin" : ""} /> Refresh
+                                </button>
+                            </div>
+
+                            {loadingContacts ? (
+                                <div className="flex justify-center p-12"><Loader2 className="animate-spin text-accent" size={32} /></div>
+                            ) : (
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    {brevoContacts.map(contact => (
+                                        <div key={contact.id} className="bg-[#151515] p-4 rounded-lg border border-white/5 flex items-center justify-between group hover:border-white/20 transition-all">
+                                            <div>
+                                                <div className="font-bold text-white">{contact.email}</div>
+                                                <div className="text-xs text-gray-500 mt-1">
+                                                    Adicionado: {new Date(contact.createdAt).toLocaleDateString()}
+                                                </div>
+                                            </div>
+                                            <div className="text-xs bg-green-900/30 text-green-400 px-2 py-1 rounded border border-green-500/20">
+                                                Ativo
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {activeTab === 'chatbot' && chatConfig && (
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-fade-in">
+                            {/* CONFIG */}
+                            <div className="bg-[#151515] p-6 rounded-xl border border-white/10 space-y-6">
+                                <h3 className="text-lg font-serif border-b border-white/10 pb-4 mb-4">Personalidade da IA</h3>
+                                <div>
+                                    <label className="block text-xs uppercase text-gray-500 mb-2">System Prompt (Instruções)</label>
+                                    <textarea 
+                                        value={chatConfig.systemPrompt}
+                                        onChange={e => setChatConfig({...chatConfig, systemPrompt: e.target.value})}
+                                        rows={12}
+                                        className="w-full bg-black/30 border border-white/10 rounded p-4 text-sm text-gray-300 focus:border-accent focus:outline-none leading-relaxed"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs uppercase text-gray-500 mb-2">Criatividade (Temperatura: {chatConfig.modelTemperature})</label>
+                                    <input 
+                                        type="range" min="0" max="1" step="0.1"
+                                        value={chatConfig.modelTemperature}
+                                        onChange={e => setChatConfig({...chatConfig, modelTemperature: parseFloat(e.target.value)})}
+                                        className="w-full accent-accent"
+                                    />
+                                </div>
+                                
+                                <div>
+                                    <div className="flex justify-between items-center mb-2">
+                                        <label className="block text-xs uppercase text-gray-500">Sugestões Iniciais (Starters)</label>
+                                        <button 
+                                            onClick={() => setChatConfig({
+                                                ...chatConfig, 
+                                                starters: [...chatConfig.starters, { id: Date.now().toString(), label: 'Nova', text: '', order: chatConfig.starters.length }]
+                                            })}
+                                            className="text-xs text-accent hover:underline"
+                                        >
+                                            + Adicionar
+                                        </button>
+                                    </div>
+                                    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEndStarters}>
+                                        <SortableContext items={chatConfig.starters.map(s => s.id)} strategy={verticalListSortingStrategy}>
+                                            {chatConfig.starters.map((starter) => (
+                                                <SortableStarter 
+                                                    key={starter.id} 
+                                                    starter={starter} 
+                                                    onChange={(updated) => setChatConfig({...chatConfig, starters: chatConfig.starters.map(s => s.id === updated.id ? updated : s)})}
+                                                    onDelete={(id) => setChatConfig({...chatConfig, starters: chatConfig.starters.filter(s => s.id !== id)})}
+                                                />
+                                            ))}
+                                        </SortableContext>
+                                    </DndContext>
+                                </div>
+
+                                <button onClick={handleSaveChatConfig} disabled={isSavingChat} className="w-full py-3 bg-accent text-white rounded font-bold uppercase tracking-widest text-xs hover:bg-accent/80 flex justify-center gap-2">
+                                    {isSavingChat ? <Loader2 className="animate-spin" size={16}/> : <Save size={16}/>} Salvar Configurações
+                                </button>
+                            </div>
+
+                            {/* FEEDBACK LOOP */}
+                            <div className="space-y-6">
+                                <div className="bg-[#151515] p-6 rounded-xl border border-white/10 h-full">
+                                    <h3 className="text-lg font-serif border-b border-white/10 pb-4 mb-4 flex items-center gap-2">
+                                        <AlertCircle size={18} className="text-red-500"/>
+                                        Feedback Negativo (Aprendizado)
+                                    </h3>
+                                    <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2">
+                                        {feedbackList.length === 0 ? (
+                                            <p className="text-gray-500 text-sm italic">Nenhum feedback negativo pendente.</p>
+                                        ) : (
+                                            feedbackList.map(item => (
+                                                <div key={item.id} className="bg-black/20 p-4 rounded border border-white/5 hover:border-red-500/30 transition-colors">
+                                                    <div className="mb-2">
+                                                        <span className="text-xs text-gray-500">Usuário perguntou:</span>
+                                                        <p className="text-white text-sm font-medium">"{item.userMessage}"</p>
+                                                    </div>
+                                                    <div className="mb-3 pl-2 border-l-2 border-red-500/20">
+                                                        <span className="text-xs text-gray-500">IA respondeu:</span>
+                                                        <p className="text-gray-400 text-xs italic">"{item.aiResponse}"</p>
+                                                    </div>
+                                                    <button 
+                                                        onClick={() => setShowFeedbackModal(item)}
+                                                        className="w-full py-2 bg-white/5 hover:bg-white/10 text-xs uppercase tracking-wide rounded text-gray-300"
+                                                    >
+                                                        Ensinar Resposta Correta
+                                                    </button>
+                                                </div>
+                                            ))
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {activeTab === 'settings' && (
+                        <div className="space-y-8 animate-fade-in max-w-4xl mx-auto">
+                            <div className="bg-[#151515] p-8 rounded-xl border border-white/10">
+                                <h3 className="text-xl font-serif mb-6 flex items-center gap-3">
+                                    <Database className="text-accent" />
+                                    Gerenciamento de Dados (Seed)
+                                </h3>
+                                
+                                <div className="bg-yellow-500/10 border border-yellow-500/20 p-4 rounded-lg mb-8 flex gap-4">
+                                    <AlertTriangle className="text-yellow-500 flex-shrink-0" />
+                                    <div className="text-sm text-yellow-200/80">
+                                        <strong className="block text-yellow-500 mb-1">Atenção: Área Sensível</strong>
+                                        Use estas ferramentas para popular o banco de dados com produtos de exemplo. 
+                                        Ideal para testes ou reiniciar o catálogo.
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="p-6 border border-white/10 rounded-lg hover:bg-white/5 transition-colors">
+                                        <h4 className="font-bold text-white mb-2">Adicionar Exemplos</h4>
+                                        <p className="text-sm text-gray-500 mb-6">
+                                            Adiciona 8 produtos de luxo (Pinturas, Esculturas, Joias) sem apagar os existentes.
+                                        </p>
+                                        <button 
+                                            onClick={() => handleSeedDatabase(false)}
+                                            disabled={isSeeding}
+                                            className="w-full py-3 bg-white/10 hover:bg-white/20 text-white rounded font-bold uppercase text-xs tracking-widest flex items-center justify-center gap-2"
+                                        >
+                                            {isSeeding ? <Loader2 className="animate-spin" size={16}/> : <Plus size={16}/>}
+                                            Adicionar Obras
+                                        </button>
+                                    </div>
+
+                                    <div className="p-6 border border-red-900/30 bg-red-900/5 rounded-lg hover:bg-red-900/10 transition-colors">
+                                        <h4 className="font-bold text-red-500 mb-2">Resetar Catálogo Completo</h4>
+                                        <p className="text-sm text-gray-500 mb-6">
+                                            ⚠️ APAGA todos os produtos atuais e recria o catálogo do zero com os exemplos.
+                                        </p>
+                                        <button 
+                                            onClick={() => handleSeedDatabase(true)}
+                                            disabled={isSeeding}
+                                            className="w-full py-3 bg-red-600 hover:bg-red-700 text-white rounded font-bold uppercase text-xs tracking-widest flex items-center justify-center gap-2"
+                                        >
+                                            {isSeeding ? <Loader2 className="animate-spin" size={16}/> : <Trash2 size={16}/>}
+                                            Resetar & Popular
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </main>
+            </div>
+            
+            {/* PRODUCT MODAL */}
+            {isProductModalOpen && (
+                <ProductForm 
+                    initialData={editingProduct} 
+                    onClose={() => setIsProductModalOpen(false)}
+                    onSuccess={() => { setIsProductModalOpen(false); setEditingProduct(null); }}
+                />
+            )}
+
+            {/* FEEDBACK TEACHING MODAL */}
+            <AnimatePresence>
+                {showFeedbackModal && (
+                    <div className="fixed inset-0 z-[110] bg-black/80 backdrop-blur flex items-center justify-center p-4">
+                        <motion.div 
+                            className="bg-[#151515] p-8 rounded-xl max-w-lg w-full border border-white/10 shadow-2xl"
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.9, opacity: 0 }}
+                        >
+                            <h3 className="text-xl font-serif mb-4">Ensinar o Chatbot</h3>
+                            <div className="bg-black/30 p-4 rounded mb-4 text-sm text-gray-400">
+                                <p className="mb-2"><strong>Pergunta:</strong> {showFeedbackModal.userMessage}</p>
+                                <p><strong>Resposta Ruim:</strong> {showFeedbackModal.aiResponse}</p>
+                            </div>
+                            <div className="mb-6">
+                                <label className="block text-xs uppercase text-gray-500 mb-2">Qual seria a resposta correta?</label>
+                                <textarea 
+                                    value={fixAnswer}
+                                    onChange={e => setFixAnswer(e.target.value)}
+                                    className="w-full bg-black/50 border border-white/10 rounded p-4 text-white focus:border-accent outline-none"
+                                    rows={4}
+                                    placeholder="Escreva a informação correta aqui..."
+                                />
+                            </div>
+                            <div className="flex gap-4">
+                                <button onClick={() => setShowFeedbackModal(null)} className="flex-1 py-3 text-gray-400 hover:text-white transition-colors">Cancelar</button>
+                                <button onClick={handleResolveFeedback} className="flex-1 py-3 bg-accent text-white font-bold rounded hover:bg-accent/80">Salvar Conhecimento</button>
+                            </div>
+                        </motion.div>
+                    </div>
                 )}
             </AnimatePresence>
         </div>
