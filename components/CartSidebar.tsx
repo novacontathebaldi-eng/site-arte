@@ -56,17 +56,21 @@ export const CartSidebar: React.FC = () => {
           <motion.div
             className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[60]"
             onClick={closeCart}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            {...({
+                initial: { opacity: 0 },
+                animate: { opacity: 1 },
+                exit: { opacity: 0 }
+            } as any)}
           />
           
           {/* Glass Sidebar */}
           <motion.div
             className="fixed top-0 right-0 h-full w-full sm:w-[480px] bg-white/90 dark:bg-black/90 backdrop-blur-2xl border-l border-white/20 z-[70] shadow-2xl flex flex-col"
-            initial={{ x: '100%' }}
-            animate={{ x: 0, transition: { type: 'spring', damping: 25, stiffness: 300 } }}
-            exit={{ x: '100%', transition: { type: 'spring', damping: 25, stiffness: 300 } }}
+            {...({
+                initial: { x: '100%' },
+                animate: { x: 0, transition: { type: 'spring', damping: 25, stiffness: 300 } },
+                exit: { x: '100%', transition: { type: 'spring', damping: 25, stiffness: 300 } }
+            } as any)}
           >
             {isCheckoutSuccess ? (
                 // SUCCESS VIEW
@@ -74,9 +78,11 @@ export const CartSidebar: React.FC = () => {
                     <SuccessCheck size={120} className="mb-8" />
                     
                     <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.8, duration: 0.6 }}
+                        {...({
+                            initial: { opacity: 0, y: 20 },
+                            animate: { opacity: 1, y: 0 },
+                            transition: { delay: 0.8, duration: 0.6 }
+                        } as any)}
                     >
                         <h2 className="font-serif text-3xl font-bold text-primary dark:text-white mb-2">
                             Pedido Confirmado
@@ -139,10 +145,12 @@ export const CartSidebar: React.FC = () => {
                                     <motion.div 
                                         key={item.id}
                                         className="flex gap-4 group"
-                                        layout
-                                        initial={{ opacity: 0, y: 20 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        exit={{ opacity: 0, x: -100 }}
+                                        {...({
+                                            layout: true,
+                                            initial: { opacity: 0, y: 20 },
+                                            animate: { opacity: 1, y: 0 },
+                                            exit: { opacity: 0, x: -100 }
+                                        } as any)}
                                     >
                                         {/* Thumbnail */}
                                         <div className="relative w-24 h-24 rounded-lg overflow-hidden flex-shrink-0 shadow-sm bg-gray-100 dark:bg-white/5">

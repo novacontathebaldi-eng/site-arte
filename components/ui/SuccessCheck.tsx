@@ -12,13 +12,15 @@ export const SuccessCheck: React.FC<SuccessCheckProps> = ({ size = 80, className
   return (
     <div className={`flex flex-col items-center justify-center ${className}`}>
       <motion.div
-        initial={{ opacity: 0, scale: 0.9 }} // Scale 0.9 para ser "leve" e elegante, não um "pop" cartunesco
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ 
-            duration: 0.6, 
-            ease: "easeOut",
-            delay: delay 
-        }}
+        {...({
+            initial: { opacity: 0, scale: 0.9 },
+            animate: { opacity: 1, scale: 1 },
+            transition: { 
+                duration: 0.6, 
+                ease: "easeOut",
+                delay: delay 
+            }
+        } as any)}
       >
         <motion.svg
             width={size}
@@ -34,13 +36,15 @@ export const SuccessCheck: React.FC<SuccessCheckProps> = ({ size = 80, className
             fill="none"
             stroke="#D4AF37" // Luxury Gold
             strokeWidth="1.5"
-            initial={{ pathLength: 0, opacity: 0, rotate: -90 }}
-            animate={{ pathLength: 1, opacity: 1, rotate: 0 }}
-            transition={{ 
-                duration: 0.8, 
-                ease: "easeInOut",
-                delay: delay + 0.1 
-            }}
+            {...({
+                initial: { pathLength: 0, opacity: 0, rotate: -90 },
+                animate: { pathLength: 1, opacity: 1, rotate: 0 },
+                transition: { 
+                    duration: 0.8, 
+                    ease: "easeInOut",
+                    delay: delay + 0.1 
+                }
+            } as any)}
             />
             
             {/* Checkmark */}
@@ -51,13 +55,15 @@ export const SuccessCheck: React.FC<SuccessCheckProps> = ({ size = 80, className
             strokeWidth="2" // Traço fino
             strokeLinecap="round"
             strokeLinejoin="round"
-            initial={{ pathLength: 0, opacity: 0 }}
-            animate={{ pathLength: 1, opacity: 1 }}
-            transition={{ 
-                duration: 0.8, 
-                ease: "easeOut", 
-                delay: delay + 0.5 // Sincronia perfeita com o círculo
-            }}
+            {...({
+                initial: { pathLength: 0, opacity: 0 },
+                animate: { pathLength: 1, opacity: 1 },
+                transition: { 
+                    duration: 0.8, 
+                    ease: "easeOut", 
+                    delay: delay + 0.5 
+                }
+            } as any)}
             />
         </motion.svg>
       </motion.div>

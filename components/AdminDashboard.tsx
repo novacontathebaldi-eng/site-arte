@@ -291,7 +291,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
             {/* SIDEBAR */}
             <motion.div 
                 className="w-20 md:w-64 bg-[#121212] border-r border-white/10 flex flex-col items-center md:items-stretch py-8"
-                initial={{ x: -100 }} animate={{ x: 0 }}
+                {...({
+                    initial: { x: -100 },
+                    animate: { x: 0 }
+                } as any)}
             >
                 <div className="mb-12 text-center">
                     <div className="w-10 h-10 bg-red-600 rounded-lg mx-auto flex items-center justify-center text-white shadow-red-500/20 shadow-lg">
@@ -330,7 +333,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
                         
                         {/* 1. ANALYTICS */}
                         {activeTab === 'analytics' && (
-                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8">
+                            <motion.div 
+                                className="space-y-8"
+                                {...({
+                                    initial: { opacity: 0 },
+                                    animate: { opacity: 1 }
+                                } as any)}
+                            >
                                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                                     {[
                                         { label: 'Vendas Hoje', value: `€ ${stats.salesToday}`, icon: DollarSign, trend: '+12%', color: '#10B981' },
@@ -371,7 +380,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
 
                         {/* 2. PRODUCTS (Drag & Drop) */}
                         {activeTab === 'products' && (
-                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                            <motion.div 
+                                {...({
+                                    initial: { opacity: 0 },
+                                    animate: { opacity: 1 }
+                                } as any)}
+                            >
                                 <div className="flex justify-between items-center mb-6">
                                     <div className="flex gap-4 bg-[#151515] p-2 rounded-lg border border-white/10 w-96">
                                         <Search className="text-gray-500" size={20} />
@@ -408,7 +422,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
                         
                         {/* 3. CRM */}
                         {activeTab === 'crm' && (
-                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                            <motion.div 
+                                {...({
+                                    initial: { opacity: 0 },
+                                    animate: { opacity: 1 }
+                                } as any)}
+                            >
                                 {loadingContacts ? <div className="text-center py-20">Carregando contatos do Brevo...</div> : (
                                     <div className="bg-[#151515] rounded-xl border border-white/10 overflow-hidden">
                                         <div className="p-4 border-b border-white/10 flex justify-between items-center">
@@ -447,7 +466,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
 
                         {/* 4. CHATBOT IA */}
                         {activeTab === 'chatbot' && chatConfig && (
-                             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+                             <motion.div 
+                                className="space-y-6"
+                                {...({
+                                    initial: { opacity: 0 },
+                                    animate: { opacity: 1 }
+                                } as any)}
+                             >
                                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                                     {/* Configs */}
                                     <div className="bg-[#151515] p-6 rounded-xl border border-white/10 space-y-4">
@@ -465,7 +490,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
                                                 <div className="text-right text-xs">{chatConfig.modelTemperature}</div>
                                             </div>
                                             <div>
-                                                 <label className="text-xs uppercase text-gray-500">Rate Limit (Config Segurança)</label>
+                                                 <label className="text-xs uppercase text-gray-500">Rate Limit (0 = Ilimitado)</label>
                                                  <div className="flex gap-2 mt-1">
                                                      <input type="number" placeholder="Msgs" value={chatConfig.rateLimit?.maxMessages || 20} onChange={e => setChatConfig({...chatConfig, rateLimit: {...(chatConfig.rateLimit || { windowMinutes: 5 }), maxMessages: parseInt(e.target.value)}})} className="w-1/2 bg-black/30 border border-white/10 rounded p-2 text-sm" />
                                                      <input type="number" placeholder="Mins" value={chatConfig.rateLimit?.windowMinutes || 5} onChange={e => setChatConfig({...chatConfig, rateLimit: {...(chatConfig.rateLimit || { maxMessages: 20 }), windowMinutes: parseInt(e.target.value)}})} className="w-1/2 bg-black/30 border border-white/10 rounded p-2 text-sm" />
@@ -540,7 +565,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
             {/* PRODUCT MODAL */}
             <AnimatePresence>
                 {isProductModalOpen && editingProduct && (
-                    <motion.div className="fixed inset-0 z-[110] bg-black/90 backdrop-blur-xl flex items-center justify-center p-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                    <motion.div 
+                        className="fixed inset-0 z-[110] bg-black/90 backdrop-blur-xl flex items-center justify-center p-4" 
+                        {...({
+                            initial: { opacity: 0 },
+                            animate: { opacity: 1 },
+                            exit: { opacity: 0 }
+                        } as any)}
+                    >
                         <div className="w-full max-w-4xl bg-[#121212] border border-white/10 rounded-2xl p-8 overflow-y-auto max-h-[90vh]">
                             <h2 className="text-2xl font-serif mb-6">Editar Produto</h2>
                             <div className="grid grid-cols-2 gap-6">
@@ -576,7 +608,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
             {/* FEEDBACK FIX MODAL */}
             <AnimatePresence>
                 {showFeedbackModal && (
-                    <motion.div className="fixed inset-0 z-[110] bg-black/90 backdrop-blur-xl flex items-center justify-center p-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                    <motion.div 
+                        className="fixed inset-0 z-[110] bg-black/90 backdrop-blur-xl flex items-center justify-center p-4" 
+                        {...({
+                            initial: { opacity: 0 },
+                            animate: { opacity: 1 },
+                            exit: { opacity: 0 }
+                        } as any)}
+                    >
                         <div className="w-full max-w-lg bg-[#121212] border border-white/10 rounded-2xl p-8">
                             <h2 className="text-2xl font-serif mb-4 text-accent">Corrigir Conhecimento</h2>
                             <p className="text-gray-400 text-sm mb-4">

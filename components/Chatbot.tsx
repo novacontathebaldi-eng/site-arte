@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageCircle, X, Send, Loader2, Sparkles, ThumbsUp, ThumbsDown, Copy, Minimize2 } from 'lucide-react';
@@ -222,8 +223,10 @@ export const Chatbot: React.FC = () => {
                 {messages.map((msg) => (
                     <motion.div 
                         key={msg.id} 
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
+                        {...({
+                            initial: { opacity: 0, y: 10 },
+                            animate: { opacity: 1, y: 0 }
+                        } as any)}
                         className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}
                     >
                         {/* Bubble */}

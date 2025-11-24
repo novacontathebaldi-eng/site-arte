@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, LayoutDashboard, Package, Heart, LogOut, MapPin, User, Plus, Edit, Save, Trash2, Phone, Globe, CheckCircle, Loader2 } from 'lucide-react';
@@ -253,10 +254,12 @@ export const Dashboard: React.FC = () => {
             {showContent && (
                 <motion.div 
                     className="fixed inset-0 z-[100] flex bg-[#0a0a0a] text-white"
-                    initial={{ opacity: 0, scale: 0.96, filter: "blur(10px)" }}
-                    animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
-                    exit={{ opacity: 0, scale: 1.02, filter: "blur(10px)" }}
-                    transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }} // Custom Apple-like ease
+                    {...({
+                        initial: { opacity: 0, scale: 0.96, filter: "blur(10px)" },
+                        animate: { opacity: 1, scale: 1, filter: "blur(0px)" },
+                        exit: { opacity: 0, scale: 1.02, filter: "blur(10px)" },
+                        transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] }
+                    } as any)}
                 >
                     {/* Background Texture/Gradient */}
                     <div className="absolute inset-0 bg-gradient-to-br from-[#121212] via-[#0a0a0a] to-black pointer-events-none" />
@@ -321,10 +324,12 @@ export const Dashboard: React.FC = () => {
                                 <motion.div
                                     key={activeTab}
                                     className="max-w-6xl mx-auto pb-24"
-                                    initial={{ opacity: 0, y: 30 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: -20 }}
-                                    transition={{ duration: 0.4 }}
+                                    {...({
+                                        initial: { opacity: 0, y: 30 },
+                                        animate: { opacity: 1, y: 0 },
+                                        exit: { opacity: 0, y: -20 },
+                                        transition: { duration: 0.4 }
+                                    } as any)}
                                 >
                                     {/* --- OVERVIEW --- */}
                                     {activeTab === 'overview' && (
@@ -520,8 +525,10 @@ export const Dashboard: React.FC = () => {
                                             ) : (
                                                 <motion.div 
                                                     className="bg-[#151515] p-10 rounded-3xl border border-white/10 max-w-2xl mx-auto"
-                                                    initial={{ opacity: 0, scale: 0.95 }}
-                                                    animate={{ opacity: 1, scale: 1 }}
+                                                    {...({
+                                                        initial: { opacity: 0, scale: 0.95 },
+                                                        animate: { opacity: 1, scale: 1 }
+                                                    } as any)}
                                                 >
                                                     <div className="flex justify-between items-center mb-8 pb-6 border-b border-white/10">
                                                         <h3 className="text-white font-serif text-2xl">

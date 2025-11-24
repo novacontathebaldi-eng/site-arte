@@ -1,6 +1,6 @@
 'use server';
 
-import { GoogleGenAI, FunctionDeclaration, Tool, SchemaType } from "@google/genai";
+import { GoogleGenAI, Type, FunctionDeclaration, Tool } from "@google/genai";
 import { getCollection, createDocument } from "@/lib/firebase/firestore";
 import { registerClientToBrevo } from "./registerClient";
 import { Product } from "@/types";
@@ -11,17 +11,17 @@ import { headers } from "next/headers";
 
 const API_KEY = process.env.GEMINI_API_KEY;
 
-// --- 1. TOOL DEFINITIONS ---
+// --- 1. TOOL DEFINITIONS (UPDATED FOR @google/genai) ---
 
 const searchProductsTool: FunctionDeclaration = {
   name: "searchProducts",
   description: "Search for artworks in the catalog based on keywords, category, or price range. Use this when the user asks for suggestions or specific art.",
   parameters: {
-    type: SchemaType.OBJECT,
+    type: Type.OBJECT,
     properties: {
-      query: { type: SchemaType.STRING, description: "Keywords like 'abstract', 'blue', 'gold', 'calm'" },
-      category: { type: SchemaType.STRING, description: "Category filter (paintings, sculptures, digital, etc)" },
-      maxPrice: { type: SchemaType.NUMBER, description: "Maximum price budget" }
+      query: { type: Type.STRING, description: "Keywords like 'abstract', 'blue', 'gold', 'calm'" },
+      category: { type: Type.STRING, description: "Category filter (paintings, sculptures, digital, etc)" },
+      maxPrice: { type: Type.NUMBER, description: "Maximum price budget" }
     },
     required: ["query"]
   }
@@ -31,20 +31,14 @@ const subscribeNewsletterTool: FunctionDeclaration = {
   name: "subscribeNewsletter",
   description: "Subscribe the user to the newsletter/VIP list when they provide their email address.",
   parameters: {
-    type: SchemaType.OBJECT,
+    type: Type.OBJECT,
     properties: {
-      email: { type: SchemaType.STRING, description: "The user's email address" },
-      name: { type: SchemaType.STRING, description: "The user's name (optional)" }
+      email: { type: Type.STRING, description: "The user's email address" },
+      name: { type: Type.STRING, description: "The user's name (optional)" }
     },
     required: ["email"]
   }
 };
-
-const tools: Tool[] = [
-  {
-    functionDeclarations: [searchProductsTool, subscribeNewsletterTool]
-  }
-];
 
 // --- 2. HELPER FUNCTIONS ---
 
@@ -54,6 +48,9 @@ async function checkRateLimit(ip: string): Promise<boolean> {
         const config = await getChatConfig();
         const { maxMessages, windowMinutes } = config.rateLimit || { maxMessages: 20, windowMinutes: 5 };
         
+        // 0 significa ILIMITADO
+        if (maxMessages === 0) return true;
+
         // Calculate the timestamp for X minutes ago
         const now = new Date();
         const windowStart = new Date(now.getTime() - windowMinutes * 60000);
@@ -156,64 +153,79 @@ export async function generateChatResponse(
     If products are found via tool, respond enthusiastically and ask if they want to see details.
   `;
 
+  // --- NEW SDK IMPLEMENTATION ---
   const ai = new GoogleGenAI({ apiKey: API_KEY });
   let foundProducts: Product[] = [];
 
   try {
-    const model = ai.getGenerativeModel({
-      model: 'gemini-2.0-flash', 
-      tools: tools,
-      generationConfig: {
-          temperature: chatConfig.modelTemperature
-      }
-    });
-
-    const chat = model.startChat({
-      history: history,
-      systemInstruction: systemInstruction
+    // Correct way to initialize Chat in @google/genai
+    const chat = ai.chats.create({
+      model: 'gemini-2.5-flash',
+      config: {
+        systemInstruction: systemInstruction,
+        temperature: chatConfig.modelTemperature,
+        tools: [{ functionDeclarations: [searchProductsTool, subscribeNewsletterTool] }]
+      },
+      history: history.map(h => ({
+        role: h.role,
+        parts: h.parts.map(p => ({ text: p.text }))
+      }))
     });
 
     // 1. Send User Message
-    const result = await chat.sendMessage(message);
-    const response = await result.response;
-    const functionCalls = response.functionCalls();
-
+    const result = await chat.sendMessage({ message: message });
+    
     let finalText = "";
+    
+    // 2. Handle Tool Calls (The new SDK returns functionCalls inside the response candidates)
+    // We iterate manually or use the helper if available, but manual iteration is safer for complex logic
+    const candidates = result.candidates;
+    const firstCandidate = candidates?.[0];
+    
+    // Check for function calls in the response content parts
+    const toolCalls: any[] = [];
+    if (firstCandidate?.content?.parts) {
+        for (const part of firstCandidate.content.parts) {
+            if (part.functionCall) {
+                toolCalls.push(part.functionCall);
+            }
+        }
+    }
 
-    // 2. Handle Tool Calls
-    if (functionCalls && functionCalls.length > 0) {
-      for (const call of functionCalls) {
+    if (toolCalls.length > 0) {
+      // Execute tools
+      const functionResponses = [];
+      
+      for (const call of toolCalls) {
         if (call.name === "searchProducts") {
           const searchResult = await executeProductSearch(call.args);
           foundProducts = searchResult.products;
-          
-          const nextResult = await chat.sendMessage([
-            {
-              functionResponse: {
-                name: "searchProducts",
-                response: { result: searchResult.info }
-              }
-            }
-          ]);
-          finalText = nextResult.response.text();
+          functionResponses.push({
+             id: call.id,
+             name: call.name,
+             response: { result: searchResult.info }
+          });
         } 
         else if (call.name === "subscribeNewsletter") {
           const args = call.args as any;
           await registerClientToBrevo(args.email, args.name || 'Art Lover');
-          
-          const nextResult = await chat.sendMessage([
-             {
-              functionResponse: {
-                name: "subscribeNewsletter",
-                response: { result: "Success. Email added to Brevo list." }
-              }
-            }
-          ]);
-          finalText = nextResult.response.text();
+          functionResponses.push({
+             id: call.id,
+             name: call.name,
+             response: { result: "Success. Email added to Brevo list." }
+          });
         }
       }
+
+      // Send tool results back to model
+      const nextResult = await chat.sendToolResponse({
+          functionResponses: functionResponses
+      });
+      
+      finalText = nextResult.text || "";
+
     } else {
-      finalText = response.text();
+      finalText = result.text || "";
     }
 
     // 3. Log Interaction
@@ -225,14 +237,14 @@ export async function generateChatResponse(
     });
 
     return { 
-      text: finalText || "Desculpe, não entendi.",
+      text: finalText || "Desculpe, não consegui processar sua resposta.",
       products: foundProducts.length > 0 ? foundProducts : undefined,
       messageId: logRef.id // Return ID for feedback mapping
     };
 
   } catch (error) {
     console.error("Gemini Error:", error);
-    return { text: "O assistente está momentaneamente indisponível. Tente novamente mais tarde." };
+    return { text: "O assistente está momentaneamente indisponível (Erro interno)." };
   }
 }
 

@@ -27,7 +27,10 @@ const GlassInput = ({ label, type, value, onChange, icon: Icon, error }: any) =>
     </div>
     {error && (
         <motion.p 
-            initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }}
+            {...({
+                initial: { opacity: 0, y: -5 },
+                animate: { opacity: 1, y: 0 }
+            } as any)}
             className="text-red-500 text-xs mt-1 ml-2 font-medium"
         >
             {error}
@@ -190,14 +193,16 @@ export const AuthModal: React.FC = () => {
                             {/* Sliding Indicator */}
                             <motion.div 
                                 className="absolute top-1 bottom-1 bg-white dark:bg-white/10 rounded-xl shadow-sm z-0"
-                                layoutId="authTabBackground"
-                                initial={false}
-                                animate={{
-                                    left: authView === 'login' ? '4px' : '50%',
-                                    width: 'calc(50% - 4px)',
-                                    x: authView === 'login' ? 0 : 0
-                                }}
-                                transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                                {...({
+                                    layoutId: "authTabBackground",
+                                    initial: false,
+                                    animate: {
+                                        left: authView === 'login' ? '4px' : '50%',
+                                        width: 'calc(50% - 4px)',
+                                        x: authView === 'login' ? 0 : 0
+                                    },
+                                    transition: { type: "spring", bounce: 0.2, duration: 0.6 }
+                                } as any)}
                             />
                             
                             <button 
@@ -265,8 +270,10 @@ export const AuthModal: React.FC = () => {
                                                         "h-full rounded-full",
                                                         passwordStrength < 50 ? "bg-red-500" : passwordStrength < 100 ? "bg-yellow-500" : "bg-green-500"
                                                     )}
-                                                    initial={{ width: 0 }}
-                                                    animate={{ width: `${passwordStrength}%` }}
+                                                    {...({
+                                                        initial: { width: 0 },
+                                                        animate: { width: `${passwordStrength}%` }
+                                                    } as any)}
                                                 />
                                             </div>
                                         )}
