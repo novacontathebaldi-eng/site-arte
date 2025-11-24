@@ -1,12 +1,13 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, LayoutDashboard, Package, Users, MessageSquare, Plus, Edit, Trash2, Save, Upload, Search, Filter, TrendingUp, DollarSign, RefreshCw, Lock, Globe, MoveUp, MoveDown, Check, ThumbsDown, AlertCircle, Move, Loader2 } from 'lucide-react';
+import { X, LayoutDashboard, Package, Users, MessageSquare, Plus, Edit, Trash2, Save, Upload, Search, Filter, TrendingUp, DollarSign, RefreshCw, Lock, Globe, MoveUp, MoveDown, Check, ThumbsDown, AlertCircle, Move, Loader2, Settings, Database, AlertTriangle } from 'lucide-react';
 import { useAuthStore } from '../store';
 import { db } from '../lib/firebase/config';
 import { deleteDocument, subscribeToCollection, updateDocument } from '../lib/firebase/firestore';
 import { Product, ProductCategory } from '../types';
 import { getBrevoStats, getBrevoContacts, getChatConfig, updateChatConfig, getChatFeedback, resolveFeedback, syncFirestoreToBrevo } from '../app/actions/admin';
+import { seedDatabase } from '../app/actions/seed';
 import { formatPrice, cn } from '../lib/utils';
 import { AvatarUploader } from './dashboard/AvatarUploader';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
@@ -89,7 +90,7 @@ const SortableStarter: React.FC<SortableStarterProps> = ({ starter, onChange, on
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose }) => {
     const { user } = useAuthStore();
     const { toast } = useToast();
-    const [activeTab, setActiveTab] = useState<'analytics' | 'products' | 'crm' | 'chatbot'>('analytics');
+    const [activeTab, setActiveTab] = useState<'analytics' | 'products' | 'crm' | 'chatbot' | 'settings'>('analytics');
     const [stats, setStats] = useState({ 
         salesToday: 0, salesMonth: 0, newOrders: 0, activeUsers: 0, brevoSubs: 0, brevoClients: 0 
     });
@@ -111,6 +112,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
     const [isSavingChat, setIsSavingChat] = useState(false);
     const [showFeedbackModal, setShowFeedbackModal] = useState<ChatFeedback | null>(null);
     const [fixAnswer, setFixAnswer] = useState('');
+
+    // --- SETTINGS / SEED STATE ---
+    const [isSeeding, setIsSeeding] = useState(false);
 
     // DnD Sensors
     const sensors = useSensors(
@@ -251,6 +255,25 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
         toast("Conhecimento adicionado. O bot aprendeu!", "success");
     };
 
+    const handleSeedDatabase = async (clear: boolean) => {
+        if (!confirm(`Tem certeza? Isso irá ${clear ? 'APAGAR TODOS os produtos existentes e ' : ''}criar produtos de exemplo.`)) return;
+        
+        setIsSeeding(true);
+        try {
+            const res = await seedDatabase(clear);
+            if (res.success) {
+                toast(res.message, "success");
+                setActiveTab('products'); // Redireciona para ver o resultado
+            } else {
+                toast("Erro ao popular banco: " + res.message, "error");
+            }
+        } catch (e) {
+            toast("Erro desconhecido ao popular.", "error");
+        } finally {
+            setIsSeeding(false);
+        }
+    };
+
     if (!isOpen) return null;
 
     const salesData = [
@@ -279,6 +302,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
                         { id: 'products', label: 'Produtos', icon: Package },
                         { id: 'crm', label: 'CRM / Brevo', icon: Users },
                         { id: 'chatbot', label: 'IA Control', icon: MessageSquare },
+                        { id: 'settings', label: 'Config / Seed', icon: Settings },
                     ].map((item) => (
                         <button key={item.id} onClick={() => setActiveTab(item.id as any)} className={cn("flex items-center gap-4 p-3 rounded-lg w-full transition-all group", activeTab === item.id ? "bg-white/10 text-white" : "text-gray-500 hover:bg-white/5 hover:text-white")}>
                             <item.icon size={20} className={activeTab === item.id ? "text-accent" : ""} />
@@ -292,7 +316,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
             {/* CONTENT */}
             <div className="flex-1 flex flex-col overflow-hidden bg-[#0a0a0a] relative">
                 <header className="h-20 border-b border-white/10 flex items-center justify-between px-8">
-                    <h1 className="text-2xl font-serif capitalize">{activeTab}</h1>
+                    <h1 className="text-2xl font-serif capitalize">{activeTab === 'settings' ? 'Configurações do Sistema' : activeTab}</h1>
                     <div className="flex items-center gap-4">
                         <span className="text-xs text-gray-500 uppercase">Ultimo login: {new Date().toLocaleTimeString()}</span>
                         <div className="w-8 h-8 bg-accent rounded-full flex items-center justify-center text-black font-bold">{user?.displayName?.[0] || 'A'}</div>
@@ -511,6 +535,51 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
                                     </table>
                                 </div>
                              </motion.div>
+                        )}
+
+                        {/* 5. SETTINGS / SEED */}
+                        {activeTab === 'settings' && (
+                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="max-w-3xl space-y-8">
+                                <div className="bg-[#151515] border border-red-900/30 p-8 rounded-xl shadow-lg relative overflow-hidden">
+                                    <div className="absolute top-0 right-0 w-32 h-32 bg-red-500/5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2"></div>
+                                    
+                                    <h3 className="text-xl font-serif text-white mb-2 flex items-center gap-2">
+                                        <Database size={24} className="text-red-500" /> 
+                                        Popular Banco de Dados
+                                    </h3>
+                                    <p className="text-gray-400 text-sm mb-6 max-w-lg">
+                                        Use esta ferramenta para gerar dados de exemplo (Seed) para o catálogo. Isso é útil para alinhar o que você vê no Admin com o que aparece no site público.
+                                    </p>
+
+                                    <div className="bg-black/30 p-4 rounded-lg border border-red-500/20 mb-8 flex gap-4 items-start">
+                                        <AlertTriangle className="text-yellow-500 shrink-0" size={20} />
+                                        <div className="text-xs text-gray-300">
+                                            <strong className="block text-yellow-500 mb-1 uppercase tracking-wider">Atenção</strong>
+                                            Esta ação irá adicionar cerca de 8 produtos de luxo fictícios, com imagens e traduções completas. Se você escolher "Limpar Tudo", todos os produtos atuais serão deletados permanentemente.
+                                        </div>
+                                    </div>
+
+                                    <div className="flex flex-wrap gap-4">
+                                        <button 
+                                            onClick={() => handleSeedDatabase(false)} 
+                                            disabled={isSeeding}
+                                            className="bg-white/10 hover:bg-white/20 text-white px-6 py-3 rounded font-bold uppercase tracking-widest text-xs flex items-center gap-2 transition-all"
+                                        >
+                                            {isSeeding ? <Loader2 className="animate-spin" size={16}/> : <Plus size={16}/>}
+                                            Adicionar Exemplos
+                                        </button>
+
+                                        <button 
+                                            onClick={() => handleSeedDatabase(true)} 
+                                            disabled={isSeeding}
+                                            className="bg-red-600/20 hover:bg-red-600 hover:text-white text-red-500 px-6 py-3 rounded font-bold uppercase tracking-widest text-xs flex items-center gap-2 transition-all border border-red-600/30"
+                                        >
+                                            {isSeeding ? <Loader2 className="animate-spin" size={16}/> : <Trash2 size={16}/>}
+                                            Limpar Tudo & Popular
+                                        </button>
+                                    </div>
+                                </div>
+                            </motion.div>
                         )}
                     </AnimatePresence>
                 </div>
