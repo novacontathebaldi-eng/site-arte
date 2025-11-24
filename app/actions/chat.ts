@@ -49,20 +49,27 @@ const tools: Tool[] = [
 // --- 2. HELPER FUNCTIONS ---
 
 async function checkRateLimit(ip: string): Promise<boolean> {
-    const config = await getChatConfig();
-    const { maxMessages, windowMinutes } = config.rateLimit;
-    
-    const now = new Date();
-    const windowStart = new Date(now.getTime() - windowMinutes * 60000);
+    try {
+        const config = await getChatConfig();
+        const { maxMessages, windowMinutes } = config.rateLimit;
+        
+        // Calculate the timestamp for X minutes ago
+        const now = new Date();
+        const windowStart = new Date(now.getTime() - windowMinutes * 60000);
 
-    const q = query(
-        collection(db, 'chat_logs'),
-        where('ip', '==', ip),
-        where('timestamp', '>=', windowStart.toISOString())
-    );
+        // Firestore query: log entries for this IP since windowStart
+        const q = query(
+            collection(db, 'chat_logs'),
+            where('ip', '==', ip),
+            where('timestamp', '>=', windowStart.toISOString())
+        );
 
-    const snapshot = await getDocs(q);
-    return snapshot.size < maxMessages;
+        const snapshot = await getDocs(q);
+        return snapshot.size < maxMessages;
+    } catch (error) {
+        console.error("Rate limit check failed, allowing by default", error);
+        return true; 
+    }
 }
 
 async function executeProductSearch(args: any): Promise<{ info: string, products: Product[] }> {
@@ -127,7 +134,7 @@ export async function generateChatResponse(
   
   const allowed = await checkRateLimit(ip);
   if (!allowed) {
-      return { text: "Você atingiu o limite de mensagens por agora. Por favor, aguarde alguns minutos." };
+      return { text: "Você enviou muitas mensagens em pouco tempo. Por favor, aguarde alguns minutos." };
   }
 
   // Load Config
@@ -137,7 +144,7 @@ export async function generateChatResponse(
 
   try {
     const model = ai.getGenerativeModel({
-      model: 'gemini-2.5-flash', 
+      model: 'gemini-2.0-flash', 
       tools: tools,
       generationConfig: {
           temperature: chatConfig.modelTemperature
@@ -146,7 +153,7 @@ export async function generateChatResponse(
 
     const chat = model.startChat({
       history: history,
-      systemInstruction: chatConfig.systemPrompt + `\n\nAdditional Context: Respond concisely.`
+      systemInstruction: chatConfig.systemPrompt + `\n\nIf products are found via tool, respond enthusiastically and ask if they want to see details.`
     });
 
     // 1. Send User Message
@@ -208,7 +215,7 @@ export async function generateChatResponse(
 
   } catch (error) {
     console.error("Gemini Error:", error);
-    return { text: "O assistente está momentaneamente indisponível devido a uma manutenção no sistema." };
+    return { text: "O assistente está momentaneamente indisponível. Tente novamente mais tarde." };
   }
 }
 

@@ -25,6 +25,7 @@ export interface KnowledgeBaseItem {
   question: string;
   answer: string;
   tags: string[];
+  createdAt?: string;
 }
 
 export interface ChatConfig {

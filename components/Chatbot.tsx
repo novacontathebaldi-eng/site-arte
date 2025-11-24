@@ -69,8 +69,12 @@ export const Chatbot: React.FC = () => {
   // Load Config (Starters)
   useEffect(() => {
     const loadConfig = async () => {
-        const config = await getChatConfig();
-        setStarters(config.starters || []);
+        try {
+            const config = await getChatConfig();
+            setStarters(config.starters || []);
+        } catch (e) {
+            console.error("Failed to load chat config");
+        }
     };
     if (isChatOpen) loadConfig();
   }, [isChatOpen]);
@@ -128,6 +132,12 @@ export const Chatbot: React.FC = () => {
 
     } catch (error) {
         console.error(error);
+        setMessages(prev => [...prev, {
+            id: Date.now().toString(),
+            role: 'model',
+            text: "Ocorreu um erro ao conectar com o assistente. Tente novamente.",
+            timestamp: Date.now()
+        }]);
     } finally {
         setIsLoading(false);
     }
@@ -158,7 +168,7 @@ export const Chatbot: React.FC = () => {
 
   return (
     <>
-      {/* Floating Button */}
+      {/* Floating Button (Bottom Left) */}
       <motion.button
         className="fixed bottom-8 left-8 z-[90] w-14 h-14 bg-white dark:bg-[#1a1a1a] text-primary dark:text-white rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.12)] flex items-center justify-center border border-white/20 hover:scale-105 transition-transform group"
         onClick={toggleChat}
@@ -234,12 +244,14 @@ export const Chatbot: React.FC = () => {
                                     <button 
                                         onClick={() => handleFeedback(msg, 'like')}
                                         className={cn("transition-colors", msg.feedback === 'like' ? "text-green-500" : "text-gray-400 hover:text-green-500")}
+                                        title="Útil"
                                     >
                                         <ThumbsUp size={12}/>
                                     </button>
                                     <button 
                                         onClick={() => handleFeedback(msg, 'dislike')}
                                         className={cn("transition-colors", msg.feedback === 'dislike' ? "text-red-500" : "text-gray-400 hover:text-red-500")}
+                                        title="Não útil"
                                     >
                                         <ThumbsDown size={12}/>
                                     </button>

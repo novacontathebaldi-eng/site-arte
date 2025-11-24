@@ -70,7 +70,7 @@ export async function getChatConfig(): Promise<ChatConfig> {
         
         // Defaults
         return {
-            systemPrompt: "You are 'Meeh Assistant', a luxury art concierge for Melissa Pelussi.",
+            systemPrompt: "You are 'Meeh Assistant', a luxury art concierge for Melissa Pelussi. Your tone is elegant, helpful, and concise. You help users find art, track orders, and join the newsletter.",
             modelTemperature: 0.7,
             rateLimit: { maxMessages: 20, windowMinutes: 5 },
             starters: [
@@ -79,8 +79,14 @@ export async function getChatConfig(): Promise<ChatConfig> {
             ]
         };
     } catch (e) {
-        console.error(e);
-        throw new Error("Failed to fetch chat config");
+        console.error("Error fetching chat config:", e);
+        // Fallback robusto
+        return {
+            systemPrompt: "You are 'Meeh Assistant'.",
+            modelTemperature: 0.7,
+            rateLimit: { maxMessages: 20, windowMinutes: 5 },
+            starters: []
+        };
     }
 }
 
@@ -90,7 +96,7 @@ export async function updateChatConfig(config: ChatConfig) {
         await setDoc(docRef, config, { merge: true });
         return { success: true };
     } catch (e) {
-        console.error(e);
+        console.error("Error updating chat config:", e);
         return { success: false };
     }
 }
@@ -106,7 +112,7 @@ export async function getChatFeedback(): Promise<ChatFeedback[]> {
         const snapshot = await getDocs(q);
         return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ChatFeedback));
     } catch (e) {
-        console.error(e);
+        console.error("Error fetching feedback:", e);
         return [];
     }
 }
