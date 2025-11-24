@@ -137,7 +137,7 @@ export async function generateChatResponse(
 
   try {
     const model = ai.getGenerativeModel({
-      model: 'gemini-2.0-flash', 
+      model: 'gemini-2.5-flash', 
       tools: tools,
       generationConfig: {
           temperature: chatConfig.modelTemperature
@@ -208,7 +208,7 @@ export async function generateChatResponse(
 
   } catch (error) {
     console.error("Gemini Error:", error);
-    return { text: "O assistente está momentaneamente indisponível." };
+    return { text: "O assistente está momentaneamente indisponível devido a uma manutenção no sistema." };
   }
 }
 
