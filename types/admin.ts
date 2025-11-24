@@ -22,8 +22,8 @@ export interface ChatStarter {
 
 export interface KnowledgeBaseItem {
   id: string;
-  question: string;
-  answer: string;
+  question: string; // O gatilho/pergunta do usuário
+  answer: string;   // A resposta correta/correção
   tags: string[];
   createdAt?: string;
 }

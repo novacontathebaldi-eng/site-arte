@@ -1,21 +1,76 @@
+
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, LayoutDashboard, Package, Users, MessageSquare, Plus, Edit, Trash2, Save, Upload, Search, Filter, TrendingUp, DollarSign, RefreshCw, Lock, Globe, MoveUp, MoveDown, Check, ThumbsDown, AlertCircle } from 'lucide-react';
+import { X, LayoutDashboard, Package, Users, MessageSquare, Plus, Edit, Trash2, Save, Upload, Search, Filter, TrendingUp, DollarSign, RefreshCw, Lock, Globe, MoveUp, MoveDown, Check, ThumbsDown, AlertCircle, Move } from 'lucide-react';
 import { useAuthStore } from '../store';
 import { db } from '../lib/firebase/config';
 import { uploadImage, getPublicUrl } from '../lib/supabase/storage';
 import { updateDocument, createDocument, deleteDocument, subscribeToCollection } from '../lib/firebase/firestore';
 import { Product, ProductCategory } from '../types';
-import { getBrevoStats, getBrevoContacts, getChatConfig, updateChatConfig, getChatFeedback, resolveFeedback } from '../app/actions/admin';
+import { getBrevoStats, getBrevoContacts, getChatConfig, updateChatConfig, getChatFeedback, resolveFeedback, syncFirestoreToBrevo } from '../app/actions/admin';
 import { formatPrice, cn } from '../lib/utils';
 import { AvatarUploader } from './dashboard/AvatarUploader';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
-import { ChatConfig, ChatFeedback, BrevoContact } from '../types/admin';
+import { ChatConfig, ChatFeedback, BrevoContact, ChatStarter } from '../types/admin';
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragOverlay } from '@dnd-kit/core';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 interface AdminDashboardProps {
     isOpen: boolean;
     onClose: () => void;
 }
+
+// --- SORTABLE COMPONENTS ---
+
+interface SortableRowProps {
+  product: Product;
+  onEdit: (p: Product) => void;
+  onDelete: (id: string) => void;
+  index: number;
+}
+
+const SortableRow: React.FC<SortableRowProps> = ({ product, onEdit, onDelete, index }) => {
+    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: product.id });
+    const style = { transform: CSS.Transform.toString(transform), transition, zIndex: isDragging ? 10 : 1, opacity: isDragging ? 0.5 : 1 };
+    
+    return (
+        <tr ref={setNodeRef} style={style} className="hover:bg-white/5 bg-[#151515]">
+            <td className="p-4 flex gap-2 items-center">
+                 <button {...attributes} {...listeners} className="p-1 hover:bg-white/10 rounded cursor-grab active:cursor-grabbing"><Move size={14} /></button>
+                 <span className="w-6 text-center text-gray-500">{index + 1}</span>
+            </td>
+            <td className="p-4"><div className="flex items-center gap-4"><img src={product.images[0]} className="w-10 h-10 object-cover rounded" alt="" /> <span>{product.translations?.fr?.title}</span></div></td>
+            <td className="p-4">{formatPrice(product.price)}</td>
+            <td className="p-4 text-right flex justify-end gap-2">
+                <button onClick={() => onEdit(product)} className="p-2 bg-blue-500/10 text-blue-500 rounded hover:bg-blue-500/20"><Edit size={16}/></button>
+                <button onClick={() => onDelete(product.id)} className="p-2 bg-red-500/10 text-red-500 rounded hover:bg-red-500/20"><Trash2 size={16}/></button>
+            </td>
+        </tr>
+    );
+};
+
+interface SortableStarterProps {
+  starter: ChatStarter;
+  onChange: (s: ChatStarter) => void;
+  onDelete: (id: string) => void;
+}
+
+const SortableStarter: React.FC<SortableStarterProps> = ({ starter, onChange, onDelete }) => {
+    const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: starter.id });
+    const style = { transform: CSS.Transform.toString(transform), transition };
+
+    return (
+        <div ref={setNodeRef} style={style} className="flex gap-2 items-center bg-black/20 p-2 rounded mb-2">
+             <button {...attributes} {...listeners} className="p-2 text-gray-500 cursor-grab active:cursor-grabbing"><Move size={14}/></button>
+             <input value={starter.label} onChange={e => onChange({...starter, label: e.target.value})} className="bg-black/30 border border-white/10 rounded p-2 text-xs w-1/3 focus:border-accent outline-none" placeholder="Rótulo" />
+             <input value={starter.text} onChange={e => onChange({...starter, text: e.target.value})} className="bg-black/30 border border-white/10 rounded p-2 text-xs flex-1 focus:border-accent outline-none" placeholder="Mensagem enviada" />
+             <button onClick={() => onDelete(starter.id)} className="text-red-500 p-2 hover:bg-red-500/10 rounded"><Trash2 size={14}/></button>
+        </div>
+    );
+};
+
+// --- MAIN COMPONENT ---
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose }) => {
     const { user } = useAuthStore();
@@ -34,11 +89,20 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
     // --- CRM STATE ---
     const [brevoContacts, setBrevoContacts] = useState<BrevoContact[]>([]);
     const [loadingContacts, setLoadingContacts] = useState(false);
+    const [isSyncing, setIsSyncing] = useState(false);
 
     // --- AI STATE ---
     const [chatConfig, setChatConfig] = useState<ChatConfig | null>(null);
     const [feedbackList, setFeedbackList] = useState<ChatFeedback[]>([]);
     const [isSavingChat, setIsSavingChat] = useState(false);
+    const [showFeedbackModal, setShowFeedbackModal] = useState<ChatFeedback | null>(null);
+    const [fixAnswer, setFixAnswer] = useState('');
+
+    // DnD Sensors
+    const sensors = useSensors(
+        useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+        useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+    );
 
     // --- SCROLL LOCK ---
     useEffect(() => {
@@ -61,11 +125,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
 
         // 1. Real-time Products
         const unsubProducts = subscribeToCollection('products', (data) => {
-            const sorted = data.sort((a, b) => (a.displayOrder || 9999) - (b.displayOrder || 9999));
+            const sorted = data.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
             setProducts(sorted as Product[]);
         });
 
-        // 2. Dashboard Stats
+        // 2. Dashboard Stats (Mocked Sales, Real Brevo)
         const fetchStats = async () => {
             const brevo = await getBrevoStats();
             setStats({
@@ -110,6 +174,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
             if (editingProduct.id) {
                 await updateDocument('products', editingProduct.id, productData);
             } else {
+                // Calculate max order
+                const maxOrder = Math.max(...products.map(p => p.displayOrder || 0), 0);
                 await createDocument('products', {
                     ...productData,
                     createdAt: new Date().toISOString(),
@@ -117,7 +183,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
                     images: editingProduct.images || [],
                     price: editingProduct.price || 0,
                     category: editingProduct.category || ProductCategory.PAINTINGS,
-                    available: true, status: 'available', stock: 1
+                    available: true, status: 'available', stock: 1,
+                    displayOrder: maxOrder + 1
                 });
             }
             setIsProductModalOpen(false);
@@ -144,16 +211,45 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
         }
     };
 
-    const handleReorder = async (product: Product, direction: 'up' | 'down') => {
-        const currentIndex = products.findIndex(p => p.id === product.id);
-        if (currentIndex === -1) return;
-        const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
-        if (targetIndex < 0 || targetIndex >= products.length) return;
-        const targetProduct = products[targetIndex];
-        const currentOrder = product.displayOrder || currentIndex;
-        const targetOrder = targetProduct.displayOrder || targetIndex;
-        await updateDocument('products', product.id, { displayOrder: targetOrder });
-        await updateDocument('products', targetProduct.id, { displayOrder: currentOrder });
+    // Drag End Handler for Products
+    const handleDragEndProducts = async (event: any) => {
+        const { active, over } = event;
+        if (active.id !== over.id) {
+            const oldIndex = products.findIndex(p => p.id === active.id);
+            const newIndex = products.findIndex(p => p.id === over.id);
+            const newItems = arrayMove(products, oldIndex, newIndex);
+            setProducts(newItems);
+
+            // Save new order to Firestore
+            for (let i = 0; i < newItems.length; i++) {
+                await updateDocument('products', newItems[i].id, { displayOrder: i });
+            }
+        }
+    };
+
+    // Drag End Handler for Starters
+    const handleDragEndStarters = (event: any) => {
+        if (!chatConfig) return;
+        const { active, over } = event;
+        if (active.id !== over.id) {
+            const oldIndex = chatConfig.starters.findIndex(s => s.id === active.id);
+            const newIndex = chatConfig.starters.findIndex(s => s.id === over.id);
+            const newStarters = arrayMove(chatConfig.starters, oldIndex, newIndex);
+            
+            // Update order property
+            const updated = newStarters.map((s, idx) => ({ ...s, order: idx }));
+            setChatConfig({ ...chatConfig, starters: updated });
+        }
+    };
+
+    const handleSyncBrevo = async () => {
+        setIsSyncing(true);
+        const res = await syncFirestoreToBrevo();
+        alert(`Sincronização concluída: ${res.added} adicionados, ${res.errors} erros.`);
+        setIsSyncing(false);
+        // Refresh contacts
+        setLoadingContacts(true);
+        getBrevoContacts().then(c => { setBrevoContacts(c); setLoadingContacts(false); });
     };
 
     const handleSaveChatConfig = async () => {
@@ -164,18 +260,21 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
         alert("Configurações salvas com sucesso!");
     };
 
-    const handleResolveFeedback = async (item: ChatFeedback) => {
-        const solution = prompt("Adicione uma correção para a base de conhecimento (Formato: Pergunta | Resposta)", `${item.userMessage} | `);
-        if (solution) {
-            const [q, a] = solution.split('|');
-            if (q && a) {
-                await resolveFeedback(item.id, { id: Date.now().toString(), question: q.trim(), answer: a.trim(), tags: ['feedback-fix'] });
-                setFeedbackList(prev => prev.filter(f => f.id !== item.id));
-            }
-        } else if (confirm("Marcar como resolvido sem adicionar à base de conhecimento?")) {
-            await resolveFeedback(item.id);
-            setFeedbackList(prev => prev.filter(f => f.id !== item.id));
-        }
+    const handleResolveFeedback = async () => {
+        if (!showFeedbackModal || !fixAnswer.trim()) return;
+        
+        const item = showFeedbackModal;
+        const solution = { 
+            id: Date.now().toString(), 
+            question: item.userMessage, 
+            answer: fixAnswer, 
+            tags: ['feedback-fix'] 
+        };
+        
+        await resolveFeedback(item.id, solution);
+        setFeedbackList(prev => prev.filter(f => f.id !== item.id));
+        setShowFeedbackModal(null);
+        setFixAnswer('');
     };
 
     if (!isOpen) return null;
@@ -236,8 +335,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
                                     {[
                                         { label: 'Vendas Hoje', value: `€ ${stats.salesToday}`, icon: DollarSign, trend: '+12%', color: '#10B981' },
                                         { label: 'Novos Pedidos', value: stats.newOrders, icon: Package, trend: '+3', color: '#3B82F6' },
-                                        { label: 'Inscritos Brevo', value: stats.brevoSubs, icon: Users, trend: 'Total', color: '#D4AF37' },
-                                        { label: 'Clientes Brevo', value: stats.brevoClients, icon: Users, trend: 'VIP', color: '#8B5CF6' },
+                                        { label: 'Inscritos Brevo', value: stats.brevoSubs, icon: Users, trend: 'Lista 5', color: '#D4AF37' },
+                                        { label: 'Clientes Brevo', value: stats.brevoClients, icon: Users, trend: 'Lista 7', color: '#8B5CF6' },
                                     ].map((stat, i) => (
                                         <div key={i} className="bg-[#151515] p-6 rounded-xl border border-white/10 relative overflow-hidden">
                                             <div className="flex justify-between items-start mb-4">
@@ -270,7 +369,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
                             </motion.div>
                         )}
 
-                        {/* 2. PRODUCTS */}
+                        {/* 2. PRODUCTS (Drag & Drop) */}
                         {activeTab === 'products' && (
                             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
                                 <div className="flex justify-between items-center mb-6">
@@ -285,25 +384,23 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
                                 <div className="bg-[#151515] rounded-xl border border-white/10 overflow-hidden">
                                     <table className="w-full text-sm">
                                         <thead className="bg-white/5 text-gray-400">
-                                            <tr><th className="p-4 text-left">Ordenação</th><th className="p-4 text-left">Produto</th><th className="p-4 text-left">Preço</th><th className="p-4 text-right">Ações</th></tr>
+                                            <tr><th className="p-4 text-left w-20">Ord.</th><th className="p-4 text-left">Produto</th><th className="p-4 text-left">Preço</th><th className="p-4 text-right">Ações</th></tr>
                                         </thead>
-                                        <tbody className="divide-y divide-white/5">
-                                            {products.filter(p => p.translations?.fr?.title?.toLowerCase().includes(productSearch.toLowerCase())).map((product, index) => (
-                                                <tr key={product.id} className="hover:bg-white/5">
-                                                    <td className="p-4 flex gap-1">
-                                                        <button onClick={() => handleReorder(product, 'up')}><MoveUp size={14}/></button>
-                                                        <span className="w-6 text-center">{product.displayOrder || index}</span>
-                                                        <button onClick={() => handleReorder(product, 'down')}><MoveDown size={14}/></button>
-                                                    </td>
-                                                    <td className="p-4"><div className="flex items-center gap-4"><img src={product.images[0]} className="w-10 h-10 object-cover rounded" alt="" /> <span>{product.translations?.fr?.title}</span></div></td>
-                                                    <td className="p-4">{formatPrice(product.price)}</td>
-                                                    <td className="p-4 text-right flex justify-end gap-2">
-                                                        <button onClick={() => { setEditingProduct(product); setIsProductModalOpen(true); }} className="p-2 bg-blue-500/10 text-blue-500 rounded"><Edit size={16}/></button>
-                                                        <button onClick={() => handleDeleteProduct(product.id)} className="p-2 bg-red-500/10 text-red-500 rounded"><Trash2 size={16}/></button>
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
+                                        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEndProducts}>
+                                            <tbody className="divide-y divide-white/5">
+                                                <SortableContext items={products.map(p => p.id)} strategy={verticalListSortingStrategy}>
+                                                    {products.filter(p => p.translations?.fr?.title?.toLowerCase().includes(productSearch.toLowerCase())).map((product, index) => (
+                                                        <SortableRow 
+                                                            key={product.id} 
+                                                            product={product} 
+                                                            index={index} 
+                                                            onEdit={(p) => { setEditingProduct(p); setIsProductModalOpen(true); }} 
+                                                            onDelete={handleDeleteProduct} 
+                                                        />
+                                                    ))}
+                                                </SortableContext>
+                                            </tbody>
+                                        </DndContext>
                                     </table>
                                 </div>
                             </motion.div>
@@ -314,9 +411,19 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
                             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
                                 {loadingContacts ? <div className="text-center py-20">Carregando contatos do Brevo...</div> : (
                                     <div className="bg-[#151515] rounded-xl border border-white/10 overflow-hidden">
-                                        <div className="p-4 border-b border-white/10 flex justify-between">
-                                            <h3 className="font-serif text-lg">Contatos Brevo</h3>
-                                            <a href="https://app.brevo.com" target="_blank" className="text-accent text-xs uppercase font-bold hover:underline">Ir para Dashboard Brevo</a>
+                                        <div className="p-4 border-b border-white/10 flex justify-between items-center">
+                                            <div className="flex items-center gap-4">
+                                                <h3 className="font-serif text-lg">Contatos Brevo</h3>
+                                                <span className="bg-green-500/10 text-green-500 text-xs px-2 py-1 rounded">Listas 5 & 7</span>
+                                            </div>
+                                            <div className="flex gap-3">
+                                                <button onClick={handleSyncBrevo} disabled={isSyncing} className="flex items-center gap-2 bg-white/10 text-white px-4 py-2 rounded text-xs uppercase font-bold hover:bg-white/20 disabled:opacity-50">
+                                                    <RefreshCw size={14} className={isSyncing ? "animate-spin" : ""} /> Sync Firestore
+                                                </button>
+                                                <a href="https://app.brevo.com" target="_blank" className="text-accent text-xs uppercase font-bold hover:underline flex items-center gap-1">
+                                                    Dashboard Externo <Globe size={12}/>
+                                                </a>
+                                            </div>
                                         </div>
                                         <table className="w-full text-sm">
                                             <thead className="bg-white/5 text-gray-400">
@@ -349,6 +456,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
                                             value={chatConfig.systemPrompt}
                                             onChange={(e) => setChatConfig({...chatConfig, systemPrompt: e.target.value})}
                                             className="w-full h-32 bg-black/30 border border-white/10 rounded p-3 text-sm focus:border-accent outline-none"
+                                            placeholder="Instruções do sistema..."
                                         />
                                         <div className="grid grid-cols-2 gap-4">
                                             <div>
@@ -357,38 +465,39 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
                                                 <div className="text-right text-xs">{chatConfig.modelTemperature}</div>
                                             </div>
                                             <div>
-                                                 <label className="text-xs uppercase text-gray-500">Rate Limit (Msgs/5min)</label>
-                                                 <input type="number" value={chatConfig.rateLimit.maxMessages} onChange={e => setChatConfig({...chatConfig, rateLimit: {...chatConfig.rateLimit, maxMessages: parseInt(e.target.value)}})} className="w-full bg-black/30 border border-white/10 rounded p-2 mt-1" />
+                                                 <label className="text-xs uppercase text-gray-500">Rate Limit (Config Segurança)</label>
+                                                 <div className="flex gap-2 mt-1">
+                                                     <input type="number" placeholder="Msgs" value={chatConfig.rateLimit?.maxMessages || 20} onChange={e => setChatConfig({...chatConfig, rateLimit: {...(chatConfig.rateLimit || { windowMinutes: 5 }), maxMessages: parseInt(e.target.value)}})} className="w-1/2 bg-black/30 border border-white/10 rounded p-2 text-sm" />
+                                                     <input type="number" placeholder="Mins" value={chatConfig.rateLimit?.windowMinutes || 5} onChange={e => setChatConfig({...chatConfig, rateLimit: {...(chatConfig.rateLimit || { maxMessages: 20 }), windowMinutes: parseInt(e.target.value)}})} className="w-1/2 bg-black/30 border border-white/10 rounded p-2 text-sm" />
+                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                     
-                                    {/* Starters */}
+                                    {/* Starters (Drag & Drop) */}
                                     <div className="bg-[#151515] p-6 rounded-xl border border-white/10">
                                         <div className="flex justify-between items-center mb-4">
-                                            <h3 className="font-serif text-lg text-accent">Sugestões Iniciais</h3>
+                                            <h3 className="font-serif text-lg text-accent">Prompt Starters (Drag & Drop)</h3>
                                             <button onClick={() => setChatConfig({...chatConfig, starters: [...chatConfig.starters, { id: Date.now().toString(), label: 'Nova', text: '', order: chatConfig.starters.length + 1 }]})} className="text-xs bg-white/10 p-1 rounded hover:bg-white/20"><Plus size={14}/></button>
                                         </div>
-                                        <div className="space-y-2">
-                                            {chatConfig.starters.sort((a,b) => a.order - b.order).map((starter, idx) => (
-                                                <div key={starter.id} className="flex gap-2 items-center">
-                                                    <input value={starter.label} onChange={e => {
-                                                        const newS = [...chatConfig.starters];
-                                                        newS[idx].label = e.target.value;
-                                                        setChatConfig({...chatConfig, starters: newS});
-                                                    }} className="bg-black/30 border border-white/10 rounded p-2 text-xs w-1/3" placeholder="Rótulo" />
-                                                    <input value={starter.text} onChange={e => {
-                                                        const newS = [...chatConfig.starters];
-                                                        newS[idx].text = e.target.value;
-                                                        setChatConfig({...chatConfig, starters: newS});
-                                                    }} className="bg-black/30 border border-white/10 rounded p-2 text-xs flex-1" placeholder="Mensagem enviada" />
-                                                    <button onClick={() => {
-                                                        const newS = chatConfig.starters.filter(s => s.id !== starter.id);
-                                                        setChatConfig({...chatConfig, starters: newS});
-                                                    }} className="text-red-500"><Trash2 size={14}/></button>
-                                                </div>
-                                            ))}
-                                        </div>
+                                        
+                                        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEndStarters}>
+                                            <SortableContext items={chatConfig.starters.map(s => s.id)} strategy={verticalListSortingStrategy}>
+                                                {chatConfig.starters.map((starter, idx) => (
+                                                    <SortableStarter 
+                                                        key={starter.id} 
+                                                        starter={starter} 
+                                                        onChange={(s) => {
+                                                            const newS = [...chatConfig.starters];
+                                                            const idx = newS.findIndex(x => x.id === s.id);
+                                                            newS[idx] = s;
+                                                            setChatConfig({...chatConfig, starters: newS});
+                                                        }}
+                                                        onDelete={(id) => setChatConfig({...chatConfig, starters: chatConfig.starters.filter(s => s.id !== id)})}
+                                                    />
+                                                ))}
+                                            </SortableContext>
+                                        </DndContext>
                                     </div>
                                 </div>
 
@@ -415,7 +524,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
                                                     <td className="p-4 max-w-xs truncate" title={f.userMessage}>{f.userMessage}</td>
                                                     <td className="p-4 max-w-xs truncate text-gray-400" title={f.aiResponse}>{f.aiResponse}</td>
                                                     <td className="p-4 text-right">
-                                                        <button onClick={() => handleResolveFeedback(f)} className="bg-white/10 hover:bg-accent hover:text-white px-3 py-1 rounded text-xs uppercase font-bold transition-colors">Corrigir / Ensinar</button>
+                                                        <button onClick={() => setShowFeedbackModal(f)} className="bg-white/10 hover:bg-accent hover:text-white px-3 py-1 rounded text-xs uppercase font-bold transition-colors">Corrigir / Ensinar</button>
                                                     </td>
                                                 </tr>
                                             ))}
@@ -458,6 +567,34 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
                             <div className="mt-8 flex justify-end gap-4">
                                 <button onClick={() => setIsProductModalOpen(false)} className="px-6 py-2 border border-white/10 rounded">Cancelar</button>
                                 <button onClick={handleSaveProduct} className="bg-accent text-white px-6 py-2 rounded font-bold">Salvar</button>
+                            </div>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* FEEDBACK FIX MODAL */}
+            <AnimatePresence>
+                {showFeedbackModal && (
+                    <motion.div className="fixed inset-0 z-[110] bg-black/90 backdrop-blur-xl flex items-center justify-center p-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                        <div className="w-full max-w-lg bg-[#121212] border border-white/10 rounded-2xl p-8">
+                            <h2 className="text-2xl font-serif mb-4 text-accent">Corrigir Conhecimento</h2>
+                            <p className="text-gray-400 text-sm mb-4">
+                                O usuário perguntou: <span className="text-white italic">"{showFeedbackModal.userMessage}"</span>
+                                <br/>A IA respondeu (e foi ruim): <span className="text-red-400 italic">"{showFeedbackModal.aiResponse}"</span>
+                            </p>
+                            
+                            <label className="block text-xs uppercase text-gray-500 mb-2">Qual a resposta correta?</label>
+                            <textarea 
+                                className="w-full bg-black/30 border border-white/10 rounded p-3 text-sm h-32 focus:border-accent outline-none"
+                                value={fixAnswer}
+                                onChange={(e) => setFixAnswer(e.target.value)}
+                                placeholder="Digite a informação correta para a IA aprender..."
+                            />
+                            
+                            <div className="mt-6 flex justify-end gap-4">
+                                <button onClick={() => setShowFeedbackModal(null)} className="px-6 py-2 border border-white/10 rounded">Cancelar</button>
+                                <button onClick={handleResolveFeedback} className="bg-accent text-white px-6 py-2 rounded font-bold">Salvar & Ensinar</button>
                             </div>
                         </div>
                     </motion.div>

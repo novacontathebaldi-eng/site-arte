@@ -4,7 +4,7 @@ import { GoogleGenAI, FunctionDeclaration, Tool, SchemaType } from "@google/gena
 import { getCollection, createDocument } from "@/lib/firebase/firestore";
 import { registerClientToBrevo } from "./registerClient";
 import { Product } from "@/types";
-import { getChatConfig } from "./admin";
+import { getChatConfig, getKnowledgeBase } from "./admin";
 import { db } from "@/lib/firebase/config";
 import { collection, query, where, getDocs, Timestamp, addDoc } from "firebase/firestore";
 import { headers } from "next/headers";
@@ -50,8 +50,9 @@ const tools: Tool[] = [
 
 async function checkRateLimit(ip: string): Promise<boolean> {
     try {
+        // Configuração dinâmica do Admin
         const config = await getChatConfig();
-        const { maxMessages, windowMinutes } = config.rateLimit;
+        const { maxMessages, windowMinutes } = config.rateLimit || { maxMessages: 20, windowMinutes: 5 };
         
         // Calculate the timestamp for X minutes ago
         const now = new Date();
@@ -137,8 +138,24 @@ export async function generateChatResponse(
       return { text: "Você enviou muitas mensagens em pouco tempo. Por favor, aguarde alguns minutos." };
   }
 
-  // Load Config
+  // Load Config & Knowledge Base
   const chatConfig = await getChatConfig();
+  const knowledgeBase = await getKnowledgeBase();
+  
+  // Prepare Knowledge Base Context Injection
+  const kbContext = knowledgeBase.map(kb => `Q: ${kb.question}\nA: ${kb.answer}`).join('\n\n');
+  
+  const systemInstruction = `
+    ${chatConfig.systemPrompt}
+    
+    --- KNOWLEDGE BASE (CORRECTIONS & FACTS) ---
+    Use the following Q&A pairs to guide your answers if relevant to the user's query. Priority is High.
+    ${kbContext}
+    --------------------------------------------
+
+    If products are found via tool, respond enthusiastically and ask if they want to see details.
+  `;
+
   const ai = new GoogleGenAI({ apiKey: API_KEY });
   let foundProducts: Product[] = [];
 
@@ -153,7 +170,7 @@ export async function generateChatResponse(
 
     const chat = model.startChat({
       history: history,
-      systemInstruction: chatConfig.systemPrompt + `\n\nIf products are found via tool, respond enthusiastically and ask if they want to see details.`
+      systemInstruction: systemInstruction
     });
 
     // 1. Send User Message
