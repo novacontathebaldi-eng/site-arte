@@ -128,6 +128,13 @@ export async function generateChatResponse(
 
     // 2. Config & Knowledge Base
     const chatConfig = await getChatConfig();
+    
+    // --- DEBUG LOGGING ---
+    console.log("-----------------------------------------------------");
+    console.log("[CHATBOT] Loaded System Prompt from Firestore:");
+    console.log(chatConfig.systemPrompt);
+    console.log("-----------------------------------------------------");
+
     const knowledgeBase = await getKnowledgeBase();
     
     const kbContext = knowledgeBase.map(kb => `Correct Fact: When asked "${kb.question}", the answer is "${kb.answer}"`).join('\n');
@@ -172,7 +179,7 @@ export async function generateChatResponse(
     let finalText = "";
     let foundProducts: Product[] = [];
     
-    // 5. Handle Tool Calls
+    // 5. Handle Tool Calls using modern SDK getter
     const toolCalls = result.functionCalls || [];
 
     if (toolCalls.length > 0) {

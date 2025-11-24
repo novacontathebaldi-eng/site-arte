@@ -1,8 +1,8 @@
-
 'use server';
 
 import { BrevoContact, ChatConfig, ChatFeedback, KnowledgeBaseItem } from '../../types/admin';
 import { adminDb, adminAuth } from '../../lib/firebase/admin';
+import { unstable_noStore as noStore } from 'next/cache';
 
 interface BrevoStats {
   subscribers: number; 
@@ -125,6 +125,7 @@ export async function syncFirestoreToBrevo(): Promise<{ added: number, errors: n
 // --- CHATBOT ADMIN ACTIONS ---
 
 export async function getChatConfig(): Promise<ChatConfig> {
+    noStore(); // Opt out of static caching
     try {
         const docSnap = await adminDb.collection('chatbot_settings').doc('config').get();
         
