@@ -1,8 +1,9 @@
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, LayoutDashboard, Package, Users, MessageSquare, Plus, Edit, Trash2, Save, Upload, Search, Filter, TrendingUp, DollarSign, RefreshCw, Lock, Globe, MoveUp, MoveDown, Check, ThumbsDown, AlertCircle, Move, Loader2, Settings, Database, AlertTriangle } from 'lucide-react';
+import { X, LayoutDashboard, Package, Users, MessageSquare, Plus, Edit, Trash2, Save, Upload, Search, Filter, TrendingUp, DollarSign, RefreshCw, Lock, Globe, MoveUp, MoveDown, Check, ThumbsDown, AlertCircle, Move, Loader2, Settings, Database, AlertTriangle, ToggleLeft, ToggleRight } from 'lucide-react';
 import { useAuthStore } from '../store';
 import { db } from '../lib/firebase/config';
 import { deleteDocument, subscribeToCollection, updateDocument } from '../lib/firebase/firestore';
@@ -491,15 +492,44 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
                             {/* CONFIG */}
                             <div className="bg-[#151515] p-6 rounded-xl border border-white/10 space-y-6">
                                 <h3 className="text-lg font-serif border-b border-white/10 pb-4 mb-4">Personalidade da IA</h3>
+                                
+                                {/* TOGGLE OVERRIDE */}
+                                <div className="flex items-center justify-between bg-black/30 p-4 rounded border border-white/10">
+                                    <div className="flex items-center gap-3">
+                                        {chatConfig.useCustomPrompt ? (
+                                            <ToggleRight size={32} className="text-accent cursor-pointer" onClick={() => setChatConfig({...chatConfig, useCustomPrompt: false})} />
+                                        ) : (
+                                            <ToggleLeft size={32} className="text-gray-500 cursor-pointer" onClick={() => setChatConfig({...chatConfig, useCustomPrompt: true})} />
+                                        )}
+                                        <div>
+                                            <span className="block text-sm font-bold text-white">Usar Prompt Personalizado</span>
+                                            <span className="text-xs text-gray-500">Se desligado, usa o Prompt Padrão de Fábrica (Seguro).</span>
+                                        </div>
+                                    </div>
+                                    {!chatConfig.useCustomPrompt && (
+                                        <span className="text-[10px] bg-green-900/30 text-green-500 px-2 py-1 rounded border border-green-500/20 uppercase font-bold">Modo Seguro</span>
+                                    )}
+                                </div>
+
                                 <div>
                                     <label className="block text-xs uppercase text-gray-500 mb-2">System Prompt (Instruções)</label>
                                     <textarea 
                                         value={chatConfig.systemPrompt}
                                         onChange={e => setChatConfig({...chatConfig, systemPrompt: e.target.value})}
                                         rows={12}
-                                        className="w-full bg-black/30 border border-white/10 rounded p-4 text-sm text-gray-300 focus:border-accent focus:outline-none leading-relaxed"
+                                        disabled={!chatConfig.useCustomPrompt}
+                                        className={cn(
+                                            "w-full bg-black/30 border border-white/10 rounded p-4 text-sm text-gray-300 focus:border-accent focus:outline-none leading-relaxed transition-opacity",
+                                            !chatConfig.useCustomPrompt && "opacity-50 cursor-not-allowed"
+                                        )}
                                     />
+                                    {!chatConfig.useCustomPrompt && (
+                                        <p className="text-xs text-yellow-500 mt-2 flex items-center gap-1">
+                                            <AlertTriangle size={12} /> O prompt acima está inativo. O sistema está usando o padrão interno.
+                                        </p>
+                                    )}
                                 </div>
+                                
                                 <div>
                                     <label className="block text-xs uppercase text-gray-500 mb-2">Criatividade (Temperatura: {chatConfig.modelTemperature})</label>
                                     <input 

@@ -1,3 +1,4 @@
+
 'use server';
 
 import { BrevoContact, ChatConfig, ChatFeedback, KnowledgeBaseItem } from '../../types/admin';
@@ -10,7 +11,8 @@ interface BrevoStats {
   campaigns: number;
 }
 
-const DEFAULT_SYSTEM_PROMPT = `Você é o Meeh Assistant, o concierge virtual da Galeria Melissa Pelussi Art. Sua missão é vender arte com elegância.
+// EXPORTADO PARA USO NO FALLBACK
+export const DEFAULT_SYSTEM_PROMPT = `Você é o Meeh Assistant, o concierge virtual da Galeria Melissa Pelussi Art. Sua missão é vender arte com elegância.
 - Tom: Sofisticado, acolhedor e profissional.
 - Idioma: Detecte o idioma do usuário (PT/EN/FR/DE) e responda no mesmo.
 - Contexto: Você tem acesso ao catálogo. Se perguntarem preço, busque nos dados fornecidos.
@@ -131,8 +133,9 @@ export async function getChatConfig(): Promise<ChatConfig> {
         
         if (docSnap.exists) {
             const data = docSnap.data() as any;
-            // Validação e Fallback se systemPrompt estiver vazio
+            // Validação e Fallback
             return {
+                useCustomPrompt: data.useCustomPrompt ?? false, // Default OFF for safety
                 systemPrompt: data.systemPrompt || DEFAULT_SYSTEM_PROMPT,
                 modelTemperature: data.modelTemperature ?? 0.7,
                 rateLimit: {
@@ -145,6 +148,7 @@ export async function getChatConfig(): Promise<ChatConfig> {
         
         // If config doesn't exist, create it with defaults immediately
         const defaultConfig: ChatConfig = {
+            useCustomPrompt: false,
             systemPrompt: DEFAULT_SYSTEM_PROMPT,
             modelTemperature: 0.7,
             rateLimit: { maxMessages: 20, windowMinutes: 5 },
@@ -161,6 +165,7 @@ export async function getChatConfig(): Promise<ChatConfig> {
     } catch (e) {
         console.error("Error fetching chat config:", e);
         return {
+            useCustomPrompt: false,
             systemPrompt: DEFAULT_SYSTEM_PROMPT,
             modelTemperature: 0.7,
             rateLimit: { maxMessages: 20, windowMinutes: 5 },
@@ -181,15 +186,12 @@ export async function updateChatConfig(config: ChatConfig) {
 
 export async function getChatFeedback(): Promise<ChatFeedback[]> {
     try {
-        // Simplified query to avoid Composite Index Requirement error
-        // We filter in-memory which is fine for Admin panel scale
         const snapshot = await adminDb.collection('chat_feedback')
             .where('feedback', '==', 'dislike')
             .get();
 
         let items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ChatFeedback));
         
-        // In-memory filter & sort
         items = items.filter(i => i.resolved === false);
         items.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 

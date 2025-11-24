@@ -29,6 +29,7 @@ export interface KnowledgeBaseItem {
 }
 
 export interface ChatConfig {
+  useCustomPrompt: boolean; // NOVO: Controle de Override
   systemPrompt: string;
   modelTemperature: number;
   rateLimit: {

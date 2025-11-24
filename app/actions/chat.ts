@@ -1,9 +1,10 @@
+
 'use server';
 
 import { GoogleGenAI, Type, FunctionDeclaration } from "@google/genai";
 import { registerClientToBrevo } from "./registerClient";
 import { Product } from "@/types";
-import { getChatConfig, getKnowledgeBase } from "./admin";
+import { getChatConfig, getKnowledgeBase, DEFAULT_SYSTEM_PROMPT } from "./admin";
 import { adminDb } from "@/lib/firebase/admin";
 import { headers } from "next/headers";
 
@@ -48,7 +49,6 @@ async function checkRateLimit(ip: string): Promise<boolean> {
         const now = new Date();
         const windowStart = new Date(now.getTime() - windowMinutes * 60000);
 
-        // Usando Admin SDK syntax
         const snapshot = await adminDb.collection('chat_logs')
             .where('ip', '==', ip)
             .where('timestamp', '>=', windowStart.toISOString())
@@ -63,7 +63,6 @@ async function checkRateLimit(ip: string): Promise<boolean> {
 
 async function executeProductSearch(args: any): Promise<{ info: string, products: Product[] }> {
   try {
-    // Busca produtos usando Admin SDK
     const snapshot = await adminDb.collection('products').get();
     const allProducts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
     
@@ -128,14 +127,23 @@ export async function generateChatResponse(
 
     // 2. Config & Knowledge Base
     const chatConfig = await getChatConfig();
-    
-    // --- DEBUG LOGGING ---
-    console.log("-----------------------------------------------------");
-    console.log("[CHATBOT] Loaded System Prompt from Firestore:");
-    console.log(chatConfig.systemPrompt);
-    console.log("-----------------------------------------------------");
-
     const knowledgeBase = await getKnowledgeBase();
+    
+    // --- PROMPT SELECTION LOGIC ---
+    let activeSystemPrompt = DEFAULT_SYSTEM_PROMPT;
+    
+    if (chatConfig.useCustomPrompt && chatConfig.systemPrompt && chatConfig.systemPrompt.trim().length > 0) {
+        activeSystemPrompt = chatConfig.systemPrompt;
+        console.log(">> CHATBOT: Usando PROMPT PERSONALIZADO do Admin.");
+    } else {
+        console.log(">> CHATBOT: Usando PROMPT PADRÃO (Fallback).");
+    }
+
+    // Logging de Diagnóstico
+    console.log(">> Current Config:", JSON.stringify({ 
+        useCustom: chatConfig.useCustomPrompt, 
+        temp: chatConfig.modelTemperature 
+    }));
     
     const kbContext = knowledgeBase.map(kb => `Correct Fact: When asked "${kb.question}", the answer is "${kb.answer}"`).join('\n');
     
@@ -144,7 +152,7 @@ export async function generateChatResponse(
         : `User is a guest. Try to get their name and email politely later.`;
 
     const systemInstruction = `
-      ${chatConfig.systemPrompt}
+      ${activeSystemPrompt}
       
       CONTEXT:
       ${userContext}
@@ -179,7 +187,6 @@ export async function generateChatResponse(
     let finalText = "";
     let foundProducts: Product[] = [];
     
-    // 5. Handle Tool Calls using modern SDK getter
     const toolCalls = result.functionCalls || [];
 
     if (toolCalls.length > 0) {
