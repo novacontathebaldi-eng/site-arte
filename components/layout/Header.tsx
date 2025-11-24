@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { ShoppingBag, User, Search, Menu, X, Lock } from 'lucide-react';
+import { ShoppingBag, User, Search, Menu, X, Lock, Loader2 } from 'lucide-react';
 import { useUIStore, useCartStore, useAuthStore } from '../../store';
 import { useLanguage } from '../../hooks/useLanguage';
 import { motion } from 'framer-motion';
@@ -13,7 +13,7 @@ const AdminDashboard = dynamic(() => import('../AdminDashboard').then(mod => mod
 export const Header: React.FC = () => {
   const { isCartOpen, toggleCart, isMobileMenuOpen, toggleMobileMenu, toggleSearch, openAuthModal, toggleDashboard, isDashboardOpen } = useUIStore();
   const { items } = useCartStore();
-  const { user } = useAuthStore();
+  const { user, isLoading } = useAuthStore();
   const { isAdmin } = useAdmin();
   const { t } = useLanguage();
   const [scrolled, setScrolled] = useState(false);
@@ -37,6 +37,8 @@ export const Header: React.FC = () => {
 
   const handleUserClick = (e: React.MouseEvent) => {
     e.preventDefault();
+    if (isLoading) return;
+    
     if (user) {
         if (!isDashboardOpen) toggleDashboard();
     } else {
@@ -85,9 +87,16 @@ export const Header: React.FC = () => {
           <button 
             onClick={handleUserClick}
             className="hover:text-accent transition-colors flex items-center gap-2 cursor-pointer"
+            disabled={isLoading}
           >
-            <User size={20} />
-            {mounted && user && <span className="text-xs uppercase tracking-wider">{user.displayName?.split(' ')[0]}</span>}
+            {isLoading ? (
+                <Loader2 size={20} className="animate-spin opacity-50" />
+            ) : (
+                <>
+                    <User size={20} />
+                    {mounted && user && <span className="text-xs uppercase tracking-wider">{user.displayName?.split(' ')[0]}</span>}
+                </>
+            )}
           </button>
 
           <button id="header-cart-btn" onClick={toggleCart} className="relative hover:text-accent transition-colors cursor-pointer" aria-label={t('cart.title')}>

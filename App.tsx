@@ -3,7 +3,7 @@
 
 import React, { useEffect } from 'react';
 import dynamic from 'next/dynamic';
-import { useThemeStore } from './store';
+import { useThemeStore, useAuthStore } from './store';
 import { Header } from './components/layout/Header';
 import { Footer } from './components/layout/Footer';
 import { Hero } from './components/Hero';
@@ -33,7 +33,13 @@ const Dashboard = dynamic(() => import('./components/Dashboard').then(mod => mod
 
 const App: React.FC = () => {
   const { theme } = useThemeStore();
+  const { checkAuth } = useAuthStore(); // Auth Store
   const { t } = useLanguage();
+
+  // Initialize Auth Listener Globally
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
 
   // Setup Theme
   useEffect(() => {

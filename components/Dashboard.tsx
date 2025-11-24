@@ -57,7 +57,7 @@ const InputField = ({ label, value, onChange, placeholder, required = false, typ
 
 export const Dashboard: React.FC = () => {
     const { isDashboardOpen, toggleDashboard, closeAllOverlays } = useUIStore();
-    const { user, logout, setUser } = useAuthStore();
+    const { user, logout, setUser, isLoading } = useAuthStore();
     const { items: wishlistIds } = useWishlistStore();
     const { t } = useLanguage();
     
@@ -88,16 +88,12 @@ export const Dashboard: React.FC = () => {
         phoneNumber: ''
     });
 
-    // --- Critical Fix: Auto-close if user is missing but dashboard is open ---
+    // --- Critical Fix: Auto-close only if NOT loading and user is missing ---
     useEffect(() => {
-        if (isDashboardOpen && !user) {
-            // Pequeno delay para evitar flash se o user estiver carregando
-            const timer = setTimeout(() => {
-                if (!user) closeAllOverlays();
-            }, 500);
-            return () => clearTimeout(timer);
+        if (isDashboardOpen && !isLoading && !user) {
+            closeAllOverlays();
         }
-    }, [isDashboardOpen, user, closeAllOverlays]);
+    }, [isDashboardOpen, user, isLoading, closeAllOverlays]);
 
     // --- Effects ---
 
@@ -258,10 +254,10 @@ export const Dashboard: React.FC = () => {
                             transition: { type: 'spring', damping: 30, stiffness: 300 }
                         } as any)}
                     >
-                        {!user ? (
+                        {isLoading || !user ? (
                             <div className="w-full h-full flex items-center justify-center flex-col gap-4 text-white">
                                 <Loader2 size={48} className="animate-spin text-accent" />
-                                <p className="text-sm uppercase tracking-widest animate-pulse">Sincronizando...</p>
+                                <p className="text-sm uppercase tracking-widest animate-pulse">Sincronizando Perfil...</p>
                             </div>
                         ) : (
                             <>
