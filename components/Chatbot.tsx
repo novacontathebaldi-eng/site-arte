@@ -1,6 +1,7 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageCircle, X, Send, Loader2, Sparkles, ThumbsUp, ThumbsDown, Copy, Minimize2, ShoppingBag } from 'lucide-react';
+import { MessageCircle, X, Send, Loader2, Sparkles, ThumbsUp, ThumbsDown, Copy, Minimize2, ShoppingBag, Check } from 'lucide-react';
 import { useUIStore, useAuthStore } from '../store';
 import { generateChatResponse, submitChatFeedback } from '../app/actions/chat';
 import { ChatMessage, Product } from '../types';
@@ -109,6 +110,7 @@ export const Chatbot: React.FC = () => {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [hasInteracted, setHasInteracted] = useState(false);
   const [starters, setStarters] = useState<ChatStarter[]>([]);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -127,7 +129,7 @@ export const Chatbot: React.FC = () => {
     loadConfig();
   }, [isChatOpen]);
 
-  // Initial Welcome
+  // Initial Welcome (Instant, no typewriter for UX on reopen)
   useEffect(() => {
     if (isChatOpen && !hasInteracted && messages.length === 0) {
         setMessages([{ 
@@ -209,8 +211,10 @@ export const Chatbot: React.FC = () => {
       }
   };
 
-  const handleCopy = (text: string) => {
+  const handleCopy = (text: string, id: string) => {
       navigator.clipboard.writeText(text);
+      setCopiedId(id);
+      setTimeout(() => setCopiedId(null), 2000);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -299,29 +303,32 @@ export const Chatbot: React.FC = () => {
 
                             {/* Bot Actions Row (Outside Bubble) */}
                             {msg.role === 'model' && (
-                                <div className="flex items-center gap-3 mt-2 ml-2">
+                                <div className="flex items-center gap-3 mt-1 ml-2 select-none">
                                     <span className="text-[10px] text-gray-400">
                                         {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                     </span>
                                     
-                                    <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity bg-gray-100 dark:bg-white/5 px-2 py-1 rounded-full">
+                                    {/* Actions - Always visible now, but subtle */}
+                                    <div className="flex items-center gap-2 bg-gray-100 dark:bg-white/5 px-2 py-1 rounded-full transition-all border border-transparent hover:border-gray-200 dark:hover:border-white/10">
                                         <button 
-                                            onClick={() => handleCopy(msg.text)}
+                                            onClick={() => handleCopy(msg.text, msg.id)}
                                             className="text-gray-400 hover:text-accent transition-colors"
-                                            title="Copiar"
+                                            title="Copiar mensagem"
                                         >
-                                            <Copy size={12}/>
+                                            {copiedId === msg.id ? <Check size={12} className="text-green-500" /> : <Copy size={12}/>}
                                         </button>
                                         <div className="w-px h-3 bg-gray-300 dark:bg-white/10" />
                                         <button 
                                             onClick={() => handleFeedback(msg, 'like')}
                                             className={cn("transition-colors", msg.feedback === 'like' ? "text-green-500" : "text-gray-400 hover:text-green-500")}
+                                            title="Gostei"
                                         >
                                             <ThumbsUp size={12}/>
                                         </button>
                                         <button 
                                             onClick={() => handleFeedback(msg, 'dislike')}
                                             className={cn("transition-colors", msg.feedback === 'dislike' ? "text-red-500" : "text-gray-400 hover:text-red-500")}
+                                            title="Não gostei"
                                         >
                                             <ThumbsDown size={12}/>
                                         </button>
