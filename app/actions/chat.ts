@@ -173,11 +173,7 @@ export async function generateChatResponse(
     let foundProducts: Product[] = [];
     
     // 5. Handle Tool Calls
-    const candidates = result.candidates;
-    const firstCandidate = candidates?.[0];
-    const content = firstCandidate?.content;
-
-    const toolCalls = content?.parts?.filter(p => p.functionCall)?.map(p => p.functionCall) || [];
+    const toolCalls = result.functionCalls || [];
 
     if (toolCalls.length > 0) {
       const responseParts: any[] = [];
