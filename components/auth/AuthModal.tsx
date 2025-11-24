@@ -305,9 +305,11 @@ export const AuthModal: React.FC = () => {
                         </form>
 
                         <div className="relative flex items-center gap-4 my-8">
-                            <div className="flex-1 h-[1px] bg-gray-200 dark:bg-white/10"></div>
-                            <span className="text-[10px] text-gray-400 dark:text-gray-500 uppercase font-medium">Ou continue com</span>
-                            <div className="flex-1 h-[1px] bg-gray-200 dark:bg-white/10"></div>
+                            {/* Darker separator lines for better visibility in light mode */}
+                            <div className="flex-1 h-[1px] bg-gray-300 dark:bg-white/10"></div>
+                            {/* Darker text color (gray-600) and bold for better contrast */}
+                            <span className="text-[10px] text-gray-600 dark:text-gray-400 uppercase font-semibold">Ou continue com</span>
+                            <div className="flex-1 h-[1px] bg-gray-300 dark:bg-white/10"></div>
                         </div>
 
                         {/* Google Button - Glass Style */}
@@ -321,7 +323,8 @@ export const AuthModal: React.FC = () => {
                         
                         {authView === 'login' && (
                             <div className="mt-6 text-center">
-                                <button className="text-xs text-gray-400 hover:text-accent transition-colors font-medium">
+                                {/* Darker text color and bold for Forgot Password */}
+                                <button className="text-xs text-gray-600 dark:text-gray-400 hover:text-accent transition-colors font-semibold">
                                     Esqueceu sua senha?
                                 </button>
                             </div>
