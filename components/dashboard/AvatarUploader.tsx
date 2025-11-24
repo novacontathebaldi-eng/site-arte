@@ -1,14 +1,13 @@
 import React, { useState, useRef } from 'react';
 import { Camera, Loader2, Trash2, Upload, Check, X } from 'lucide-react';
 import { useAuthStore } from '../../store';
-import { uploadImage, deleteImage, getPublicUrl } from '../../lib/supabase/storage';
+import { uploadImage, deleteImage, getPublicUrl, STORAGE_BUCKET } from '../../lib/supabase/storage';
 import { updateDocument } from '../../lib/firebase/firestore';
 import { auth } from '../../lib/firebase/config';
 import { updateProfile } from 'firebase/auth';
 import { cn } from '../../lib/utils';
 
-const DEFAULT_AVATAR = "https://pycvlkcxgfwsquzolkzw.supabase.co/storage/v1/object/public/storage-arte/img_perfil.jpg";
-const BUCKET = "storage-arte";
+const DEFAULT_AVATAR = `https://pycvlkcxgfwsquzolkzw.supabase.co/storage/v1/object/public/${STORAGE_BUCKET}/avatars/default_profile.jpg`;
 
 export const AvatarUploader: React.FC = () => {
   const { user, setUser } = useAuthStore();
@@ -37,8 +36,9 @@ export const AvatarUploader: React.FC = () => {
         // 1. Delete old custom photo if exists
         if (isCustomPhoto) {
             try {
-                const oldPath = currentPhoto.split(`${BUCKET}/`)[1];
-                if (oldPath) await deleteImage(BUCKET, oldPath);
+                // Extract path from URL (naive check, better to store path in DB but this works for now)
+                const urlParts = currentPhoto.split(`${STORAGE_BUCKET}/`);
+                if (urlParts[1]) await deleteImage(STORAGE_BUCKET, urlParts[1]);
             } catch (e) {
                 console.warn("Could not delete old image", e);
             }
@@ -46,11 +46,11 @@ export const AvatarUploader: React.FC = () => {
 
         // 2. Upload new
         const fileExt = selectedFile.name.split('.').pop();
-        const fileName = `avatar-${user.uid}-${Date.now()}.${fileExt}`;
-        const { path } = await uploadImage(BUCKET, selectedFile, `avatars/${fileName}`);
+        const fileName = `avatars/avatar-${user.uid}-${Date.now()}.${fileExt}`;
+        const { path } = await uploadImage(STORAGE_BUCKET, selectedFile, fileName);
         
         // 3. Get URL
-        const publicUrl = getPublicUrl(BUCKET, path);
+        const publicUrl = getPublicUrl(STORAGE_BUCKET, path);
 
         // 4. Update Auth & Firestore
         if (auth.currentUser) {
@@ -85,8 +85,8 @@ export const AvatarUploader: React.FC = () => {
     setIsUploading(true);
     try {
         // 1. Delete from Storage
-        const oldPath = currentPhoto.split(`${BUCKET}/`)[1];
-        if (oldPath) await deleteImage(BUCKET, oldPath);
+        const urlParts = currentPhoto.split(`${STORAGE_BUCKET}/`);
+        if (urlParts[1]) await deleteImage(STORAGE_BUCKET, urlParts[1]);
 
         // 2. Reset to Default
         if (auth.currentUser) {

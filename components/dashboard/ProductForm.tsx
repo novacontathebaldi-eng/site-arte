@@ -6,7 +6,7 @@ import { productSchema, ProductFormValues } from '../../lib/validators/product';
 import { Product, ProductCategory, ProductImage } from '../../types/product';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Save, X, Upload, Trash2, Star, Image as ImageIcon, Languages, Box, Tag, Globe, Loader2 } from 'lucide-react';
-import { uploadImage, getPublicUrl } from '../../lib/supabase/storage';
+import { uploadImage, getPublicUrl, STORAGE_BUCKET } from '../../lib/supabase/storage';
 import { createDocument, updateDocument } from '../../lib/firebase/firestore';
 import { cn } from '../../lib/utils';
 import { useToast } from '../ui/Toast';
@@ -85,8 +85,11 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, onClose, 
         const newImages: ProductImage[] = [];
         for (let i = 0; i < files.length; i++) {
             const file = files[i];
-            const { path } = await uploadImage("products", file, `prod-${Date.now()}-${i}`);
-            const url = getPublicUrl("products", path);
+            // Fix: Use correct bucket and 'products' folder
+            const fileName = `products/prod-${Date.now()}-${i}-${file.name.replace(/[^a-zA-Z0-9.]/g, '')}`;
+            const { path } = await uploadImage(STORAGE_BUCKET, file, fileName);
+            const url = getPublicUrl(STORAGE_BUCKET, path);
+            
             newImages.push({
                 id: Math.random().toString(36).substr(2, 9),
                 url,

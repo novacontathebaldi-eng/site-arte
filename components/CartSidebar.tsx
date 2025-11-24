@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Trash2, ShoppingBag, CreditCard, Plus, Minus, ArrowRight, Heart } from 'lucide-react';
@@ -249,7 +250,7 @@ export const CartSidebar: React.FC = () => {
                             
                             <button 
                                 onClick={handleCheckout}
-                                className="w-full bg-primary dark:bg-white text-white dark:text-primary py-4 font-bold uppercase tracking-[0.2em] text-xs hover:bg-accent dark:hover:bg-gray-200 transition-colors flex items-center justify-center gap-3 shadow-xl group"
+                                className="w-full bg-accent text-white py-4 font-bold uppercase tracking-[0.2em] text-xs hover:bg-[#b59328] transition-all flex items-center justify-center gap-3 shadow-lg hover:shadow-xl hover:-translate-y-0.5 group"
                             >
                                 {t('cart.checkout')}
                                 <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
