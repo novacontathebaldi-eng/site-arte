@@ -1,8 +1,7 @@
 'use server';
 
 import { BrevoContact, ChatConfig, ChatFeedback, KnowledgeBaseItem } from '../../types/admin';
-import { db } from '../../lib/firebase/config';
-import { doc, getDoc, setDoc, collection, getDocs, query, where, orderBy, updateDoc, addDoc } from 'firebase/firestore';
+import { adminDb, adminAuth } from '../../lib/firebase/admin';
 
 interface BrevoStats {
   subscribers: number; 
@@ -93,10 +92,11 @@ export async function syncFirestoreToBrevo(): Promise<{ added: number, errors: n
     let errors = 0;
 
     try {
-        const usersSnap = await getDocs(collection(db, 'users'));
-        const users = usersSnap.docs.map(d => d.data());
-
-        for (const user of users) {
+        // ADMIN SDK: Lista todos os usuários sem restrição de regras
+        const usersSnap = await adminDb.collection('users').get();
+        
+        for (const doc of usersSnap.docs) {
+            const user = doc.data();
             if (user.email) {
                 try {
                     const response = await fetch('https://api.brevo.com/v3/contacts', {
@@ -138,11 +138,10 @@ export async function syncFirestoreToBrevo(): Promise<{ added: number, errors: n
 
 export async function getChatConfig(): Promise<ChatConfig> {
     try {
-        const docRef = doc(db, 'chatbot_settings', 'config');
-        const docSnap = await getDoc(docRef);
+        const docSnap = await adminDb.collection('chatbot_settings').doc('config').get();
         
-        if (docSnap.exists()) {
-            const data = docSnap.data();
+        if (docSnap.exists) {
+            const data = docSnap.data() as any;
             return {
                 systemPrompt: data.systemPrompt || DEFAULT_SYSTEM_PROMPT,
                 modelTemperature: data.modelTemperature ?? 0.7,
@@ -166,12 +165,11 @@ export async function getChatConfig(): Promise<ChatConfig> {
             ]
         };
 
-        await setDoc(docRef, defaultConfig);
+        await adminDb.collection('chatbot_settings').doc('config').set(defaultConfig);
         return defaultConfig;
 
     } catch (e) {
         console.error("Error fetching chat config:", e);
-        // Fallback to avoid UI crash
         return {
             systemPrompt: DEFAULT_SYSTEM_PROMPT,
             modelTemperature: 0.7,
@@ -183,9 +181,7 @@ export async function getChatConfig(): Promise<ChatConfig> {
 
 export async function updateChatConfig(config: ChatConfig) {
     try {
-        const docRef = doc(db, 'chatbot_settings', 'config');
-        // Deep merge is safer
-        await setDoc(docRef, config, { merge: true });
+        await adminDb.collection('chatbot_settings').doc('config').set(config, { merge: true });
         return { success: true };
     } catch (e) {
         console.error("Error updating chat config:", e);
@@ -195,13 +191,12 @@ export async function updateChatConfig(config: ChatConfig) {
 
 export async function getChatFeedback(): Promise<ChatFeedback[]> {
     try {
-        const q = query(
-            collection(db, 'chat_feedback'), 
-            where('feedback', '==', 'dislike'),
-            where('resolved', '==', false),
-            orderBy('timestamp', 'desc')
-        );
-        const snapshot = await getDocs(q);
+        const snapshot = await adminDb.collection('chat_feedback')
+            .where('feedback', '==', 'dislike')
+            .where('resolved', '==', false)
+            .orderBy('timestamp', 'desc')
+            .get();
+
         return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ChatFeedback));
     } catch (e) {
         console.error("Error fetching feedback:", e);
@@ -211,10 +206,10 @@ export async function getChatFeedback(): Promise<ChatFeedback[]> {
 
 export async function resolveFeedback(feedbackId: string, solution?: KnowledgeBaseItem) {
     try {
-        await updateDoc(doc(db, 'chat_feedback', feedbackId), { resolved: true });
+        await adminDb.collection('chat_feedback').doc(feedbackId).update({ resolved: true });
 
         if (solution) {
-            await addDoc(collection(db, 'chatbot_knowledge_base'), {
+            await adminDb.collection('chatbot_knowledge_base').add({
                 ...solution,
                 createdAt: new Date().toISOString()
             });
@@ -228,7 +223,7 @@ export async function resolveFeedback(feedbackId: string, solution?: KnowledgeBa
 
 export async function getKnowledgeBase(): Promise<KnowledgeBaseItem[]> {
     try {
-        const snapshot = await getDocs(collection(db, 'chatbot_knowledge_base'));
+        const snapshot = await adminDb.collection('chatbot_knowledge_base').get();
         return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as KnowledgeBaseItem));
     } catch(e) {
         return [];
@@ -237,7 +232,7 @@ export async function getKnowledgeBase(): Promise<KnowledgeBaseItem[]> {
 
 export async function logAudit(action: string, details: string, userEmail: string) {
     try {
-        await addDoc(collection(db, 'admin_audit_logs'), {
+        await adminDb.collection('admin_audit_logs').add({
             action,
             details,
             user: userEmail,

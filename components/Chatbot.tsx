@@ -211,7 +211,6 @@ export const Chatbot: React.FC = () => {
 
   const handleCopy = (text: string) => {
       navigator.clipboard.writeText(text);
-      // Optional: Add a small tooltip or icon change to indicate success could be nice
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -275,6 +274,9 @@ export const Chatbot: React.FC = () => {
             >
                 {messages.map((msg, idx) => {
                     const isLast = idx === messages.length - 1;
+                    // Dont type welcome message
+                    const shouldType = msg.role === 'model' && isLast && !msg.products && msg.id !== 'welcome';
+
                     return (
                         <motion.div 
                             key={msg.id} 
@@ -288,7 +290,7 @@ export const Chatbot: React.FC = () => {
                                     ? "bg-primary dark:bg-white text-white dark:text-black rounded-2xl rounded-tr-sm" 
                                     : "bg-white dark:bg-[#1e1e1e] text-gray-800 dark:text-gray-200 rounded-2xl rounded-tl-sm border border-gray-100 dark:border-white/5"
                             )}>
-                                {msg.role === 'model' && isLast && !msg.products ? (
+                                {shouldType ? (
                                     <TypewriterText text={msg.text} onComplete={scrollToBottom} />
                                 ) : (
                                     <p className="whitespace-pre-wrap">{msg.text}</p>

@@ -1,12 +1,10 @@
 'use server';
 
 import { GoogleGenAI, Type, FunctionDeclaration } from "@google/genai";
-import { getCollection } from "@/lib/firebase/firestore";
 import { registerClientToBrevo } from "./registerClient";
 import { Product } from "@/types";
 import { getChatConfig, getKnowledgeBase } from "./admin";
-import { db } from "@/lib/firebase/config";
-import { collection, query, where, getDocs, addDoc } from "firebase/firestore";
+import { adminDb } from "@/lib/firebase/admin";
 import { headers } from "next/headers";
 
 // --- 1. TOOL DEFINITIONS ---
@@ -50,13 +48,12 @@ async function checkRateLimit(ip: string): Promise<boolean> {
         const now = new Date();
         const windowStart = new Date(now.getTime() - windowMinutes * 60000);
 
-        const q = query(
-            collection(db, 'chat_logs'),
-            where('ip', '==', ip),
-            where('timestamp', '>=', windowStart.toISOString())
-        );
+        // Usando Admin SDK syntax
+        const snapshot = await adminDb.collection('chat_logs')
+            .where('ip', '==', ip)
+            .where('timestamp', '>=', windowStart.toISOString())
+            .get();
 
-        const snapshot = await getDocs(q);
         return snapshot.size < maxMessages;
     } catch (error) {
         console.error("Rate limit check failed, allowing by default", error);
@@ -66,7 +63,9 @@ async function checkRateLimit(ip: string): Promise<boolean> {
 
 async function executeProductSearch(args: any): Promise<{ info: string, products: Product[] }> {
   try {
-    const allProducts = (await getCollection('products')) as Product[];
+    // Busca produtos usando Admin SDK
+    const snapshot = await adminDb.collection('products').get();
+    const allProducts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
     
     let filtered = allProducts.filter(p => p.status !== 'sold');
 
@@ -220,8 +219,8 @@ export async function generateChatResponse(
       finalText = result.text || "";
     }
 
-    // 6. Log Interaction
-    const logRef = await addDoc(collection(db, 'chat_logs'), {
+    // 6. Log Interaction using Admin SDK
+    const logRef = await adminDb.collection('chat_logs').add({
         ip,
         userId: userInfo?.id || 'guest',
         userMessage: message,
@@ -243,7 +242,7 @@ export async function generateChatResponse(
 
 export async function submitChatFeedback(messageId: string, userMessage: string, aiResponse: string, feedback: 'like' | 'dislike') {
     try {
-        await addDoc(collection(db, 'chat_feedback'), {
+        await adminDb.collection('chat_feedback').add({
             messageId,
             userMessage,
             aiResponse,
