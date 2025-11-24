@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Trash2, ShoppingBag, CreditCard, Plus, Minus, ArrowRight, Heart } from 'lucide-react';
@@ -120,8 +119,11 @@ export const CartSidebar: React.FC = () => {
                     </button>
                     </div>
 
-                    {/* Items List */}
-                    <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                    {/* Items List - FIXED SCROLLING */}
+                    <div 
+                        className="flex-1 overflow-y-auto p-6 space-y-6 overscroll-contain"
+                        data-lenis-prevent // CRITICAL FIX
+                    >
                     {items.length === 0 ? (
                         <div className="flex flex-col items-center justify-center h-full text-gray-400 space-y-6">
                             <div className="w-24 h-24 bg-gray-100 dark:bg-white/5 rounded-full flex items-center justify-center">

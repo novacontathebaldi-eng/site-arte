@@ -326,7 +326,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
                     </div>
                 </header>
 
-                <div className="flex-1 overflow-y-auto p-8">
+                <div 
+                    className="flex-1 overflow-y-auto p-8 overscroll-contain"
+                    data-lenis-prevent // CRITICAL FIX: Allows internal scrolling in Admin Panel
+                >
                     <AnimatePresence mode="wait">
                         
                         {/* 1. ANALYTICS */}
@@ -547,7 +550,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
                         className="fixed inset-0 z-[110] bg-black/90 backdrop-blur-xl flex items-center justify-center p-4" 
                         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                     >
-                        <div className="w-full max-w-4xl bg-[#121212] border border-white/10 rounded-2xl p-8 overflow-y-auto max-h-[90vh]">
+                        <div 
+                            className="w-full max-w-4xl bg-[#121212] border border-white/10 rounded-2xl p-8 overflow-y-auto max-h-[90vh]"
+                            data-lenis-prevent // Critical for Modal Scroll
+                        >
                             <h2 className="text-2xl font-serif mb-6">Editar Produto</h2>
                             <div className="grid grid-cols-2 gap-6">
                                 <div className="space-y-4">

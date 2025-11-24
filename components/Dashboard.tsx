@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, LayoutDashboard, Package, Heart, LogOut, MapPin, User, Plus, Edit, Save, Trash2, Phone, Globe, CheckCircle, Loader2 } from 'lucide-react';
@@ -278,7 +277,7 @@ export const Dashboard: React.FC = () => {
                             </div>
                         </div>
 
-                        <div className="flex-1 py-8 px-4 space-y-2 overflow-y-auto">
+                        <div className="flex-1 py-8 px-4 space-y-2 overflow-y-auto" data-lenis-prevent>
                             <DashboardTab id="overview" label="Visão Geral" icon={LayoutDashboard} active={activeTab === 'overview'} onClick={() => setActiveTab('overview')} />
                             <DashboardTab id="orders" label="Meus Pedidos" icon={Package} active={activeTab === 'orders'} onClick={() => setActiveTab('orders')} />
                             <DashboardTab id="wishlist" label="Wishlist" icon={Heart} active={activeTab === 'wishlist'} onClick={() => setActiveTab('wishlist')} />
@@ -317,8 +316,8 @@ export const Dashboard: React.FC = () => {
 
                         {/* Scrollable Area */}
                         <div 
-                            className="flex-1 overflow-y-auto p-8 md:p-12"
-                            data-lenis-prevent // Critical: Stops global scroll hijacking
+                            className="flex-1 overflow-y-auto p-8 md:p-12 overscroll-contain"
+                            data-lenis-prevent // CRITICAL FIX
                         >
                             <AnimatePresence mode="wait">
                                 <motion.div

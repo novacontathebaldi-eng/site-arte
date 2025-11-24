@@ -27,6 +27,8 @@
 html, body {
   height: 100%;
   width: 100%;
+  /* Fix Lenis issues on Mac */
+  overscroll-behavior: none; 
 }
 
 /* Lenis Scroll Fixes */

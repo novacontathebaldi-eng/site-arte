@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ShoppingBag, Heart, Check, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -158,7 +157,10 @@ export const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onC
               )}
             </div>
 
-            <div className="w-full md:w-2/5 p-8 md:p-10 flex flex-col overflow-y-auto">
+            <div 
+                className="w-full md:w-2/5 p-8 md:p-10 flex flex-col overflow-y-auto overscroll-contain"
+                data-lenis-prevent // Critical for modal scroll
+            >
               <div className="flex-1">
                 <span className="text-accent text-xs font-bold uppercase tracking-widest mb-2 block">
                     {product.category}

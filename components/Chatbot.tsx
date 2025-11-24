@@ -46,8 +46,8 @@ const TypewriterText = ({ text, onComplete }: { text: string, onComplete?: () =>
 // --- SUB-COMPONENTS ---
 
 const ProductCarousel = ({ products, onSelect }: { products: Product[], onSelect: (p: Product) => void }) => (
-  <div className="w-full mt-3 mb-2">
-      <div className="flex gap-3 overflow-x-auto py-2 px-1 snap-x no-scrollbar pb-4">
+  <div className="w-full mt-3 mb-2" data-lenis-prevent>
+      <div className="flex gap-3 overflow-x-auto py-2 px-1 snap-x no-scrollbar pb-4 touch-pan-x">
         {products.map((p) => {
             const img = getImageUrl(p.images[0]);
             return (
@@ -268,8 +268,11 @@ export const Chatbot: React.FC = () => {
                 </button>
             </div>
 
-            {/* Messages Area */}
-            <div className="flex-1 overflow-y-auto p-4 pt-20 pb-4 space-y-6 bg-gray-50/50 dark:bg-black/20 scroll-smooth">
+            {/* Messages Area - FIXED SCROLLING */}
+            <div 
+                className="flex-1 overflow-y-auto p-4 pt-20 pb-4 space-y-6 bg-gray-50/50 dark:bg-black/20 scroll-smooth overscroll-contain"
+                data-lenis-prevent // CRITICAL: Tells Smooth Scroll to ignore this container
+            >
                 {messages.map((msg, idx) => {
                     const isLast = idx === messages.length - 1;
                     return (
