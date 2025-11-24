@@ -1,41 +1,45 @@
+
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
 import { Language } from '../types';
 
 interface UIState {
+  // Persisted State
   language: Language;
+  setLanguage: (lang: Language) => void;
+
+  // Ephemeral UI State (Reset on refresh)
   isCartOpen: boolean;
   isChatOpen: boolean;
   isSearchOpen: boolean;
   isMobileMenuOpen: boolean;
-  
-  // Auth & Dashboard
   isAuthOpen: boolean;
   authView: 'login' | 'register';
   isDashboardOpen: boolean;
-
-  // Modals
   activeModal: string | null;
-  
-  setLanguage: (lang: Language) => void;
+
+  // Actions
   toggleCart: () => void;
   toggleChat: () => void;
   toggleSearch: () => void;
   toggleMobileMenu: () => void;
   
-  // New Toggles
   openAuthModal: (view?: 'login' | 'register') => void;
   closeAuthModal: () => void;
-  toggleDashboard: () => void;
+  
+  openDashboard: () => void;
+  closeDashboard: () => void;
 
   openModal: (modalName: string) => void;
   closeModal: () => void;
+  
   closeAllOverlays: () => void;
 }
 
 export const useUIStore = create<UIState>()(
   persist(
     (set) => ({
+      // Defaults
       language: Language.FR,
       isCartOpen: false,
       isChatOpen: false,
@@ -47,72 +51,77 @@ export const useUIStore = create<UIState>()(
       activeModal: null,
 
       setLanguage: (language) => set({ language }),
-      
+
+      // Simple Toggles (Close others when opening one)
       toggleCart: () => set((state) => ({ 
         isCartOpen: !state.isCartOpen, 
         isChatOpen: false, 
         isSearchOpen: false, 
-        isMobileMenuOpen: false,
-        isAuthOpen: false,
-        isDashboardOpen: false
+        isMobileMenuOpen: false, 
+        isAuthOpen: false, 
+        isDashboardOpen: false 
       })),
-      
+
       toggleChat: () => set((state) => ({ 
         isChatOpen: !state.isChatOpen, 
         isCartOpen: false, 
         isSearchOpen: false, 
-        isMobileMenuOpen: false,
-        isAuthOpen: false,
-        isDashboardOpen: false
+        isMobileMenuOpen: false, 
+        isAuthOpen: false, 
+        isDashboardOpen: false 
       })),
-      
+
       toggleSearch: () => set((state) => ({ 
         isSearchOpen: !state.isSearchOpen,
         isCartOpen: false,
         isChatOpen: false,
-        isAuthOpen: false
+        isMobileMenuOpen: false 
       })),
-      
+
       toggleMobileMenu: () => set((state) => ({ 
         isMobileMenuOpen: !state.isMobileMenuOpen,
         isCartOpen: false,
-        isChatOpen: false,
-        isAuthOpen: false
+        isChatOpen: false 
       })),
 
-      openAuthModal: (view = 'login') => set({ 
-        isAuthOpen: true, 
+      // Explicit Actions for Auth/Dashboard
+      openAuthModal: (view = 'login') => set({
+        isAuthOpen: true,
         authView: view,
         isCartOpen: false,
         isMobileMenuOpen: false,
-        isDashboardOpen: false
+        isDashboardOpen: false,
+        isChatOpen: false
       }),
 
       closeAuthModal: () => set({ isAuthOpen: false }),
 
-      toggleDashboard: () => set((state) => ({
-        isDashboardOpen: !state.isDashboardOpen,
+      openDashboard: () => set({
+        isDashboardOpen: true,
         isAuthOpen: false,
         isCartOpen: false,
-        isMobileMenuOpen: false
-      })),
+        isMobileMenuOpen: false,
+        isChatOpen: false
+      }),
+
+      closeDashboard: () => set({ isDashboardOpen: false }),
 
       openModal: (modalName) => set({ activeModal: modalName }),
       closeModal: () => set({ activeModal: null }),
 
-      closeAllOverlays: () => set({ 
-        isCartOpen: false, 
-        isChatOpen: false, 
-        isSearchOpen: false, 
+      closeAllOverlays: () => set({
+        isCartOpen: false,
+        isChatOpen: false,
+        isSearchOpen: false,
         isMobileMenuOpen: false,
         isAuthOpen: false,
         isDashboardOpen: false,
         activeModal: null
-      }),
+      })
     }),
-    { 
-      name: 'ui-storage', 
-      partialize: (state) => ({ language: state.language }) 
+    {
+      name: 'ui-storage', // Key in localStorage
+      partialize: (state) => ({ language: state.language }), // ONLY persist language
     }
   )
 );

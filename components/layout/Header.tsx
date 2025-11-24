@@ -11,11 +11,20 @@ import dynamic from 'next/dynamic';
 const AdminDashboard = dynamic(() => import('../AdminDashboard').then(mod => mod.AdminDashboard), { ssr: false });
 
 export const Header: React.FC = () => {
-  const { isCartOpen, toggleCart, isMobileMenuOpen, toggleMobileMenu, toggleSearch, openAuthModal, toggleDashboard, isDashboardOpen } = useUIStore();
+  const { 
+    isCartOpen, toggleCart, 
+    isMobileMenuOpen, toggleMobileMenu, 
+    toggleSearch, 
+    openAuthModal, 
+    openDashboard, 
+    closeAllOverlays 
+  } = useUIStore();
+  
   const { items } = useCartStore();
   const { user, isLoading } = useAuthStore();
   const { isAdmin } = useAdmin();
   const { t } = useLanguage();
+  
   const [scrolled, setScrolled] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
@@ -37,11 +46,17 @@ export const Header: React.FC = () => {
 
   const handleUserClick = (e: React.MouseEvent) => {
     e.preventDefault();
+    e.stopPropagation();
+    
+    // Se estiver carregando, ignora o clique
     if (isLoading) return;
     
+    // Se estiver logado -> Abre Dashboard
     if (user) {
-        if (!isDashboardOpen) toggleDashboard();
-    } else {
+        openDashboard();
+    } 
+    // Se não estiver logado -> Abre Login
+    else {
         openAuthModal('login');
     }
   };
@@ -58,7 +73,10 @@ export const Header: React.FC = () => {
     >
       <div className="container mx-auto px-6 flex justify-between items-center">
         {/* Logo */}
-        <div className="flex items-center z-50 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+        <div className="flex items-center z-50 cursor-pointer" onClick={() => {
+            closeAllOverlays();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}>
             <div className="w-10 h-10 bg-accent rounded-full flex items-center justify-center mr-3">
                 <span className="font-serif font-bold text-white text-xl">M</span>
             </div>
@@ -86,7 +104,7 @@ export const Header: React.FC = () => {
           
           <button 
             onClick={handleUserClick}
-            className="hover:text-accent transition-colors flex items-center gap-2 cursor-pointer"
+            className="hover:text-accent transition-colors flex items-center gap-2 cursor-pointer relative"
             disabled={isLoading}
           >
             {isLoading ? (
@@ -94,7 +112,7 @@ export const Header: React.FC = () => {
             ) : (
                 <>
                     <User size={20} />
-                    {mounted && user && <span className="text-xs uppercase tracking-wider">{user.displayName?.split(' ')[0]}</span>}
+                    {mounted && user && <span className="text-xs uppercase tracking-wider font-medium">{user.displayName?.split(' ')[0]}</span>}
                 </>
             )}
           </button>

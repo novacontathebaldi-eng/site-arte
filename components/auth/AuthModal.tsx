@@ -37,7 +37,7 @@ const GlassInput = ({ label, type, value, onChange, icon: Icon, error }: any) =>
 );
 
 export const AuthModal: React.FC = () => {
-  const { isAuthOpen, closeAuthModal, authView, openAuthModal, toggleDashboard } = useUIStore();
+  const { isAuthOpen, closeAuthModal, authView, openAuthModal, openDashboard } = useUIStore();
   const { loginWithGoogle, setUser } = useAuthStore();
   const { t } = useLanguage();
   const [isLoading, setIsLoading] = useState(false);
@@ -50,11 +50,9 @@ export const AuthModal: React.FC = () => {
   const [name, setName] = useState('');
 
   const onSuccess = () => {
-    closeAuthModal();
-    // Delay slightly to allow modal closing animation to start before dashboard enters
-    setTimeout(() => {
-        toggleDashboard();
-    }, 200);
+    // Fecha o modal de auth e abre o dashboard diretamente
+    // Não usamos closeAuthModal() explicitamente pois openDashboard() já cuida disso no store
+    openDashboard(); 
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -92,7 +90,7 @@ export const AuthModal: React.FC = () => {
             setTimeout(() => {
                 setShowSuccess(false);
                 onSuccess();
-            }, 2000);
+            }, 1500);
         }
       }
     } catch (err: any) {
@@ -305,9 +303,7 @@ export const AuthModal: React.FC = () => {
                         </form>
 
                         <div className="relative flex items-center gap-4 my-8">
-                            {/* Darker separator lines for better visibility in light mode */}
                             <div className="flex-1 h-[1px] bg-gray-300 dark:bg-white/10"></div>
-                            {/* Darker text color (gray-600) and bold for better contrast */}
                             <span className="text-[10px] text-gray-600 dark:text-gray-400 uppercase font-semibold">Ou continue com</span>
                             <div className="flex-1 h-[1px] bg-gray-300 dark:bg-white/10"></div>
                         </div>
@@ -323,7 +319,6 @@ export const AuthModal: React.FC = () => {
                         
                         {authView === 'login' && (
                             <div className="mt-6 text-center">
-                                {/* Darker text color and bold for Forgot Password */}
                                 <button className="text-xs text-gray-600 dark:text-gray-400 hover:text-accent transition-colors font-semibold">
                                     Esqueceu sua senha?
                                 </button>
