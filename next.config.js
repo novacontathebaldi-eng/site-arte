@@ -3,6 +3,8 @@ const nextConfig = {
   reactStrictMode: true,
   output: 'standalone',
   distDir: '.next',
+  // Fix for Firebase 'compat' issues with webpack in recent versions
+  transpilePackages: ['firebase'],
   // trailingSlash ajuda o Vercel a diferenciar arquivos estáticos de rotas dinâmicas
   trailingSlash: true,
   images: {
