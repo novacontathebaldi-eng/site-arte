@@ -1,3 +1,4 @@
+
 'use server';
 
 import { BrevoContact, ChatConfig, ChatFeedback, KnowledgeBaseItem } from '../../types/admin';
@@ -191,13 +192,19 @@ export async function updateChatConfig(config: ChatConfig) {
 
 export async function getChatFeedback(): Promise<ChatFeedback[]> {
     try {
+        // Simplified query to avoid Composite Index Requirement error
+        // We filter in-memory which is fine for Admin panel scale
         const snapshot = await adminDb.collection('chat_feedback')
             .where('feedback', '==', 'dislike')
-            .where('resolved', '==', false)
-            .orderBy('timestamp', 'desc')
             .get();
 
-        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ChatFeedback));
+        let items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ChatFeedback));
+        
+        // In-memory filter & sort
+        items = items.filter(i => i.resolved === false);
+        items.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+
+        return items;
     } catch (e) {
         console.error("Error fetching feedback:", e);
         return [];

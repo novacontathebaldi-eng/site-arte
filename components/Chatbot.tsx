@@ -209,13 +209,22 @@ export const Chatbot: React.FC = () => {
   };
 
   const handleFeedback = async (msg: ChatMessage, type: 'like' | 'dislike') => {
+      if (!msg.id) return;
+
       const msgIndex = messages.findIndex(m => m.id === msg.id);
-      const userMsg = messages[msgIndex - 1];
       
+      // Tenta pegar a mensagem do usuário anterior. Se for a primeira (welcome), usa um placeholder.
+      const userMsg = msgIndex > 0 ? messages[msgIndex - 1] : null;
+      const userText = userMsg ? userMsg.text : "[Início da Conversa / Boas-vindas]";
+      
+      // Update UI Optimistically
       setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, feedback: type } : m));
 
-      if (userMsg && msg.id) {
-          await submitChatFeedback(msg.id, userMsg.text, msg.text, type);
+      // Send to Backend
+      try {
+        await submitChatFeedback(msg.id, userText, msg.text, type);
+      } catch (e) {
+        console.error("Falha ao enviar feedback", e);
       }
   };
 
