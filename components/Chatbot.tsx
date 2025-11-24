@@ -1,5 +1,5 @@
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageCircle, X, Send, Loader2, Sparkles, ThumbsUp, ThumbsDown, Copy, Minimize2, ShoppingBag, Check } from 'lucide-react';
 import { useUIStore, useAuthStore } from '../store';
@@ -22,27 +22,35 @@ const getImageUrl = (img: any) => {
     return '';
 };
 
-// Typewriter Component
-const TypewriterText = ({ text, onComplete }: { text: string, onComplete?: () => void }) => {
+// Typewriter Component Optimized
+// React.memo impede que ele renderize novamente se as props (text, onComplete) não mudarem
+const TypewriterText = React.memo(({ text, onComplete }: { text: string, onComplete?: () => void }) => {
     const [displayedText, setDisplayedText] = useState('');
     
     useEffect(() => {
         let i = 0;
         const speed = 15; // ms per char
+        setDisplayedText(''); // Reset visual state on new text
+
         const interval = setInterval(() => {
-            if (i < text.length) {
-                setDisplayedText(text.substring(0, i + 1));
-                i++;
-            } else {
+            // Usando substring garante que pegamos o texto correto mesmo em closures
+            const nextChar = text.substring(0, i + 1);
+            setDisplayedText(nextChar);
+            i++;
+
+            if (i >= text.length) {
                 clearInterval(interval);
                 if (onComplete) onComplete();
             }
         }, speed);
+
         return () => clearInterval(interval);
-    }, [text, onComplete]);
+    }, [text, onComplete]); // Dependências controladas
 
     return <p className="whitespace-pre-wrap">{displayedText}</p>;
-};
+});
+
+TypewriterText.displayName = 'TypewriterText';
 
 // --- SUB-COMPONENTS ---
 
@@ -141,14 +149,14 @@ export const Chatbot: React.FC = () => {
     }
   }, [isChatOpen, hasInteracted, t, messages.length]);
 
-  // Scroll to bottom
-  const scrollToBottom = () => {
+  // Scroll to bottom - MEMOIZED to prevent Typewriter re-renders
+  const scrollToBottom = useCallback(() => {
       messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+  }, []);
   
   useEffect(() => {
     scrollToBottom();
-  }, [messages, isChatOpen]);
+  }, [messages, isChatOpen, scrollToBottom]);
 
   const handleSend = async (text: string = inputValue) => {
     if (!text.trim()) return;
