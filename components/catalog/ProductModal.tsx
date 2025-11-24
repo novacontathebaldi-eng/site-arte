@@ -21,21 +21,47 @@ export const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onC
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isAdded, setIsAdded] = useState(false);
   
-  // Ref for animation target (main image in modal)
   const imageRef = useRef<HTMLImageElement>(null);
 
   if (!product || !isOpen) return null;
 
-  const translation = product.translations[language] || 
-                      product.translations['fr'] || 
-                      product.translations['en'] || 
+  // Safeguard: Ensure translation exists
+  const translation = product.translations?.[language] || 
+                      product.translations?.['fr'] || 
+                      product.translations?.['en'] || 
                       { title: 'Untitled', description: '', material: '' };
 
   const isSoldOut = product.status === 'sold' || product.stock <= 0;
   const inWishlist = isInWishlist(product.id);
 
+  // Helper to handle Dimensions (String or Object)
+  const renderDimensions = (dim: any) => {
+    if (!dim) return null;
+    if (typeof dim === 'string') return dim;
+    if (typeof dim === 'object') {
+        // Handle { width, height, depth } object
+        const parts = [];
+        if (dim.height) parts.push(`H: ${dim.height}`);
+        if (dim.width) parts.push(`W: ${dim.width}`);
+        if (dim.depth) parts.push(`D: ${dim.depth}`);
+        return parts.join(' x ');
+    }
+    return String(dim);
+  };
+
+  // Helper to handle Image (String or Object)
+  const getImageUrl = (img: any) => {
+    if (!img) return '';
+    if (typeof img === 'string') return img;
+    if (img.url) return img.url;
+    if (img.src) return img.src;
+    return '';
+  };
+
+  const images = product.images || [];
+  const currentImage = getImageUrl(images[currentImageIndex]);
+
   const handleAddToCart = () => {
-    // Feature: Remove from Wishlist if present
     if (inWishlist) {
         toggleWishlist(product.id);
     }
@@ -48,14 +74,14 @@ export const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onC
   };
 
   const nextImage = () => {
-    if (product.images.length > 0) {
-        setCurrentImageIndex((prev) => (prev + 1) % product.images.length);
+    if (images.length > 0) {
+        setCurrentImageIndex((prev) => (prev + 1) % images.length);
     }
   };
 
   const prevImage = () => {
-    if (product.images.length > 0) {
-        setCurrentImageIndex((prev) => (prev - 1 + product.images.length) % product.images.length);
+    if (images.length > 0) {
+        setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
     }
   };
 
@@ -63,30 +89,23 @@ export const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onC
     <AnimatePresence>
       {isOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
-          {/* Heavy Blur Backdrop */}
           <motion.div
             onClick={onClose}
             className="absolute inset-0 bg-black/60 backdrop-blur-xl"
-            {...({
-                initial: { opacity: 0 },
-                animate: { opacity: 1 },
-                exit: { opacity: 0 }
-            } as any)}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
           />
 
-          {/* Modal Content */}
           <motion.div
             className="relative w-full max-w-5xl bg-white dark:bg-[#1a1a1a] shadow-2xl overflow-hidden flex flex-col md:flex-row rounded-lg max-h-[90vh] md:h-auto"
             onClick={(e) => e.stopPropagation()}
-            {...({
-                layoutId: `product-${product.id}`,
-                initial: { opacity: 0, scale: 0.95, y: 20 },
-                animate: { opacity: 1, scale: 1, y: 0 },
-                exit: { opacity: 0, scale: 0.95, y: 20 },
-                transition: { type: 'spring', damping: 25, stiffness: 300 }
-            } as any)}
+            layoutId={`product-${product.id}`}
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
           >
-            {/* Close Button */}
             <button
               onClick={onClose}
               className="absolute top-4 right-4 z-20 bg-white/10 hover:bg-white/20 backdrop-blur rounded-full p-2 text-primary dark:text-white transition-colors"
@@ -94,23 +113,21 @@ export const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onC
               <X size={24} />
             </button>
 
-            {/* Left: Image Gallery */}
             <div className="w-full md:w-3/5 bg-gray-100 dark:bg-black/20 relative group h-[40vh] md:h-auto md:min-h-[500px]">
-              <motion.img
-                ref={imageRef}
-                key={currentImageIndex}
-                src={product.images[currentImageIndex]}
-                alt={translation.title}
-                className="w-full h-full object-cover"
-                {...({
-                    initial: { opacity: 0 },
-                    animate: { opacity: 1 },
-                    transition: { duration: 0.4 }
-                } as any)}
-              />
+              {currentImage && (
+                  <motion.img
+                    ref={imageRef}
+                    key={currentImageIndex}
+                    src={currentImage}
+                    alt={translation.title}
+                    className="w-full h-full object-cover"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.4 }}
+                  />
+              )}
               
-              {/* Navigation Arrows */}
-              {product.images.length > 1 && (
+              {images.length > 1 && (
                   <>
                     <button onClick={prevImage} className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 backdrop-blur p-2 rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity">
                         <ChevronLeft size={24} />
@@ -119,9 +136,8 @@ export const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onC
                         <ChevronRight size={24} />
                     </button>
 
-                    {/* Thumbnails Indicator */}
                     <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
-                        {product.images.map((_, idx) => (
+                        {images.map((_, idx) => (
                             <button
                                 key={idx}
                                 onClick={() => setCurrentImageIndex(idx)}
@@ -136,7 +152,6 @@ export const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onC
               )}
             </div>
 
-            {/* Right: Info */}
             <div className="w-full md:w-2/5 p-8 md:p-10 flex flex-col overflow-y-auto">
               <div className="flex-1">
                 <span className="text-accent text-xs font-bold uppercase tracking-widest mb-2 block">
@@ -170,13 +185,12 @@ export const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onC
                     {product.dimensions && (
                          <div>
                             <strong className="text-primary dark:text-white uppercase text-xs tracking-wider block mb-1">Dimensions</strong>
-                            {product.dimensions}
+                            {renderDimensions(product.dimensions)}
                         </div>
                     )}
                 </div>
               </div>
 
-              {/* Actions Footer */}
               <div className="mt-8 pt-6 flex flex-col gap-4">
                  <button
                     onClick={handleAddToCart}

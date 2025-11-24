@@ -9,6 +9,7 @@ import { cn, formatPrice } from '../lib/utils';
 import { updateDocument } from '../lib/firebase/firestore';
 import { auth, db } from '../lib/firebase/config';
 import { Address, Product } from '../types';
+import { useToast } from './ui/Toast';
 
 // --- Constants ---
 const COUNTRIES = ["Luxembourg", "France", "Germany", "Portugal", "Belgium", "Netherlands", "United Kingdom", "United States", "Brazil", "Spain", "Italy"];
@@ -52,6 +53,7 @@ export const Dashboard: React.FC = () => {
     const { user, logout, setUser, isLoading } = useAuthStore();
     const { items: wishlistIds } = useWishlistStore();
     const { t } = useLanguage();
+    const { toast } = useToast();
     
     // Tabs
     const [activeTab, setActiveTab] = useState('overview');
@@ -66,7 +68,10 @@ export const Dashboard: React.FC = () => {
     const [isAddressFormOpen, setIsAddressFormOpen] = useState(false);
     const [editingAddress, setEditingAddress] = useState<Address | null>(null);
     const [addressForm, setAddressForm] = useState<Partial<Address>>({ country: 'Luxembourg' });
+    
+    // Profile Edit State
     const [isEditingProfile, setIsEditingProfile] = useState(false);
+    const [isSavingProfile, setIsSavingProfile] = useState(false);
     const [profileForm, setProfileForm] = useState({ displayName: '', phoneNumber: '' });
 
     // --- SCROLL LOCK ---
@@ -173,6 +178,8 @@ export const Dashboard: React.FC = () => {
 
     const handleSaveProfile = async () => {
         if (!user) return;
+        setIsSavingProfile(true);
+        
         try {
             await auth.currentUser?.updateProfile({ displayName: profileForm.displayName });
             await updateDocument('users', user.uid, { 
@@ -180,9 +187,14 @@ export const Dashboard: React.FC = () => {
                 phoneNumber: profileForm.phoneNumber 
             });
             setUser({ ...user, displayName: profileForm.displayName, phoneNumber: profileForm.phoneNumber });
+            
+            toast("Perfil atualizado com sucesso", "success");
             setIsEditingProfile(false);
         } catch (e) {
             console.error("Profile update failed", e);
+            toast("Erro ao atualizar perfil", "error");
+        } finally {
+            setIsSavingProfile(false);
         }
     };
 
@@ -192,11 +204,13 @@ export const Dashboard: React.FC = () => {
         try {
             if (editingAddress) {
                 await db.collection('users').doc(user.uid).collection('addresses').doc(editingAddress.id).update(addressForm);
+                toast("Endereço atualizado", "success");
             } else {
                 await db.collection('users').doc(user.uid).collection('addresses').add({
                     ...addressForm,
                     createdAt: new Date().toISOString()
                 });
+                toast("Endereço adicionado", "success");
             }
             const snapshot = await db.collection('users').doc(user.uid).collection('addresses').get();
             setAddresses(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Address[]);
@@ -205,6 +219,7 @@ export const Dashboard: React.FC = () => {
             setAddressForm({ country: 'Luxembourg' });
         } catch (e) {
             console.error("Address save failed", e);
+            toast("Erro ao salvar endereço", "error");
         }
     };
 
@@ -213,8 +228,10 @@ export const Dashboard: React.FC = () => {
         try {
             await db.collection('users').doc(user.uid).collection('addresses').doc(id).delete();
             setAddresses(addresses.filter(a => a.id !== id));
+            toast("Endereço removido", "info");
         } catch (e) {
             console.error(e);
+            toast("Erro ao remover", "error");
         }
     };
 
@@ -547,12 +564,25 @@ export const Dashboard: React.FC = () => {
                                                 <h3 className="text-white font-serif text-2xl">Dados Pessoais</h3>
                                                 <button 
                                                     onClick={() => isEditingProfile ? handleSaveProfile() : setIsEditingProfile(true)}
+                                                    disabled={isSavingProfile}
                                                     className={cn(
-                                                        "px-6 py-2 rounded-full text-xs font-bold uppercase tracking-widest flex items-center gap-2 transition-colors",
-                                                        isEditingProfile ? "bg-green-600 text-white hover:bg-green-700" : "bg-white text-black hover:bg-gray-200"
+                                                        "px-6 py-2 rounded-full text-xs font-bold uppercase tracking-widest flex items-center gap-2 transition-all min-w-[120px] justify-center",
+                                                        isEditingProfile 
+                                                            ? isSavingProfile 
+                                                                ? "bg-green-700/50 text-white/50 cursor-not-allowed" 
+                                                                : "bg-green-600 text-white hover:bg-green-700 shadow-lg hover:shadow-green-500/20" 
+                                                            : "bg-white text-black hover:bg-gray-200"
                                                     )}
                                                 >
-                                                    {isEditingProfile ? <><Save size={16}/> Salvar</> : <><Edit size={16}/> Editar</>}
+                                                    {isEditingProfile ? (
+                                                        isSavingProfile ? (
+                                                            <><Loader2 size={16} className="animate-spin"/> Salvando...</>
+                                                        ) : (
+                                                            <><Save size={16}/> Salvar</>
+                                                        )
+                                                    ) : (
+                                                        <><Edit size={16}/> Editar</>
+                                                    )}
                                                 </button>
                                             </div>
                                             <div className="bg-[#151515] p-10 rounded-3xl border border-white/10 space-y-8 shadow-2xl">
@@ -566,7 +596,7 @@ export const Dashboard: React.FC = () => {
                                                 <div className="space-y-6">
                                                     <div>
                                                         <label className="block text-gray-500 text-xs uppercase tracking-widest mb-2">Nome de Exibição</label>
-                                                        <input type="text" disabled={!isEditingProfile} value={profileForm.displayName} onChange={e => setProfileForm({...profileForm, displayName: e.target.value})} className="w-full bg-[#0a0a0a] border border-white/10 rounded p-4 text-white disabled:opacity-50 disabled:cursor-not-allowed focus:border-accent focus:outline-none transition-colors" />
+                                                        <input type="text" disabled={!isEditingProfile || isSavingProfile} value={profileForm.displayName} onChange={e => setProfileForm({...profileForm, displayName: e.target.value})} className="w-full bg-[#0a0a0a] border border-white/10 rounded p-4 text-white disabled:opacity-50 disabled:cursor-not-allowed focus:border-accent focus:outline-none transition-colors" />
                                                     </div>
                                                     <div>
                                                         <label className="block text-gray-500 text-xs uppercase tracking-widest mb-2">Email de Acesso</label>
@@ -574,7 +604,7 @@ export const Dashboard: React.FC = () => {
                                                     </div>
                                                     <div>
                                                         <label className="block text-gray-500 text-xs uppercase tracking-widest mb-2">Telefone Principal</label>
-                                                        <input type="tel" disabled={!isEditingProfile} value={profileForm.phoneNumber} onChange={e => setProfileForm({...profileForm, phoneNumber: e.target.value})} placeholder="+352 ..." className="w-full bg-[#0a0a0a] border border-white/10 rounded p-4 text-white disabled:opacity-50 disabled:cursor-not-allowed focus:border-accent focus:outline-none transition-colors" />
+                                                        <input type="tel" disabled={!isEditingProfile || isSavingProfile} value={profileForm.phoneNumber} onChange={e => setProfileForm({...profileForm, phoneNumber: e.target.value})} placeholder="+352 ..." className="w-full bg-[#0a0a0a] border border-white/10 rounded p-4 text-white disabled:opacity-50 disabled:cursor-not-allowed focus:border-accent focus:outline-none transition-colors" />
                                                     </div>
                                                 </div>
                                             </div>

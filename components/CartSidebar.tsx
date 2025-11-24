@@ -1,21 +1,23 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Trash2, ShoppingBag, CreditCard, Plus, Minus, ArrowRight } from 'lucide-react';
-import { useUIStore, useCartStore, useAuthStore } from '../store';
+import { X, Trash2, ShoppingBag, CreditCard, Plus, Minus, ArrowRight, Heart } from 'lucide-react';
+import { useUIStore, useCartStore, useAuthStore, useWishlistStore } from '../store';
 import { useLanguage } from '../hooks/useLanguage';
 import { ProductCategory } from '../types';
-import { formatPrice } from '../lib/utils';
+import { formatPrice, cn } from '../lib/utils';
 import { SuccessCheck } from './ui/SuccessCheck';
+import { useWishlist } from '../hooks/useWishlist';
 
 export const CartSidebar: React.FC = () => {
   const { isCartOpen, toggleCart } = useUIStore();
   const { items, removeItem, updateQuantity, total, clearCart } = useCartStore();
   const { user, login } = useAuthStore();
+  const { toggleWishlist, isInWishlist } = useWishlist();
   const { t, language } = useLanguage();
   const [isCheckoutSuccess, setIsCheckoutSuccess] = useState(false);
 
-  // Reset success state when cart closes to avoid stuck state
+  // Reset success state when cart closes
   useEffect(() => {
     if (!isCartOpen) {
         const timer = setTimeout(() => setIsCheckoutSuccess(false), 500);
@@ -27,7 +29,6 @@ export const CartSidebar: React.FC = () => {
     if (!user) {
         login();
     } else {
-        // Simulação de Checkout
         setIsCheckoutSuccess(true);
         setTimeout(() => {
             clearCart();
@@ -39,6 +40,14 @@ export const CartSidebar: React.FC = () => {
     toggleCart();
   };
 
+  const getImageUrl = (img: any) => {
+    if (!img) return '';
+    if (typeof img === 'string') return img;
+    if (img.url) return img.url;
+    if (img.src) return img.src;
+    return '';
+  };
+
   return (
     <AnimatePresence>
       {isCartOpen && (
@@ -47,21 +56,17 @@ export const CartSidebar: React.FC = () => {
           <motion.div
             className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[60]"
             onClick={closeCart}
-            {...({
-                initial: { opacity: 0 },
-                animate: { opacity: 1 },
-                exit: { opacity: 0 }
-            } as any)}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
           />
           
           {/* Glass Sidebar */}
           <motion.div
             className="fixed top-0 right-0 h-full w-full sm:w-[480px] bg-white/90 dark:bg-black/90 backdrop-blur-2xl border-l border-white/20 z-[70] shadow-2xl flex flex-col"
-            {...({
-                initial: { x: '100%' },
-                animate: { x: 0, transition: { type: 'spring', damping: 25, stiffness: 300 } },
-                exit: { x: '100%', transition: { type: 'spring', damping: 25, stiffness: 300 } }
-            } as any)}
+            initial={{ x: '100%' }}
+            animate={{ x: 0, transition: { type: 'spring', damping: 25, stiffness: 300 } }}
+            exit={{ x: '100%', transition: { type: 'spring', damping: 25, stiffness: 300 } }}
           >
             {isCheckoutSuccess ? (
                 // SUCCESS VIEW
@@ -125,26 +130,29 @@ export const CartSidebar: React.FC = () => {
                         <AnimatePresence>
                             {items.map((item) => {
                                 const isUnique = item.category === ProductCategory.PAINTINGS || item.category === ProductCategory.SCULPTURES;
-                                const translation = item.translations[language] || item.translations['fr'];
+                                // Safeguard Translation
+                                const translation = item.translations?.[language] || item.translations?.['fr'] || { title: 'Untitled' };
+                                const imageUrl = getImageUrl(item.images?.[0]);
+                                const inWishlist = isInWishlist(item.id);
 
                                 return (
                                     <motion.div 
                                         key={item.id}
                                         className="flex gap-4 group"
-                                        {...({
-                                            layout: true,
-                                            initial: { opacity: 0, y: 20 },
-                                            animate: { opacity: 1, y: 0 },
-                                            exit: { opacity: 0, x: -100 }
-                                        } as any)}
+                                        layout
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, x: -100 }}
                                     >
                                         {/* Thumbnail */}
                                         <div className="relative w-24 h-24 rounded-lg overflow-hidden flex-shrink-0 shadow-sm bg-gray-100 dark:bg-white/5">
-                                            <img 
-                                                src={item.images[0]} 
-                                                alt={translation.title} 
-                                                className="w-full h-full object-cover" 
-                                            />
+                                            {imageUrl && (
+                                                <img 
+                                                    src={imageUrl} 
+                                                    alt={translation.title} 
+                                                    className="w-full h-full object-cover" 
+                                                />
+                                            )}
                                         </div>
 
                                         {/* Info */}
@@ -190,13 +198,29 @@ export const CartSidebar: React.FC = () => {
                                             </div>
                                         </div>
 
-                                        {/* Delete Action */}
-                                        <button 
-                                            onClick={() => removeItem(item.id)}
-                                            className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-red-500 self-start p-1"
-                                        >
-                                            <Trash2 size={18} />
-                                        </button>
+                                        {/* Actions */}
+                                        <div className="flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity self-start">
+                                            <button 
+                                                onClick={() => removeItem(item.id)}
+                                                className="text-gray-400 hover:text-red-500 p-1"
+                                                title="Remove"
+                                            >
+                                                <Trash2 size={18} />
+                                            </button>
+                                            <button 
+                                                onClick={() => {
+                                                    toggleWishlist(item.id);
+                                                    removeItem(item.id);
+                                                }}
+                                                className={cn(
+                                                    "p-1 transition-colors",
+                                                    inWishlist ? "text-accent hover:text-accent/80" : "text-gray-400 hover:text-accent"
+                                                )}
+                                                title="Save to Wishlist"
+                                            >
+                                                <Heart size={18} fill={inWishlist ? "currentColor" : "none"} />
+                                            </button>
+                                        </div>
                                     </motion.div>
                                 );
                             })}

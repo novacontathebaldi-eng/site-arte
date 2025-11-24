@@ -20,4 +20,7 @@ export interface ChatMessage {
   role: 'user' | 'model';
   text: string;
   timestamp: number;
+  // Novos campos para Rich UI
+  products?: any[]; // Produtos sugeridos pela IA para o carrossel
+  feedback?: 'like' | 'dislike' | null;
 }

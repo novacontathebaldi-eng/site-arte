@@ -37,30 +37,49 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   return (
     <ToastContext.Provider value={{ toast }}>
       {children}
-      <div className="fixed bottom-4 right-4 z-[100] flex flex-col gap-2">
-        <AnimatePresence>
+      {/* 
+         POSICIONAMENTO: Topo Centralizado (App-like feel) 
+         Z-INDEX: 200 para garantir que fique acima do Dashboard (z-100)
+      */}
+      <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[200] flex flex-col gap-3 w-full max-w-sm px-4 pointer-events-none">
+        <AnimatePresence mode="popLayout">
           {toasts.map((t) => (
             <motion.div
               key={t.id}
+              layout
               className={cn(
-                "flex items-center gap-3 min-w-[300px] p-4 rounded-lg shadow-lg border backdrop-blur-md",
-                t.type === 'success' && "bg-white/90 dark:bg-[#1a1a1a]/90 border-green-500/20 text-green-600 dark:text-green-400",
-                t.type === 'error' && "bg-white/90 dark:bg-[#1a1a1a]/90 border-red-500/20 text-red-600 dark:text-red-400",
-                t.type === 'info' && "bg-white/90 dark:bg-[#1a1a1a]/90 border-blue-500/20 text-blue-600 dark:text-blue-400"
+                "pointer-events-auto flex items-center gap-3 p-4 rounded-xl shadow-2xl border backdrop-blur-xl",
+                // Luxury Styles: Glassmorphism refinado
+                t.type === 'success' && "bg-white/90 dark:bg-[#1a1a1a]/90 border-green-500/30 text-green-700 dark:text-green-400 shadow-green-500/10",
+                t.type === 'error' && "bg-white/90 dark:bg-[#1a1a1a]/90 border-red-500/30 text-red-700 dark:text-red-400 shadow-red-500/10",
+                t.type === 'info' && "bg-white/90 dark:bg-[#1a1a1a]/90 border-accent/30 text-primary dark:text-accent shadow-accent/10"
               )}
               {...({
-                  initial: { opacity: 0, y: 20, scale: 0.9 },
+                  initial: { opacity: 0, y: -20, scale: 0.9 },
                   animate: { opacity: 1, y: 0, scale: 1 },
-                  exit: { opacity: 0, x: 20, scale: 0.9 }
+                  exit: { opacity: 0, scale: 0.9, transition: { duration: 0.2 } },
+                  transition: { type: "spring", stiffness: 400, damping: 25 }
               } as any)}
             >
-              {t.type === 'success' && <CheckCircle size={20} />}
-              {t.type === 'error' && <AlertCircle size={20} />}
-              {t.type === 'info' && <Info size={20} />}
+              <div className={cn(
+                  "p-2 rounded-full",
+                  t.type === 'success' ? "bg-green-100 dark:bg-green-500/20" : 
+                  t.type === 'error' ? "bg-red-100 dark:bg-red-500/20" : 
+                  "bg-gray-100 dark:bg-accent/20"
+              )}>
+                  {t.type === 'success' && <CheckCircle size={18} />}
+                  {t.type === 'error' && <AlertCircle size={18} />}
+                  {t.type === 'info' && <Info size={18} />}
+              </div>
               
-              <p className="text-sm font-medium flex-1 text-primary dark:text-white">{t.message}</p>
+              <p className="text-sm font-semibold flex-1 text-primary dark:text-white tracking-wide">
+                  {t.message}
+              </p>
               
-              <button onClick={() => removeToast(t.id)} className="opacity-50 hover:opacity-100">
+              <button 
+                onClick={() => removeToast(t.id)} 
+                className="p-1 rounded-md hover:bg-black/5 dark:hover:bg-white/10 transition-colors opacity-60 hover:opacity-100"
+              >
                 <X size={16} />
               </button>
             </motion.div>
