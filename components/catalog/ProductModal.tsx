@@ -28,7 +28,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onC
   const translation = product.translations?.[language] || 
                       product.translations?.['fr'] || 
                       product.translations?.['en'] || 
-                      { title: 'Untitled', description: '', material: '' };
+                      { title: 'Untitled', description: '', material_label: '' };
 
   const isSoldOut = product.status === 'sold' || product.stock <= 0;
   const inWishlist = isInWishlist(product.id);
@@ -183,10 +183,10 @@ export const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onC
                 <div className="space-y-6 text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
                     <p>{translation.description}</p>
                     
-                    {translation.material && (
+                    {translation.material_label && (
                         <div>
                             <strong className="text-primary dark:text-white uppercase text-xs tracking-wider block mb-1">Material</strong>
-                            {translation.material}
+                            {translation.material_label}
                         </div>
                     )}
                     

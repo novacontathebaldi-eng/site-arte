@@ -9,20 +9,52 @@ export const useProducts = () => {
     queryFn: async () => {
       const data = await getCollection('products');
       
-      // Map and validate data
-      const products = data.map((doc: any) => ({
-        id: doc.id,
-        translations: doc.translations || {},
-        price: doc.price || 0,
-        category: doc.category || ProductCategory.PAINTINGS,
-        images: doc.images || [],
-        available: doc.available ?? true,
-        status: doc.status || (doc.available ? 'available' : 'sold'),
-        stock: doc.stock || 1,
-        dimensions: doc.dimensions || '',
-        featured: doc.featured || false,
-        createdAt: doc.createdAt
-      })) as Product[];
+      // Map and validate data robustly
+      const products = data.map((doc: any) => {
+        // Handle legacy images (string[]) vs new images (ProductImage[])
+        const rawImages = doc.images || [];
+        const processedImages = Array.isArray(rawImages) 
+            ? rawImages.map((img: any, idx: number) => {
+                if (typeof img === 'string') {
+                    return { id: idx.toString(), url: img, alt: doc.title || 'Artwork', isThumbnail: idx === 0 };
+                }
+                return img;
+            })
+            : [];
+
+        return {
+          id: doc.id,
+          sku: doc.sku || '',
+          slug: doc.slug || '',
+          
+          translations: doc.translations || { 
+            fr: { title: doc.title || 'Untitled', description: doc.description || '' },
+            en: { title: doc.title || 'Untitled', description: doc.description || '' }
+          },
+          
+          price: doc.price || 0,
+          category: doc.category || ProductCategory.PAINTINGS,
+          
+          images: processedImages,
+          
+          available: doc.available ?? true,
+          status: doc.status || (doc.available ? 'active' : 'sold'),
+          stock: doc.stock || 1,
+          
+          dimensions: doc.dimensions || { height: 0, width: 0, depth: 0, unit: 'cm' },
+          weight: doc.weight || 0,
+          medium: doc.medium || '',
+          year: doc.year || new Date().getFullYear(),
+          framing: doc.framing || 'unframed',
+          authenticity_certificate: doc.authenticity_certificate ?? true,
+          signature: doc.signature ?? true,
+          
+          featured: doc.featured || false,
+          displayOrder: doc.displayOrder || 0,
+          createdAt: doc.createdAt,
+          tags: doc.tags || []
+        };
+      }) as Product[];
 
       return products;
     },

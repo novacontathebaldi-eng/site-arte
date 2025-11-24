@@ -1,10 +1,10 @@
+
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, LayoutDashboard, Package, Users, MessageSquare, Plus, Edit, Trash2, Save, Upload, Search, Filter, TrendingUp, DollarSign, RefreshCw, Lock, Globe, MoveUp, MoveDown, Check, ThumbsDown, AlertCircle, Move, Loader2 } from 'lucide-react';
 import { useAuthStore } from '../store';
 import { db } from '../lib/firebase/config';
-import { uploadImage, getPublicUrl } from '../lib/supabase/storage';
-import { updateDocument, createDocument, deleteDocument, subscribeToCollection } from '../lib/firebase/firestore';
+import { deleteDocument, subscribeToCollection, updateDocument } from '../lib/firebase/firestore';
 import { Product, ProductCategory } from '../types';
 import { getBrevoStats, getBrevoContacts, getChatConfig, updateChatConfig, getChatFeedback, resolveFeedback, syncFirestoreToBrevo } from '../app/actions/admin';
 import { formatPrice, cn } from '../lib/utils';
@@ -15,6 +15,7 @@ import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, us
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useToast } from './ui/Toast';
+import { ProductForm } from './dashboard/ProductForm';
 
 interface AdminDashboardProps {
     isOpen: boolean;
@@ -34,13 +35,26 @@ const SortableRow: React.FC<SortableRowProps> = ({ product, onEdit, onDelete, in
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: product.id });
     const style = { transform: CSS.Transform.toString(transform), transition, zIndex: isDragging ? 10 : 1, opacity: isDragging ? 0.5 : 1 };
     
+    // Safely access image 0
+    const imgUrl = product.images && product.images.length > 0 
+        ? (typeof product.images[0] === 'string' ? product.images[0] : product.images[0].url)
+        : '';
+
     return (
         <tr ref={setNodeRef} style={style} className="hover:bg-white/5 bg-[#151515]">
             <td className="p-4 flex gap-2 items-center">
                  <button {...attributes} {...listeners} className="p-1 hover:bg-white/10 rounded cursor-grab active:cursor-grabbing"><Move size={14} /></button>
                  <span className="w-6 text-center text-gray-500">{index + 1}</span>
             </td>
-            <td className="p-4"><div className="flex items-center gap-4"><img src={product.images[0]} className="w-10 h-10 object-cover rounded" alt="" /> <span>{product.translations?.fr?.title}</span></div></td>
+            <td className="p-4">
+                <div className="flex items-center gap-4">
+                    {imgUrl && <img src={imgUrl} className="w-10 h-10 object-cover rounded" alt="" />}
+                    <div>
+                        <span className="block">{product.translations?.fr?.title || 'Sem Título'}</span>
+                        <span className="text-xs text-gray-500">{product.sku}</span>
+                    </div>
+                </div>
+            </td>
             <td className="p-4">{formatPrice(product.price)}</td>
             <td className="p-4 text-right flex justify-end gap-2">
                 <button onClick={() => onEdit(product)} className="p-2 bg-blue-500/10 text-blue-500 rounded hover:bg-blue-500/20"><Edit size={16}/></button>
@@ -82,10 +96,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
     
     // --- PRODUCT STATE ---
     const [products, setProducts] = useState<Product[]>([]);
-    const [editingProduct, setEditingProduct] = useState<Partial<Product> | null>(null);
+    const [editingProduct, setEditingProduct] = useState<Product | null>(null);
     const [isProductModalOpen, setIsProductModalOpen] = useState(false);
     const [productSearch, setProductSearch] = useState('');
-    const [editLang, setEditLang] = useState('fr');
 
     // --- CRM STATE ---
     const [brevoContacts, setBrevoContacts] = useState<BrevoContact[]>([]);
@@ -130,7 +143,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
             setProducts(sorted as Product[]);
         });
 
-        // 2. Dashboard Stats (Mocked Sales, Real Brevo)
+        // 2. Dashboard Stats
         const fetchStats = async () => {
             const brevo = await getBrevoStats();
             setStats({
@@ -168,48 +181,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
 
     // --- HANDLERS ---
 
-    const handleSaveProduct = async () => {
-        if (!editingProduct) return;
-        try {
-            const productData = { ...editingProduct, updatedAt: new Date().toISOString() };
-            if (editingProduct.id) {
-                await updateDocument('products', editingProduct.id, productData);
-            } else {
-                const maxOrder = Math.max(...products.map(p => p.displayOrder || 0), 0);
-                await createDocument('products', {
-                    ...productData,
-                    createdAt: new Date().toISOString(),
-                    translations: editingProduct.translations || { fr: { title: 'New Art', description: '' } },
-                    images: editingProduct.images || [],
-                    price: editingProduct.price || 0,
-                    category: editingProduct.category || ProductCategory.PAINTINGS,
-                    available: true, status: 'available', stock: 1,
-                    displayOrder: maxOrder + 1
-                });
-            }
-            setIsProductModalOpen(false);
-            setEditingProduct(null);
-            toast("Produto salvo com sucesso", "success");
-        } catch (error) {
-            console.error("Error saving product:", error);
-            toast("Erro ao salvar produto", "error");
-        }
-    };
-
     const handleDeleteProduct = async (id: string) => {
         if(confirm("Tem certeza que deseja deletar esta obra?")) await deleteDocument('products', id);
-    };
-
-    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file || !editingProduct) return;
-        try {
-            const { path } = await uploadImage("products", file, `prod-${Date.now()}`);
-            const url = getPublicUrl("products", path);
-            setEditingProduct({ ...editingProduct, images: [...(editingProduct.images || []), url] });
-        } catch (err) {
-            alert("Erro no upload.");
-        }
     };
 
     const handleDragEndProducts = async (event: any) => {
@@ -381,7 +354,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
                                         <Search className="text-gray-500" size={20} />
                                         <input type="text" placeholder="Buscar produtos..." className="bg-transparent outline-none text-sm w-full" value={productSearch} onChange={(e) => setProductSearch(e.target.value)} />
                                     </div>
-                                    <button onClick={() => { setEditingProduct({}); setIsProductModalOpen(true); }} className="bg-accent text-white px-6 py-2 rounded-full text-xs font-bold uppercase tracking-widest flex items-center gap-2 hover:bg-accent/80">
+                                    <button onClick={() => { setEditingProduct(null); setIsProductModalOpen(true); }} className="bg-accent text-white px-6 py-2 rounded-full text-xs font-bold uppercase tracking-widest flex items-center gap-2 hover:bg-accent/80">
                                         <Plus size={16} /> Novo Produto
                                     </button>
                                 </div>
@@ -543,45 +516,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
                 </div>
             </div>
 
-            {/* PRODUCT MODAL */}
+            {/* PRODUCT FORM MODAL - REPLACED WITH NEW COMPONENT */}
             <AnimatePresence>
-                {isProductModalOpen && editingProduct && (
-                    <motion.div 
-                        className="fixed inset-0 z-[110] bg-black/90 backdrop-blur-xl flex items-center justify-center p-4" 
-                        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                    >
-                        <div 
-                            className="w-full max-w-4xl bg-[#121212] border border-white/10 rounded-2xl p-8 overflow-y-auto max-h-[90vh]"
-                            data-lenis-prevent // Critical for Modal Scroll
-                        >
-                            <h2 className="text-2xl font-serif mb-6">Editar Produto</h2>
-                            <div className="grid grid-cols-2 gap-6">
-                                <div className="space-y-4">
-                                    <input placeholder="Título" value={editingProduct.translations?.[editLang]?.title || ''} onChange={(e) => { const t = {...editingProduct.translations}; if(!t[editLang]) t[editLang]={title:'',description:''}; t[editLang].title=e.target.value; setEditingProduct({...editingProduct, translations:t}); }} className="w-full bg-black/30 border border-white/10 rounded p-3 text-white" />
-                                    <textarea placeholder="Descrição" rows={5} value={editingProduct.translations?.[editLang]?.description || ''} onChange={(e) => { const t = {...editingProduct.translations}; if(!t[editLang]) t[editLang]={title:'',description:''}; t[editLang].description=e.target.value; setEditingProduct({...editingProduct, translations:t}); }} className="w-full bg-black/30 border border-white/10 rounded p-3 text-white" />
-                                    <div className="flex gap-4">
-                                        <input type="number" placeholder="Preço" value={editingProduct.price} onChange={e => setEditingProduct({...editingProduct, price: parseFloat(e.target.value)})} className="flex-1 bg-black/30 border border-white/10 rounded p-3 text-white" />
-                                        <select value={editingProduct.category} onChange={e => setEditingProduct({...editingProduct, category: e.target.value as any})} className="flex-1 bg-black/30 border border-white/10 rounded p-3 capitalize text-white">
-                                            {Object.values(ProductCategory).map(c => <option key={c} value={c}>{c}</option>)}
-                                        </select>
-                                    </div>
-                                </div>
-                                <div>
-                                    <label className="block mb-2 text-xs uppercase text-gray-500">Imagens</label>
-                                    <div className="flex flex-wrap gap-2">
-                                        {editingProduct.images?.map((img, i) => (
-                                            <img key={i} src={img} className="w-20 h-20 object-cover rounded border border-white/10" alt=""/>
-                                        ))}
-                                        <label className="w-20 h-20 border border-dashed border-white/20 rounded flex items-center justify-center cursor-pointer hover:bg-white/5"><Upload size={20}/><input type="file" className="hidden" onChange={handleImageUpload}/></label>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="mt-8 flex justify-end gap-4">
-                                <button onClick={() => setIsProductModalOpen(false)} className="px-6 py-2 border border-white/10 rounded">Cancelar</button>
-                                <button onClick={handleSaveProduct} className="bg-accent text-white px-6 py-2 rounded font-bold">Salvar</button>
-                            </div>
-                        </div>
-                    </motion.div>
+                {isProductModalOpen && (
+                    <ProductForm 
+                        initialData={editingProduct} 
+                        onClose={() => setIsProductModalOpen(false)}
+                        onSuccess={() => {
+                            setIsProductModalOpen(false);
+                            setEditingProduct(null);
+                        }}
+                    />
                 )}
             </AnimatePresence>
 

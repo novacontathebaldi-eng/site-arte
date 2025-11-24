@@ -15,6 +15,13 @@ import { useToast } from './ui/Toast';
 // --- Constants ---
 const COUNTRIES = ["Luxembourg", "France", "Germany", "Portugal", "Belgium", "Netherlands", "United Kingdom", "United States", "Brazil", "Spain", "Italy"];
 
+// --- Helper ---
+const getImageUrl = (img: any) => {
+    if (!img) return '';
+    if (typeof img === 'string') return img;
+    return img.url || '';
+};
+
 // --- Components ---
 const DashboardTab: React.FC<{ 
     id: string; 
@@ -437,7 +444,7 @@ export const Dashboard: React.FC = () => {
                                                     {wishlistProducts.map(p => (
                                                         <div key={p.id} className="group bg-[#151515] rounded-2xl overflow-hidden border border-white/5 hover:border-accent/50 transition-all hover:shadow-2xl hover:shadow-accent/5">
                                                             <div className="aspect-square relative overflow-hidden">
-                                                                <img src={p.images[0]} alt="" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                                                                <img src={getImageUrl(p.images[0])} alt="" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                                                                 <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity" />
                                                             </div>
                                                             <div className="p-6">
