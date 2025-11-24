@@ -1,9 +1,9 @@
 'use server';
 
 import { GoogleGenAI, FunctionDeclaration, Tool, SchemaType } from "@google/genai";
-import { getCollection } from "../lib/firebase/firestore";
+import { getCollection } from "@/lib/firebase/firestore";
 import { registerClientToBrevo } from "./registerClient";
-import { Product } from "../types";
+import { Product } from "@/types";
 
 const API_KEY = process.env.GEMINI_API_KEY;
 
