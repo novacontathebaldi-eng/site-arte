@@ -5,16 +5,41 @@ import { db } from '../../lib/firebase/config';
 import { doc, getDoc, setDoc, collection, getDocs, query, where, orderBy, updateDoc, addDoc } from 'firebase/firestore';
 
 interface BrevoStats {
-  subscribers: number; // Lista 5 (ou env)
-  clients: number;     // Lista 7 (ou env)
+  subscribers: number; 
+  clients: number;     
   campaigns: number;
 }
+
+const DEFAULT_SYSTEM_PROMPT = `Você é a "Meeh Assistant", a concierge virtual exclusiva da artista Melissa Pelussi (Meeh).
+Sua missão é oferecer uma experiência de atendimento de luxo, informativa e acolhedora sobre arte contemporânea.
+
+TONALIDADE E PERSONALIDADE:
+- Elegante, mas acessível. Sofisticada, mas não arrogante.
+- Use emojis moderadamente para manter a leveza (ex: 🎨, ✨).
+- Fale como uma especialista em arte que ama o que faz.
+- Se o usuário falar em Português, responda em Português. Se falar em Inglês, responda em Inglês, etc.
+
+CONHECIMENTO CHAVE:
+- Artista: Melissa Pelussi (Meeh), baseada em Luxemburgo.
+- Estilo: Expressionismo abstrato, cores vibrantes, texturas, fusão com arte digital.
+- Produtos: Pinturas originais, Esculturas, Joias, Prints e Arte Digital.
+- Logística: Enviamos para todo o mundo. O frete é calculado no checkout.
+
+REGRAS DE VENDAS:
+- Se o usuário perguntar preço, mostre o preço mas enfatize o valor artístico.
+- Se o usuário parecer indeciso, sugira obras baseadas em emoções (ex: "Algo calmo", "Algo energético").
+- Se o usuário quiser comprar, use a tool 'searchProducts' para mostrar opções ou direcione para o checkout.
+- Tente capturar o email para a newsletter oferecendo conteúdo exclusivo ("The Journal").
+
+LIMITAÇÕES:
+- Não invente preços.
+- Não prometa prazos de entrega exatos sem verificar.
+- Se não souber, diga que vai verificar com a equipe humana e peça o email.`;
 
 // --- BREVO ACTIONS ---
 
 export async function getBrevoStats(): Promise<BrevoStats> {
   const apiKey = process.env.BREVO_API_KEY;
-  // Listas especificadas: Newsletter (Ex: 5), Clientes (Ex: 7)
   const newsletterListId = process.env.BREVO_LIST_ID ? Number(process.env.BREVO_LIST_ID) : 5;
   const clientListId = process.env.BREVO_WELCOME_LIST_ID ? Number(process.env.BREVO_WELCOME_LIST_ID) : 7;
 
@@ -31,14 +56,10 @@ export async function getBrevoStats(): Promise<BrevoStats> {
     const clientListRes = await fetch(`https://api.brevo.com/v3/contacts/lists/${clientListId}`, { headers });
     const clientListData = await clientListRes.json();
 
-    // Get Campaigns count (Opcional, mockado para performance se não crítico)
-    // const campaignsRes = await fetch(`https://api.brevo.com/v3/emailCampaigns?limit=1`, { headers });
-    // const campaignsData = await campaignsRes.json();
-
     return {
         subscribers: listData.uniqueSubscribers || 0,
         clients: clientListData.uniqueSubscribers || 0,
-        campaigns: 12 // Mock fixo para performance, ou implementar chamada real se necessário
+        campaigns: 12 
     };
   } catch (error) {
     console.error("Brevo Stats Error:", error);
@@ -72,11 +93,9 @@ export async function syncFirestoreToBrevo(): Promise<{ added: number, errors: n
     let errors = 0;
 
     try {
-        // 1. Get all users from Firestore
         const usersSnap = await getDocs(collection(db, 'users'));
         const users = usersSnap.docs.map(d => d.data());
 
-        // 2. Iterate and add to Brevo
         for (const user of users) {
             if (user.email) {
                 try {
@@ -98,7 +117,7 @@ export async function syncFirestoreToBrevo(): Promise<{ added: number, errors: n
                             updateEnabled: true
                         }),
                     });
-                    if (response.ok || response.status === 400) { // 400 is often duplicate, which is fine
+                    if (response.ok || response.status === 400) { 
                         added++;
                     } else {
                         errors++;
@@ -124,34 +143,39 @@ export async function getChatConfig(): Promise<ChatConfig> {
         
         if (docSnap.exists()) {
             const data = docSnap.data();
-            // Merge defaults to ensure type safety if DB is incomplete
             return {
-                systemPrompt: data.systemPrompt || "You are 'Meeh Assistant'.",
-                modelTemperature: data.modelTemperature || 0.7,
+                systemPrompt: data.systemPrompt || DEFAULT_SYSTEM_PROMPT,
+                modelTemperature: data.modelTemperature ?? 0.7,
                 rateLimit: {
-                    maxMessages: data.rateLimit?.maxMessages || 20,
-                    windowMinutes: data.rateLimit?.windowMinutes || 5
+                    maxMessages: data.rateLimit?.maxMessages ?? 20,
+                    windowMinutes: data.rateLimit?.windowMinutes ?? 5
                 },
                 starters: data.starters || []
             };
         }
         
-        // Default Init
-        return {
-            systemPrompt: "You are 'Meeh Assistant', a luxury art concierge for Melissa Pelussi. Your tone is elegant, helpful, and concise.",
+        // If config doesn't exist, create it with defaults immediately
+        const defaultConfig: ChatConfig = {
+            systemPrompt: DEFAULT_SYSTEM_PROMPT,
             modelTemperature: 0.7,
             rateLimit: { maxMessages: 20, windowMinutes: 5 },
             starters: [
                 { id: '1', label: '🎨 Sugira Obras', text: 'Pode me sugerir obras abstratas?', order: 1 },
                 { id: '2', label: '📦 Meus Pedidos', text: 'Gostaria de saber o status do meu pedido.', order: 2 },
+                { id: '3', label: '✈️ Frete', text: 'Como funciona o envio internacional?', order: 3 },
             ]
         };
+
+        await setDoc(docRef, defaultConfig);
+        return defaultConfig;
+
     } catch (e) {
         console.error("Error fetching chat config:", e);
+        // Fallback to avoid UI crash
         return {
-            systemPrompt: "Error loading config.",
-            modelTemperature: 0.5,
-            rateLimit: { maxMessages: 10, windowMinutes: 5 },
+            systemPrompt: DEFAULT_SYSTEM_PROMPT,
+            modelTemperature: 0.7,
+            rateLimit: { maxMessages: 20, windowMinutes: 5 },
             starters: []
         };
     }
@@ -160,6 +184,7 @@ export async function getChatConfig(): Promise<ChatConfig> {
 export async function updateChatConfig(config: ChatConfig) {
     try {
         const docRef = doc(db, 'chatbot_settings', 'config');
+        // Deep merge is safer
         await setDoc(docRef, config, { merge: true });
         return { success: true };
     } catch (e) {
@@ -186,12 +211,9 @@ export async function getChatFeedback(): Promise<ChatFeedback[]> {
 
 export async function resolveFeedback(feedbackId: string, solution?: KnowledgeBaseItem) {
     try {
-        // 1. Mark feedback as resolved
         await updateDoc(doc(db, 'chat_feedback', feedbackId), { resolved: true });
 
-        // 2. If a solution (KB Item) was provided, add it to Knowledge Base
         if (solution) {
-            // Add to specific collection for RAG/Injection
             await addDoc(collection(db, 'chatbot_knowledge_base'), {
                 ...solution,
                 createdAt: new Date().toISOString()

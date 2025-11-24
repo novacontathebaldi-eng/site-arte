@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, LayoutDashboard, Package, Users, MessageSquare, Plus, Edit, Trash2, Save, Upload, Search, Filter, TrendingUp, DollarSign, RefreshCw, Lock, Globe, MoveUp, MoveDown, Check, ThumbsDown, AlertCircle, Move } from 'lucide-react';
+import { X, LayoutDashboard, Package, Users, MessageSquare, Plus, Edit, Trash2, Save, Upload, Search, Filter, TrendingUp, DollarSign, RefreshCw, Lock, Globe, MoveUp, MoveDown, Check, ThumbsDown, AlertCircle, Move, Loader2 } from 'lucide-react';
 import { useAuthStore } from '../store';
 import { db } from '../lib/firebase/config';
 import { uploadImage, getPublicUrl } from '../lib/supabase/storage';
@@ -15,6 +14,7 @@ import { ChatConfig, ChatFeedback, BrevoContact, ChatStarter } from '../types/ad
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragOverlay } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { useToast } from './ui/Toast';
 
 interface AdminDashboardProps {
     isOpen: boolean;
@@ -63,8 +63,8 @@ const SortableStarter: React.FC<SortableStarterProps> = ({ starter, onChange, on
     return (
         <div ref={setNodeRef} style={style} className="flex gap-2 items-center bg-black/20 p-2 rounded mb-2">
              <button {...attributes} {...listeners} className="p-2 text-gray-500 cursor-grab active:cursor-grabbing"><Move size={14}/></button>
-             <input value={starter.label} onChange={e => onChange({...starter, label: e.target.value})} className="bg-black/30 border border-white/10 rounded p-2 text-xs w-1/3 focus:border-accent outline-none" placeholder="Rótulo" />
-             <input value={starter.text} onChange={e => onChange({...starter, text: e.target.value})} className="bg-black/30 border border-white/10 rounded p-2 text-xs flex-1 focus:border-accent outline-none" placeholder="Mensagem enviada" />
+             <input value={starter.label} onChange={e => onChange({...starter, label: e.target.value})} className="bg-black/30 border border-white/10 rounded p-2 text-xs w-1/3 focus:border-accent outline-none text-white" placeholder="Rótulo" />
+             <input value={starter.text} onChange={e => onChange({...starter, text: e.target.value})} className="bg-black/30 border border-white/10 rounded p-2 text-xs flex-1 focus:border-accent outline-none text-white" placeholder="Mensagem enviada" />
              <button onClick={() => onDelete(starter.id)} className="text-red-500 p-2 hover:bg-red-500/10 rounded"><Trash2 size={14}/></button>
         </div>
     );
@@ -74,6 +74,7 @@ const SortableStarter: React.FC<SortableStarterProps> = ({ starter, onChange, on
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose }) => {
     const { user } = useAuthStore();
+    const { toast } = useToast();
     const [activeTab, setActiveTab] = useState<'analytics' | 'products' | 'crm' | 'chatbot'>('analytics');
     const [stats, setStats] = useState({ 
         salesToday: 0, salesMonth: 0, newOrders: 0, activeUsers: 0, brevoSubs: 0, brevoClients: 0 
@@ -174,7 +175,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
             if (editingProduct.id) {
                 await updateDocument('products', editingProduct.id, productData);
             } else {
-                // Calculate max order
                 const maxOrder = Math.max(...products.map(p => p.displayOrder || 0), 0);
                 await createDocument('products', {
                     ...productData,
@@ -189,9 +189,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
             }
             setIsProductModalOpen(false);
             setEditingProduct(null);
+            toast("Produto salvo com sucesso", "success");
         } catch (error) {
             console.error("Error saving product:", error);
-            alert("Erro ao salvar produto.");
+            toast("Erro ao salvar produto", "error");
         }
     };
 
@@ -211,7 +212,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
         }
     };
 
-    // Drag End Handler for Products
     const handleDragEndProducts = async (event: any) => {
         const { active, over } = event;
         if (active.id !== over.id) {
@@ -220,14 +220,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
             const newItems = arrayMove(products, oldIndex, newIndex);
             setProducts(newItems);
 
-            // Save new order to Firestore
             for (let i = 0; i < newItems.length; i++) {
                 await updateDocument('products', newItems[i].id, { displayOrder: i });
             }
         }
     };
 
-    // Drag End Handler for Starters
     const handleDragEndStarters = (event: any) => {
         if (!chatConfig) return;
         const { active, over } = event;
@@ -236,7 +234,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
             const newIndex = chatConfig.starters.findIndex(s => s.id === over.id);
             const newStarters = arrayMove(chatConfig.starters, oldIndex, newIndex);
             
-            // Update order property
             const updated = newStarters.map((s, idx) => ({ ...s, order: idx }));
             setChatConfig({ ...chatConfig, starters: updated });
         }
@@ -245,9 +242,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
     const handleSyncBrevo = async () => {
         setIsSyncing(true);
         const res = await syncFirestoreToBrevo();
-        alert(`Sincronização concluída: ${res.added} adicionados, ${res.errors} erros.`);
+        toast(`Sincronização concluída: ${res.added} adicionados.`, "success");
         setIsSyncing(false);
-        // Refresh contacts
         setLoadingContacts(true);
         getBrevoContacts().then(c => { setBrevoContacts(c); setLoadingContacts(false); });
     };
@@ -255,9 +251,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
     const handleSaveChatConfig = async () => {
         if (!chatConfig) return;
         setIsSavingChat(true);
-        await updateChatConfig(chatConfig);
+        const res = await updateChatConfig(chatConfig);
         setIsSavingChat(false);
-        alert("Configurações salvas com sucesso!");
+        if (res.success) {
+            toast("Configurações do Chatbot salvas.", "success");
+        } else {
+            toast("Erro ao salvar configurações.", "error");
+        }
     };
 
     const handleResolveFeedback = async () => {
@@ -275,11 +275,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
         setFeedbackList(prev => prev.filter(f => f.id !== item.id));
         setShowFeedbackModal(null);
         setFixAnswer('');
+        toast("Conhecimento adicionado. O bot aprendeu!", "success");
     };
 
     if (!isOpen) return null;
 
-    // --- CHART DATA MOCK ---
     const salesData = [
         { name: 'Jan', value: 4000 }, { name: 'Fev', value: 3000 }, { name: 'Mar', value: 2000 }, 
         { name: 'Abr', value: 2780 }, { name: 'Mai', value: 1890 }, { name: 'Jun', value: 2390 }, 
@@ -291,10 +291,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
             {/* SIDEBAR */}
             <motion.div 
                 className="w-20 md:w-64 bg-[#121212] border-r border-white/10 flex flex-col items-center md:items-stretch py-8"
-                {...({
-                    initial: { x: -100 },
-                    animate: { x: 0 }
-                } as any)}
+                initial={{ x: -100 }}
+                animate={{ x: 0 }}
             >
                 <div className="mb-12 text-center">
                     <div className="w-10 h-10 bg-red-600 rounded-lg mx-auto flex items-center justify-center text-white shadow-red-500/20 shadow-lg">
@@ -333,13 +331,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
                         
                         {/* 1. ANALYTICS */}
                         {activeTab === 'analytics' && (
-                            <motion.div 
-                                className="space-y-8"
-                                {...({
-                                    initial: { opacity: 0 },
-                                    animate: { opacity: 1 }
-                                } as any)}
-                            >
+                            <motion.div className="space-y-8" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
                                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                                     {[
                                         { label: 'Vendas Hoje', value: `€ ${stats.salesToday}`, icon: DollarSign, trend: '+12%', color: '#10B981' },
@@ -378,14 +370,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
                             </motion.div>
                         )}
 
-                        {/* 2. PRODUCTS (Drag & Drop) */}
+                        {/* 2. PRODUCTS */}
                         {activeTab === 'products' && (
-                            <motion.div 
-                                {...({
-                                    initial: { opacity: 0 },
-                                    animate: { opacity: 1 }
-                                } as any)}
-                            >
+                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
                                 <div className="flex justify-between items-center mb-6">
                                     <div className="flex gap-4 bg-[#151515] p-2 rounded-lg border border-white/10 w-96">
                                         <Search className="text-gray-500" size={20} />
@@ -422,13 +409,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
                         
                         {/* 3. CRM */}
                         {activeTab === 'crm' && (
-                            <motion.div 
-                                {...({
-                                    initial: { opacity: 0 },
-                                    animate: { opacity: 1 }
-                                } as any)}
-                            >
-                                {loadingContacts ? <div className="text-center py-20">Carregando contatos do Brevo...</div> : (
+                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                                {loadingContacts ? <div className="text-center py-20 flex flex-col items-center"><Loader2 className="animate-spin mb-4" /> Carregando...</div> : (
                                     <div className="bg-[#151515] rounded-xl border border-white/10 overflow-hidden">
                                         <div className="p-4 border-b border-white/10 flex justify-between items-center">
                                             <div className="flex items-center gap-4">
@@ -466,40 +448,32 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
 
                         {/* 4. CHATBOT IA */}
                         {activeTab === 'chatbot' && chatConfig && (
-                             <motion.div 
-                                className="space-y-6"
-                                {...({
-                                    initial: { opacity: 0 },
-                                    animate: { opacity: 1 }
-                                } as any)}
-                             >
+                             <motion.div className="space-y-6" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
                                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                    {/* Configs */}
                                     <div className="bg-[#151515] p-6 rounded-xl border border-white/10 space-y-4">
                                         <h3 className="font-serif text-lg text-accent mb-4">Cérebro da IA (System Prompt)</h3>
                                         <textarea 
                                             value={chatConfig.systemPrompt}
                                             onChange={(e) => setChatConfig({...chatConfig, systemPrompt: e.target.value})}
-                                            className="w-full h-32 bg-black/30 border border-white/10 rounded p-3 text-sm focus:border-accent outline-none"
+                                            className="w-full h-48 bg-black/30 border border-white/10 rounded p-3 text-sm focus:border-accent outline-none text-white/80"
                                             placeholder="Instruções do sistema..."
                                         />
                                         <div className="grid grid-cols-2 gap-4">
                                             <div>
-                                                <label className="text-xs uppercase text-gray-500">Temperatura (Criatividade)</label>
+                                                <label className="text-xs uppercase text-gray-500">Temperatura</label>
                                                 <input type="range" min="0" max="1" step="0.1" value={chatConfig.modelTemperature} onChange={e => setChatConfig({...chatConfig, modelTemperature: parseFloat(e.target.value)})} className="w-full mt-2" />
-                                                <div className="text-right text-xs">{chatConfig.modelTemperature}</div>
+                                                <div className="text-right text-xs text-accent">{chatConfig.modelTemperature}</div>
                                             </div>
                                             <div>
-                                                 <label className="text-xs uppercase text-gray-500">Rate Limit (0 = Ilimitado)</label>
+                                                 <label className="text-xs uppercase text-gray-500">Rate Limit (0=Ilimitado)</label>
                                                  <div className="flex gap-2 mt-1">
-                                                     <input type="number" placeholder="Msgs" value={chatConfig.rateLimit?.maxMessages || 20} onChange={e => setChatConfig({...chatConfig, rateLimit: {...(chatConfig.rateLimit || { windowMinutes: 5 }), maxMessages: parseInt(e.target.value)}})} className="w-1/2 bg-black/30 border border-white/10 rounded p-2 text-sm" />
-                                                     <input type="number" placeholder="Mins" value={chatConfig.rateLimit?.windowMinutes || 5} onChange={e => setChatConfig({...chatConfig, rateLimit: {...(chatConfig.rateLimit || { maxMessages: 20 }), windowMinutes: parseInt(e.target.value)}})} className="w-1/2 bg-black/30 border border-white/10 rounded p-2 text-sm" />
+                                                     <input type="number" value={chatConfig.rateLimit?.maxMessages} onChange={e => setChatConfig({...chatConfig, rateLimit: {...chatConfig.rateLimit, maxMessages: parseInt(e.target.value)}})} className="w-1/2 bg-black/30 border border-white/10 rounded p-2 text-sm text-white" />
+                                                     <input type="number" value={chatConfig.rateLimit?.windowMinutes} onChange={e => setChatConfig({...chatConfig, rateLimit: {...chatConfig.rateLimit, windowMinutes: parseInt(e.target.value)}})} className="w-1/2 bg-black/30 border border-white/10 rounded p-2 text-sm text-white" />
                                                  </div>
                                             </div>
                                         </div>
                                     </div>
                                     
-                                    {/* Starters (Drag & Drop) */}
                                     <div className="bg-[#151515] p-6 rounded-xl border border-white/10">
                                         <div className="flex justify-between items-center mb-4">
                                             <h3 className="font-serif text-lg text-accent">Prompt Starters (Drag & Drop)</h3>
@@ -527,29 +501,33 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
                                 </div>
 
                                 <div className="flex justify-end">
-                                    <button onClick={handleSaveChatConfig} disabled={isSavingChat} className="bg-accent text-white px-8 py-3 rounded font-bold uppercase tracking-widest text-xs hover:bg-accent/80 flex items-center gap-2">
-                                        <Save size={16}/> Salvar Configurações
+                                    <button 
+                                        onClick={handleSaveChatConfig} 
+                                        disabled={isSavingChat} 
+                                        className="bg-accent text-white px-8 py-3 rounded font-bold uppercase tracking-widest text-xs hover:bg-accent/80 flex items-center gap-2 shadow-lg hover:shadow-accent/20 transition-all disabled:opacity-50"
+                                    >
+                                        {isSavingChat ? <Loader2 size={16} className="animate-spin" /> : <Save size={16}/>} 
+                                        {isSavingChat ? 'Salvando...' : 'Salvar Configurações'}
                                     </button>
                                 </div>
 
-                                {/* Feedback Loop */}
                                 <div className="bg-[#151515] rounded-xl border border-white/10 overflow-hidden">
                                     <div className="p-4 border-b border-white/10 bg-red-500/5">
-                                        <h3 className="font-serif text-lg text-red-400 flex items-center gap-2"><AlertCircle size={18}/> Feedback Negativo (Ajuste de Conhecimento)</h3>
+                                        <h3 className="font-serif text-lg text-red-400 flex items-center gap-2"><AlertCircle size={18}/> Feedback Negativo</h3>
                                     </div>
                                     <table className="w-full text-sm">
                                         <thead className="bg-white/5 text-gray-400">
-                                            <tr><th className="p-4 text-left">Pergunta do Usuário</th><th className="p-4 text-left">Resposta da IA</th><th className="p-4 text-right">Ação</th></tr>
+                                            <tr><th className="p-4 text-left">Pergunta</th><th className="p-4 text-left">Resposta da IA</th><th className="p-4 text-right">Ação</th></tr>
                                         </thead>
                                         <tbody className="divide-y divide-white/5">
                                             {feedbackList.length === 0 ? (
-                                                <tr><td colSpan={3} className="p-8 text-center text-gray-500">Nenhum feedback negativo pendente. Ótimo trabalho!</td></tr>
+                                                <tr><td colSpan={3} className="p-8 text-center text-gray-500">Nenhum feedback negativo pendente.</td></tr>
                                             ) : feedbackList.map(f => (
                                                 <tr key={f.id} className="hover:bg-white/5">
                                                     <td className="p-4 max-w-xs truncate" title={f.userMessage}>{f.userMessage}</td>
                                                     <td className="p-4 max-w-xs truncate text-gray-400" title={f.aiResponse}>{f.aiResponse}</td>
                                                     <td className="p-4 text-right">
-                                                        <button onClick={() => setShowFeedbackModal(f)} className="bg-white/10 hover:bg-accent hover:text-white px-3 py-1 rounded text-xs uppercase font-bold transition-colors">Corrigir / Ensinar</button>
+                                                        <button onClick={() => setShowFeedbackModal(f)} className="bg-white/10 hover:bg-accent hover:text-white px-3 py-1 rounded text-xs uppercase font-bold transition-colors">Corrigir</button>
                                                     </td>
                                                 </tr>
                                             ))}
@@ -567,21 +545,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
                 {isProductModalOpen && editingProduct && (
                     <motion.div 
                         className="fixed inset-0 z-[110] bg-black/90 backdrop-blur-xl flex items-center justify-center p-4" 
-                        {...({
-                            initial: { opacity: 0 },
-                            animate: { opacity: 1 },
-                            exit: { opacity: 0 }
-                        } as any)}
+                        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                     >
                         <div className="w-full max-w-4xl bg-[#121212] border border-white/10 rounded-2xl p-8 overflow-y-auto max-h-[90vh]">
                             <h2 className="text-2xl font-serif mb-6">Editar Produto</h2>
                             <div className="grid grid-cols-2 gap-6">
                                 <div className="space-y-4">
-                                    <input placeholder="Título" value={editingProduct.translations?.[editLang]?.title || ''} onChange={(e) => { const t = {...editingProduct.translations}; if(!t[editLang]) t[editLang]={title:'',description:''}; t[editLang].title=e.target.value; setEditingProduct({...editingProduct, translations:t}); }} className="w-full bg-black/30 border border-white/10 rounded p-3" />
-                                    <textarea placeholder="Descrição" rows={5} value={editingProduct.translations?.[editLang]?.description || ''} onChange={(e) => { const t = {...editingProduct.translations}; if(!t[editLang]) t[editLang]={title:'',description:''}; t[editLang].description=e.target.value; setEditingProduct({...editingProduct, translations:t}); }} className="w-full bg-black/30 border border-white/10 rounded p-3" />
+                                    <input placeholder="Título" value={editingProduct.translations?.[editLang]?.title || ''} onChange={(e) => { const t = {...editingProduct.translations}; if(!t[editLang]) t[editLang]={title:'',description:''}; t[editLang].title=e.target.value; setEditingProduct({...editingProduct, translations:t}); }} className="w-full bg-black/30 border border-white/10 rounded p-3 text-white" />
+                                    <textarea placeholder="Descrição" rows={5} value={editingProduct.translations?.[editLang]?.description || ''} onChange={(e) => { const t = {...editingProduct.translations}; if(!t[editLang]) t[editLang]={title:'',description:''}; t[editLang].description=e.target.value; setEditingProduct({...editingProduct, translations:t}); }} className="w-full bg-black/30 border border-white/10 rounded p-3 text-white" />
                                     <div className="flex gap-4">
-                                        <input type="number" placeholder="Preço" value={editingProduct.price} onChange={e => setEditingProduct({...editingProduct, price: parseFloat(e.target.value)})} className="flex-1 bg-black/30 border border-white/10 rounded p-3" />
-                                        <select value={editingProduct.category} onChange={e => setEditingProduct({...editingProduct, category: e.target.value as any})} className="flex-1 bg-black/30 border border-white/10 rounded p-3 capitalize">
+                                        <input type="number" placeholder="Preço" value={editingProduct.price} onChange={e => setEditingProduct({...editingProduct, price: parseFloat(e.target.value)})} className="flex-1 bg-black/30 border border-white/10 rounded p-3 text-white" />
+                                        <select value={editingProduct.category} onChange={e => setEditingProduct({...editingProduct, category: e.target.value as any})} className="flex-1 bg-black/30 border border-white/10 rounded p-3 capitalize text-white">
                                             {Object.values(ProductCategory).map(c => <option key={c} value={c}>{c}</option>)}
                                         </select>
                                     </div>
@@ -610,22 +584,18 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
                 {showFeedbackModal && (
                     <motion.div 
                         className="fixed inset-0 z-[110] bg-black/90 backdrop-blur-xl flex items-center justify-center p-4" 
-                        {...({
-                            initial: { opacity: 0 },
-                            animate: { opacity: 1 },
-                            exit: { opacity: 0 }
-                        } as any)}
+                        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                     >
                         <div className="w-full max-w-lg bg-[#121212] border border-white/10 rounded-2xl p-8">
                             <h2 className="text-2xl font-serif mb-4 text-accent">Corrigir Conhecimento</h2>
                             <p className="text-gray-400 text-sm mb-4">
                                 O usuário perguntou: <span className="text-white italic">"{showFeedbackModal.userMessage}"</span>
-                                <br/>A IA respondeu (e foi ruim): <span className="text-red-400 italic">"{showFeedbackModal.aiResponse}"</span>
+                                <br/>A IA respondeu: <span className="text-red-400 italic">"{showFeedbackModal.aiResponse}"</span>
                             </p>
                             
                             <label className="block text-xs uppercase text-gray-500 mb-2">Qual a resposta correta?</label>
                             <textarea 
-                                className="w-full bg-black/30 border border-white/10 rounded p-3 text-sm h-32 focus:border-accent outline-none"
+                                className="w-full bg-black/30 border border-white/10 rounded p-3 text-sm h-32 focus:border-accent outline-none text-white"
                                 value={fixAnswer}
                                 onChange={(e) => setFixAnswer(e.target.value)}
                                 placeholder="Digite a informação correta para a IA aprender..."

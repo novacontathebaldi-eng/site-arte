@@ -1,50 +1,95 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageCircle, X, Send, Loader2, Sparkles, ThumbsUp, ThumbsDown, Copy, Minimize2 } from 'lucide-react';
-import { useUIStore } from '../store';
+import { MessageCircle, X, Send, Loader2, Sparkles, ThumbsUp, ThumbsDown, Copy, Minimize2, ShoppingBag } from 'lucide-react';
+import { useUIStore, useAuthStore } from '../store';
 import { generateChatResponse, submitChatFeedback } from '../app/actions/chat';
 import { ChatMessage, Product } from '../types';
 import { useLanguage } from '../hooks/useLanguage';
-import { useCart } from '../hooks/useCart';
 import { formatPrice, cn } from '../lib/utils';
 import { ProductModal } from './catalog/ProductModal';
 import { getChatConfig } from '../app/actions/admin';
 import { ChatStarter } from '../types/admin';
 
+// --- HELPERS ---
+
+// Safe image URL getter to prevent [object Object] 404s
+const getImageUrl = (img: any) => {
+    if (!img) return '';
+    if (typeof img === 'string') return img;
+    if (img.url) return img.url;
+    if (img.src) return img.src;
+    return '';
+};
+
+// Typewriter Component
+const TypewriterText = ({ text, onComplete }: { text: string, onComplete?: () => void }) => {
+    const [displayedText, setDisplayedText] = useState('');
+    
+    useEffect(() => {
+        let i = 0;
+        const speed = 15; // ms per char
+        const interval = setInterval(() => {
+            if (i < text.length) {
+                setDisplayedText(text.substring(0, i + 1));
+                i++;
+            } else {
+                clearInterval(interval);
+                if (onComplete) onComplete();
+            }
+        }, speed);
+        return () => clearInterval(interval);
+    }, [text, onComplete]);
+
+    return <p className="whitespace-pre-wrap">{displayedText}</p>;
+};
+
 // --- SUB-COMPONENTS ---
 
 const ProductCarousel = ({ products, onSelect }: { products: Product[], onSelect: (p: Product) => void }) => (
-  <div className="flex gap-3 overflow-x-auto py-3 px-1 snap-x no-scrollbar">
-    {products.map((p) => (
-      <div 
-        key={p.id} 
-        className="min-w-[140px] w-[140px] bg-white dark:bg-[#252525] rounded-lg border border-gray-200 dark:border-white/10 overflow-hidden snap-center flex-shrink-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer group"
-        onClick={() => onSelect(p)}
-      >
-        <div className="aspect-square relative overflow-hidden">
-            <img src={p.images[0]} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="" />
-        </div>
-        <div className="p-2">
-            <h4 className="text-xs font-serif font-bold truncate text-primary dark:text-white">{p.translations['fr']?.title || 'Art'}</h4>
-            <p className="text-[10px] text-accent font-medium">{formatPrice(p.price)}</p>
-        </div>
-        <button className="w-full py-1.5 bg-gray-100 dark:bg-white/5 text-[10px] font-bold uppercase hover:bg-accent hover:text-white transition-colors">
-            Ver Obra
-        </button>
+  <div className="w-full mt-3 mb-2">
+      <div className="flex gap-3 overflow-x-auto py-2 px-1 snap-x no-scrollbar pb-4">
+        {products.map((p) => {
+            const img = getImageUrl(p.images[0]);
+            return (
+              <div 
+                key={p.id} 
+                className="min-w-[160px] w-[160px] bg-white dark:bg-[#252525] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden snap-center flex-shrink-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer group flex flex-col"
+                onClick={() => onSelect(p)}
+              >
+                <div className="aspect-[4/5] relative overflow-hidden bg-gray-100">
+                    {img ? (
+                        <img src={img} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="" />
+                    ) : (
+                        <div className="w-full h-full flex items-center justify-center text-[10px] text-gray-400">No Image</div>
+                    )}
+                </div>
+                <div className="p-3 flex-1 flex flex-col justify-between">
+                    <div>
+                        <h4 className="text-xs font-serif font-bold truncate text-primary dark:text-white mb-1">{p.translations['fr']?.title || 'Art'}</h4>
+                        <p className="text-[10px] text-gray-500">{p.category}</p>
+                    </div>
+                    <div className="mt-2 flex justify-between items-center">
+                        <p className="text-xs text-accent font-bold">{formatPrice(p.price)}</p>
+                        <div className="bg-gray-100 dark:bg-white/10 p-1.5 rounded-full text-primary dark:text-white">
+                            <ShoppingBag size={12} />
+                        </div>
+                    </div>
+                </div>
+              </div>
+            );
+        })}
       </div>
-    ))}
   </div>
 );
 
 const PromptChips = ({ starters, onSelect }: { starters: ChatStarter[], onSelect: (text: string) => void }) => {
     return (
-        <div className="flex gap-2 overflow-x-auto py-2 px-4 no-scrollbar">
+        <div className="flex flex-wrap gap-2 px-1">
             {starters.sort((a,b) => a.order - b.order).map((s) => (
                 <button
                     key={s.id}
                     onClick={() => onSelect(s.text)}
-                    className="whitespace-nowrap px-4 py-2 rounded-full bg-white dark:bg-[#252525] border border-gray-200 dark:border-white/10 text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-accent hover:text-white hover:border-accent transition-all shadow-sm"
+                    className="px-3 py-1.5 rounded-lg bg-white dark:bg-[#252525] border border-gray-200 dark:border-white/10 text-[11px] font-medium text-primary dark:text-gray-300 hover:bg-accent hover:text-white hover:border-accent transition-all shadow-sm"
                 >
                     {s.label}
                 </button>
@@ -55,6 +100,7 @@ const PromptChips = ({ starters, onSelect }: { starters: ChatStarter[], onSelect
 
 export const Chatbot: React.FC = () => {
   const { isChatOpen, toggleChat } = useUIStore();
+  const { user } = useAuthStore();
   const { t, language } = useLanguage();
   
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -67,9 +113,10 @@ export const Chatbot: React.FC = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Load Config (Starters)
+  // Load Config
   useEffect(() => {
     const loadConfig = async () => {
+        if (!isChatOpen) return;
         try {
             const config = await getChatConfig();
             setStarters(config.starters || []);
@@ -77,12 +124,12 @@ export const Chatbot: React.FC = () => {
             console.error("Failed to load chat config");
         }
     };
-    if (isChatOpen) loadConfig();
+    loadConfig();
   }, [isChatOpen]);
 
   // Initial Welcome
   useEffect(() => {
-    if (!hasInteracted && messages.length === 0) {
+    if (isChatOpen && !hasInteracted && messages.length === 0) {
         setMessages([{ 
             id: 'welcome', 
             role: 'model', 
@@ -90,13 +137,15 @@ export const Chatbot: React.FC = () => {
             timestamp: Date.now() 
         }]);
     }
-  }, [language, hasInteracted, t, messages.length]);
+  }, [isChatOpen, hasInteracted, t, messages.length]);
 
+  // Scroll to bottom
+  const scrollToBottom = () => {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+  
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    if (isChatOpen) {
-        setTimeout(() => inputRef.current?.focus(), 300);
-    }
+    scrollToBottom();
   }, [messages, isChatOpen]);
 
   const handleSend = async (text: string = inputValue) => {
@@ -105,6 +154,7 @@ export const Chatbot: React.FC = () => {
     setHasInteracted(true);
     setInputValue('');
 
+    // Optimistic User UI
     const userMsg: ChatMessage = {
         id: Date.now().toString(),
         role: 'user',
@@ -120,10 +170,14 @@ export const Chatbot: React.FC = () => {
             parts: [{ text: m.text }]
         }));
 
-        const response = await generateChatResponse(text, history);
+        const response = await generateChatResponse(
+            text, 
+            history,
+            user ? { name: user.displayName, id: user.uid } : undefined
+        );
 
         const botMsg: ChatMessage = {
-            id: response.messageId || (Date.now() + 1).toString(), // Capture server log ID
+            id: response.messageId || (Date.now() + 1).toString(),
             role: 'model',
             text: response.text,
             products: response.products,
@@ -136,7 +190,7 @@ export const Chatbot: React.FC = () => {
         setMessages(prev => [...prev, {
             id: Date.now().toString(),
             role: 'model',
-            text: "Ocorreu um erro ao conectar com o assistente. Tente novamente.",
+            text: "Desculpe, tive um problema técnico. Pode repetir?",
             timestamp: Date.now()
         }]);
     } finally {
@@ -145,19 +199,19 @@ export const Chatbot: React.FC = () => {
   };
 
   const handleFeedback = async (msg: ChatMessage, type: 'like' | 'dislike') => {
-      // Find the user message before this bot message
       const msgIndex = messages.findIndex(m => m.id === msg.id);
       const userMsg = messages[msgIndex - 1];
       
-      // Update UI state
-      setMessages(prev => prev.map(m => 
-          m.id === msg.id ? { ...m, feedback: type } : m
-      ));
+      setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, feedback: type } : m));
 
-      // Send to server
       if (userMsg && msg.id) {
           await submitChatFeedback(msg.id, userMsg.text, msg.text, type);
       }
+  };
+
+  const handleCopy = (text: string) => {
+      navigator.clipboard.writeText(text);
+      // Optional: Add a small tooltip or icon change to indicate success could be nice
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -169,118 +223,128 @@ export const Chatbot: React.FC = () => {
 
   return (
     <>
-      {/* Floating Button (Bottom Left) */}
+      {/* Floating Button */}
       <motion.button
-        className="fixed bottom-8 left-8 z-[90] w-14 h-14 bg-white dark:bg-[#1a1a1a] text-primary dark:text-white rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.12)] flex items-center justify-center border border-white/20 hover:scale-105 transition-transform group"
+        className="fixed bottom-8 left-8 z-[90] w-14 h-14 bg-white/80 dark:bg-black/80 backdrop-blur-md text-primary dark:text-white rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.12)] flex items-center justify-center border border-white/20 hover:scale-105 transition-transform group"
         onClick={toggleChat}
-        {...({
-            initial: { scale: 0 },
-            animate: { scale: 1 },
-            whileTap: { scale: 0.9 }
-        } as any)}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
       >
         {isChatOpen ? <Minimize2 size={24} /> : <MessageCircle size={24} className="group-hover:text-accent transition-colors" />}
         {!isChatOpen && messages.length > 1 && (
-             <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse" />
+             <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 rounded-full animate-pulse border-2 border-white dark:border-black" />
         )}
       </motion.button>
 
-      {/* Pop-over Window */}
+      {/* Chat Window */}
       <AnimatePresence>
         {isChatOpen && (
           <motion.div
-            className="fixed bottom-24 left-4 md:left-8 w-[calc(100vw-32px)] md:w-[380px] h-[600px] max-h-[80vh] bg-white/90 dark:bg-[#1a1a1a]/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 dark:border-white/10 z-[90] flex flex-col overflow-hidden"
-            {...({
-                initial: { opacity: 0, scale: 0.9, y: 20, transformOrigin: "bottom left" },
-                animate: { opacity: 1, scale: 1, y: 0 },
-                exit: { opacity: 0, scale: 0.9, y: 20 }
-            } as any)}
+            className="fixed bottom-24 left-4 md:left-8 w-[calc(100vw-32px)] md:w-[380px] h-[650px] max-h-[80vh] bg-white/95 dark:bg-[#121212]/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 dark:border-white/10 z-[90] flex flex-col overflow-hidden"
+            initial={{ opacity: 0, scale: 0.9, y: 50, transformOrigin: "bottom left" }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 50 }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
           >
             {/* Header */}
-            <div className="p-4 border-b border-gray-100 dark:border-white/5 flex justify-between items-center bg-white/50 dark:bg-black/20">
+            <div className="p-4 border-b border-gray-100 dark:border-white/5 flex justify-between items-center bg-white/50 dark:bg-black/20 backdrop-blur-md absolute top-0 w-full z-10">
                 <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-gradient-to-br from-accent to-[#b59328] rounded-full flex items-center justify-center shadow-lg">
-                        <Sparkles size={20} className="text-white" />
+                        <Sparkles size={18} className="text-white" />
                     </div>
                     <div>
-                        <h3 className="font-serif font-bold text-sm text-primary dark:text-white">Meeh Assistant</h3>
+                        <h3 className="font-serif font-bold text-sm text-primary dark:text-white leading-none mb-1">Meeh Assistant</h3>
                         <div className="flex items-center gap-1.5">
                             <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
-                            <span className="text-[10px] text-gray-500 font-medium tracking-wide">Online</span>
+                            <span className="text-[10px] text-gray-500 font-medium tracking-wide uppercase">Online</span>
                         </div>
                     </div>
                 </div>
                 <button 
                     onClick={toggleChat} 
-                    className="w-8 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 flex items-center justify-center transition-colors"
+                    className="w-8 h-8 rounded-full bg-gray-100 dark:bg-white/10 hover:bg-red-100 dark:hover:bg-red-900/30 flex items-center justify-center transition-colors group"
                 >
-                    <X size={18} className="text-gray-500" />
+                    <X size={16} className="text-gray-500 dark:text-gray-400 group-hover:text-red-500" />
                 </button>
             </div>
 
             {/* Messages Area */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-6 bg-gray-50/50 dark:bg-black/20">
-                {messages.map((msg) => (
-                    <motion.div 
-                        key={msg.id} 
-                        {...({
-                            initial: { opacity: 0, y: 10 },
-                            animate: { opacity: 1, y: 0 }
-                        } as any)}
-                        className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}
-                    >
-                        {/* Bubble */}
-                        <div className={cn(
-                            "max-w-[85%] p-3.5 text-sm leading-relaxed shadow-sm relative group",
-                            msg.role === 'user' 
-                                ? "bg-primary dark:bg-white text-white dark:text-black rounded-2xl rounded-tr-sm" 
-                                : "bg-white dark:bg-[#252525] text-gray-800 dark:text-gray-200 rounded-2xl rounded-tl-sm border border-gray-100 dark:border-white/5"
-                        )}>
-                            {msg.text}
+            <div className="flex-1 overflow-y-auto p-4 pt-20 pb-4 space-y-6 bg-gray-50/50 dark:bg-black/20 scroll-smooth">
+                {messages.map((msg, idx) => {
+                    const isLast = idx === messages.length - 1;
+                    return (
+                        <motion.div 
+                            key={msg.id} 
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}
+                        >
+                            <div className={cn(
+                                "max-w-[85%] p-3.5 text-sm leading-relaxed shadow-sm relative group transition-all",
+                                msg.role === 'user' 
+                                    ? "bg-primary dark:bg-white text-white dark:text-black rounded-2xl rounded-tr-sm" 
+                                    : "bg-white dark:bg-[#1e1e1e] text-gray-800 dark:text-gray-200 rounded-2xl rounded-tl-sm border border-gray-100 dark:border-white/5"
+                            )}>
+                                {msg.role === 'model' && isLast && !msg.products ? (
+                                    <TypewriterText text={msg.text} onComplete={scrollToBottom} />
+                                ) : (
+                                    <p className="whitespace-pre-wrap">{msg.text}</p>
+                                )}
+                            </div>
 
-                            {/* Interactions Footer (Only for bot) */}
+                            {/* Bot Actions Row (Outside Bubble) */}
                             {msg.role === 'model' && (
-                                <div className={cn(
-                                    "absolute -bottom-6 left-0 flex gap-2 pt-1 px-1 transition-opacity",
-                                    msg.feedback ? "opacity-100" : "opacity-0 group-hover:opacity-100"
-                                )}>
-                                    <button 
-                                        onClick={() => handleFeedback(msg, 'like')}
-                                        className={cn("transition-colors", msg.feedback === 'like' ? "text-green-500" : "text-gray-400 hover:text-green-500")}
-                                        title="Útil"
-                                    >
-                                        <ThumbsUp size={12}/>
-                                    </button>
-                                    <button 
-                                        onClick={() => handleFeedback(msg, 'dislike')}
-                                        className={cn("transition-colors", msg.feedback === 'dislike' ? "text-red-500" : "text-gray-400 hover:text-red-500")}
-                                        title="Não útil"
-                                    >
-                                        <ThumbsDown size={12}/>
-                                    </button>
+                                <div className="flex items-center gap-3 mt-2 ml-2">
+                                    <span className="text-[10px] text-gray-400">
+                                        {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                    </span>
+                                    
+                                    <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity bg-gray-100 dark:bg-white/5 px-2 py-1 rounded-full">
+                                        <button 
+                                            onClick={() => handleCopy(msg.text)}
+                                            className="text-gray-400 hover:text-accent transition-colors"
+                                            title="Copiar"
+                                        >
+                                            <Copy size={12}/>
+                                        </button>
+                                        <div className="w-px h-3 bg-gray-300 dark:bg-white/10" />
+                                        <button 
+                                            onClick={() => handleFeedback(msg, 'like')}
+                                            className={cn("transition-colors", msg.feedback === 'like' ? "text-green-500" : "text-gray-400 hover:text-green-500")}
+                                        >
+                                            <ThumbsUp size={12}/>
+                                        </button>
+                                        <button 
+                                            onClick={() => handleFeedback(msg, 'dislike')}
+                                            className={cn("transition-colors", msg.feedback === 'dislike' ? "text-red-500" : "text-gray-400 hover:text-red-500")}
+                                        >
+                                            <ThumbsDown size={12}/>
+                                        </button>
+                                    </div>
                                 </div>
                             )}
-                        </div>
 
-                        {/* Product Carousel */}
-                        {msg.products && msg.products.length > 0 && (
-                            <div className="w-full mt-2 ml-1">
+                            {/* User Timestamp */}
+                            {msg.role === 'user' && (
+                                <span className="text-[10px] text-gray-400 mt-1 mr-1">
+                                    {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                </span>
+                            )}
+
+                            {/* Product Carousel */}
+                            {msg.products && msg.products.length > 0 && (
                                 <ProductCarousel products={msg.products} onSelect={setSelectedProduct} />
-                            </div>
-                        )}
-                        
-                        <span className="text-[10px] text-gray-400 mt-1 px-1">
-                            {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </span>
-                    </motion.div>
-                ))}
+                            )}
+                        </motion.div>
+                    );
+                })}
                 
                 {isLoading && (
                     <div className="flex justify-start">
-                         <div className="bg-white dark:bg-[#252525] p-4 rounded-2xl rounded-tl-sm shadow-sm flex gap-1.5 items-center border border-gray-100 dark:border-white/5">
+                         <div className="bg-white dark:bg-[#1e1e1e] px-4 py-3 rounded-2xl rounded-tl-sm shadow-sm border border-gray-100 dark:border-white/5 flex gap-1.5 items-center">
                             <span className="w-1.5 h-1.5 bg-accent rounded-full animate-bounce" />
-                            <span className="w-1.5 h-1.5 bg-accent rounded-full animate-bounce delay-100" />
-                            <span className="w-1.5 h-1.5 bg-accent rounded-full animate-bounce delay-200" />
+                            <span className="w-1.5 h-1.5 bg-accent rounded-full animate-bounce delay-75" />
+                            <span className="w-1.5 h-1.5 bg-accent rounded-full animate-bounce delay-150" />
                          </div>
                     </div>
                 )}
@@ -288,7 +352,7 @@ export const Chatbot: React.FC = () => {
             </div>
 
             {/* Input Area */}
-            <div className="p-4 bg-white dark:bg-[#1a1a1a] border-t border-gray-100 dark:border-white/5">
+            <div className="p-4 bg-white dark:bg-[#121212] border-t border-gray-100 dark:border-white/5 relative z-20">
                 {/* Dynamic Prompt Starters */}
                 {!isLoading && messages.length < 3 && starters.length > 0 && (
                     <div className="mb-3">
@@ -296,7 +360,7 @@ export const Chatbot: React.FC = () => {
                     </div>
                 )}
 
-                <div className="relative flex items-center">
+                <div className="relative flex items-center shadow-sm rounded-full bg-gray-50 dark:bg-[#1a1a1a] border border-gray-200 dark:border-white/10 focus-within:border-accent focus-within:ring-1 focus-within:ring-accent transition-all">
                     <input
                         ref={inputRef}
                         type="text"
@@ -304,12 +368,12 @@ export const Chatbot: React.FC = () => {
                         onChange={(e) => setInputValue(e.target.value)}
                         onKeyDown={handleKeyDown}
                         placeholder={t('chat.placeholder')}
-                        className="w-full bg-gray-100 dark:bg-black/40 border border-transparent focus:border-accent rounded-full pl-5 pr-12 py-3.5 text-sm focus:ring-0 outline-none transition-all placeholder-gray-400"
+                        className="w-full bg-transparent border-none pl-5 pr-12 py-3.5 text-sm focus:ring-0 outline-none placeholder-gray-400"
                     />
                     <button 
                         onClick={() => handleSend()}
                         disabled={isLoading || !inputValue.trim()}
-                        className="absolute right-2 p-2 bg-accent text-white rounded-full hover:brightness-110 disabled:opacity-50 disabled:bg-gray-300 dark:disabled:bg-white/10 transition-all shadow-md"
+                        className="absolute right-2 p-2 bg-accent text-white rounded-full hover:brightness-110 disabled:opacity-50 disabled:bg-gray-300 dark:disabled:bg-white/10 transition-all shadow-md active:scale-95"
                     >
                         {isLoading ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
                     </button>
