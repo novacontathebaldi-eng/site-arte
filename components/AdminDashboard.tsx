@@ -555,7 +555,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
                                         <AlertTriangle className="text-yellow-500 shrink-0" size={20} />
                                         <div className="text-xs text-gray-300">
                                             <strong className="block text-yellow-500 mb-1 uppercase tracking-wider">Atenção</strong>
-                                            Esta ação irá adicionar cerca de 8 produtos de luxo fictícios, com imagens e traduções completas. Se você escolher "Limpar Tudo", todos os produtos atuais serão deletados permanentemente.
+                                            Esta ação irá adicionar cerca 8 produtos de luxo fictícios, com imagens e traduções completas. Se você escolher "Limpar Tudo", todos os produtos atuais serão deletados permanentemente.
                                         </div>
                                     </div>
 
