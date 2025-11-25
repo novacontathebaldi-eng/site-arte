@@ -47,7 +47,7 @@ export const ImageCropper: React.FC<ImageCropperProps> = ({ imageSrc, onCancel, 
   };
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md">
       <motion.div
         className="relative w-full max-w-lg bg-[#121212] border border-white/10 rounded-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]"
         {...({
@@ -65,25 +65,28 @@ export const ImageCropper: React.FC<ImageCropperProps> = ({ imageSrc, onCancel, 
         </div>
 
         {/* Cropper Area */}
-        <div className="relative w-full h-[400px] bg-[#0a0a0a]">
+        <div className="relative w-full h-[50vh] min-h-[300px] md:h-[400px] bg-[#0a0a0a]">
           <Cropper
             image={imageSrc}
             crop={crop}
             zoom={zoom}
             aspect={1}
             cropShape="round"
-            showGrid={false}
+            showGrid={true}
             onCropChange={onCropChange}
             onCropComplete={onCropCompleteHandler}
             onZoomChange={onZoomChange}
+            objectFit="auto-cover"
+            restrictPosition={false}
+            minZoom={0.5}
             classes={{
                 containerClassName: "bg-[#0a0a0a]",
-                cropAreaClassName: "border-2 border-accent shadow-[0_0_0_9999px_rgba(0,0,0,0.7)]"
+                cropAreaClassName: "border-2 border-accent shadow-[0_0_0_9999px_rgba(0,0,0,0.8)]"
             }}
           />
           
-          <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-black/50 text-white text-[10px] uppercase tracking-widest px-3 py-1 rounded-full backdrop-blur-sm pointer-events-none flex items-center gap-2">
-            <Move size={12} /> Arraste para mover
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-black/50 text-white text-[10px] uppercase tracking-widest px-3 py-1 rounded-full backdrop-blur-sm pointer-events-none flex items-center gap-2 border border-white/10">
+            <Move size={12} /> Arraste para ajustar
           </div>
         </div>
 
@@ -94,7 +97,7 @@ export const ImageCropper: React.FC<ImageCropperProps> = ({ imageSrc, onCancel, 
                 <input
                     type="range"
                     value={zoom}
-                    min={1}
+                    min={0.5}
                     max={3}
                     step={0.1}
                     aria-labelledby="Zoom"
