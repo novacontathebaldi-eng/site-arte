@@ -19,7 +19,9 @@ export const viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
-  userScalable: false,
+  userScalable: false, // Previne zoom manual
+  viewportFit: 'cover', // Preenche toda a tela (notches)
+  themeColor: '#000000',
 };
 
 export const metadata = {
@@ -59,7 +61,7 @@ export default function RootLayout({
   return (
     <html lang="fr" className={`${inter.variable} ${playfair.variable}`} suppressHydrationWarning>
       <body 
-        className="bg-light dark:bg-primary text-primary dark:text-white transition-colors duration-300 overflow-x-hidden font-sans min-h-screen flex flex-col"
+        className="bg-light dark:bg-primary text-primary dark:text-white transition-colors duration-300 overflow-x-hidden font-sans min-h-screen flex flex-col antialiased"
         suppressHydrationWarning
       >
         <Providers>

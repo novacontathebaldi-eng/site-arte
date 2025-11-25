@@ -38,7 +38,7 @@ export const Header: React.FC = () => {
 
   const headerClasses = scrolled
     ? 'bg-white/90 dark:bg-[#1a1a1a]/90 backdrop-blur-md shadow-sm py-3 text-primary dark:text-white border-gray-200 dark:border-white/10'
-    : 'bg-transparent py-6 text-white border-transparent';
+    : 'bg-transparent py-4 md:py-6 text-white border-transparent';
 
   const contentColorClass = scrolled 
     ? 'text-primary dark:text-white' 
@@ -71,40 +71,43 @@ export const Header: React.FC = () => {
           transition: { duration: 0.5 }
       } as any)}
     >
-      <div className="container mx-auto px-6 flex justify-between items-center">
+      <div className="container mx-auto px-4 md:px-6 flex justify-between items-center">
         {/* Logo */}
-        <div className="flex items-center z-50 cursor-pointer" onClick={() => {
+        <div className="flex items-center z-50 cursor-pointer flex-shrink-0" onClick={() => {
             closeAllOverlays();
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }}>
-            <div className="w-10 h-10 bg-accent rounded-full flex items-center justify-center mr-3">
-                <span className="font-serif font-bold text-white text-xl">M</span>
+            <div className="w-8 h-8 md:w-10 md:h-10 bg-accent rounded-full flex items-center justify-center mr-2 md:mr-3">
+                <span className="font-serif font-bold text-white text-lg md:text-xl">M</span>
             </div>
-            <span className={`font-serif text-2xl font-bold tracking-tighter ${scrolled ? 'text-primary dark:text-white' : 'text-white mix-blend-difference'}`}>
+            <span className={`font-serif text-lg md:text-2xl font-bold tracking-tighter ${scrolled ? 'text-primary dark:text-white' : 'text-white mix-blend-difference'}`}>
                 MELISSA PELUSSI
             </span>
         </div>
 
-        {/* Desktop Icons */}
-        <div className={`hidden md:flex items-center gap-6 ${contentColorClass}`}>
-          {/* Admin Toggle */}
+        {/* Icons Section (Visible on Mobile & Desktop) */}
+        <div className={`flex items-center gap-3 md:gap-6 ${contentColorClass}`}>
+          
+          {/* Admin Toggle (Desktop Only to save space) */}
           {isAdmin && (
             <button 
                 onClick={() => setShowAdminPanel(true)} 
-                className="hover:text-red-500 transition-colors" 
+                className="hidden md:block hover:text-red-500 transition-colors" 
                 title="Painel Administrativo"
             >
                 <Lock size={18} />
             </button>
           )}
 
-          <button onClick={toggleSearch} className="hover:text-accent transition-colors cursor-pointer" aria-label={t('common.search')}>
+          {/* Search Icon */}
+          <button onClick={toggleSearch} className="hover:text-accent transition-colors cursor-pointer p-1" aria-label={t('common.search')}>
             <Search size={20} />
           </button>
           
+          {/* User / Login Icon */}
           <button 
             onClick={handleUserClick}
-            className="hover:text-accent transition-colors flex items-center gap-2 cursor-pointer relative"
+            className="hover:text-accent transition-colors flex items-center gap-2 cursor-pointer relative p-1"
             disabled={isLoading}
           >
             {isLoading ? (
@@ -112,25 +115,26 @@ export const Header: React.FC = () => {
             ) : (
                 <>
                     <User size={20} />
-                    {mounted && user && <span className="text-xs uppercase tracking-wider font-medium">{user.displayName?.split(' ')[0]}</span>}
+                    {mounted && user && <span className="hidden md:inline text-xs uppercase tracking-wider font-medium">{user.displayName?.split(' ')[0]}</span>}
                 </>
             )}
           </button>
 
-          <button id="header-cart-btn" onClick={toggleCart} className="relative hover:text-accent transition-colors cursor-pointer" aria-label={t('cart.title')}>
+          {/* Cart Icon */}
+          <button id="header-cart-btn" onClick={toggleCart} className="relative hover:text-accent transition-colors cursor-pointer p-1" aria-label={t('cart.title')}>
             <ShoppingBag size={20} />
             {mounted && items.length > 0 && (
-              <span className="absolute -top-2 -right-2 bg-accent text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center animate-pulse">
+              <span className="absolute -top-1 -right-1 md:-top-2 md:-right-2 bg-accent text-white text-[9px] md:text-[10px] font-bold w-3.5 h-3.5 md:w-4 md:h-4 rounded-full flex items-center justify-center animate-pulse">
                 {items.length}
               </span>
             )}
           </button>
-        </div>
 
-        {/* Mobile Menu Toggle */}
-        <button className={`md:hidden z-50 ${contentColorClass}`} onClick={toggleMobileMenu} aria-label="Menu">
-          {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
+          {/* Mobile Menu Toggle (Hamburger) - Apenas para links extras se houver */}
+          <button className={`md:hidden z-50 p-1 ${contentColorClass}`} onClick={toggleMobileMenu} aria-label="Menu">
+            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
       </div>
     </motion.header>
     
