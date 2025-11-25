@@ -55,10 +55,12 @@ const MagnifierImage = ({ src, alt }: { src: string, alt: string }) => {
             <AnimatePresence>
                 {showMagnifier && (
                     <motion.div 
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.8 }}
-                        transition={{ duration: 0.2 }}
+                        {...({
+                            initial: { opacity: 0, scale: 0.8 },
+                            animate: { opacity: 1, scale: 1 },
+                            exit: { opacity: 0, scale: 0.8 },
+                            transition: { duration: 0.2 }
+                        } as any)}
                         className="absolute hidden md:block w-48 h-48 rounded-full border-2 border-accent/50 shadow-2xl pointer-events-none z-20 bg-no-repeat bg-cover"
                         style={{
                             left: `${cursorPosition.x - 96}px`,

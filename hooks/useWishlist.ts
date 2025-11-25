@@ -1,50 +1,11 @@
-import { useEffect } from 'react';
+
 import { useWishlistStore } from '../store/wishlistStore';
-import { useAuthStore } from '../store/authStore';
-import { db } from '../lib/firebase/config';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { debounce } from '../lib/utils';
 
 export const useWishlist = () => {
-  const { items, toggleItem, hasItem, setItems } = useWishlistStore();
-  const { user } = useAuthStore();
-
-  // Sync on Load
-  useEffect(() => {
-    if (!user) return;
-
-    const fetchWishlist = async () => {
-        try {
-            const docRef = doc(db, 'users', user.uid, 'wishlist', 'active');
-            const docSnap = await getDoc(docRef);
-            if (docSnap.exists()) {
-                const data = docSnap.data() as { items?: string[] } | undefined;
-                setItems(data?.items || []);
-            }
-        } catch (e) {
-            console.error("Fetch wishlist error", e);
-        }
-    };
-    fetchWishlist();
-  }, [user, setItems]);
-
-  // Sync on Change
-  useEffect(() => {
-    if (!user) return;
-
-    const saveWishlist = async () => {
-        try {
-            const docRef = doc(db, 'users', user.uid, 'wishlist', 'active');
-            await setDoc(docRef, { items }, { merge: true });
-        } catch (e) {
-            console.error("Save wishlist error", e);
-        }
-    };
-
-    const debouncedSave = debounce(saveWishlist, 1000);
-    debouncedSave();
-  }, [items, user]);
-
+  const { items, toggleItem, hasItem } = useWishlistStore();
+  
+  // Logic moved to UserDataSync.tsx to prevent multiple listeners
+  
   return {
     items,
     toggleWishlist: toggleItem,

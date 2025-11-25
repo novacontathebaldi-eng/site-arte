@@ -1,9 +1,11 @@
+
 'use client';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React, { useState, type PropsWithChildren } from 'react';
 import { ToastProvider } from '../components/ui/Toast';
 import { SmoothScroll } from '../components/providers/SmoothScroll';
+import { UserDataSync } from '../components/providers/UserDataSync';
 
 export default function Providers({ children }: PropsWithChildren) {
   const [queryClient] = useState(
@@ -22,6 +24,7 @@ export default function Providers({ children }: PropsWithChildren) {
     <QueryClientProvider client={queryClient}>
       <ToastProvider>
         <SmoothScroll>
+          <UserDataSync />
           {children}
         </SmoothScroll>
       </ToastProvider>

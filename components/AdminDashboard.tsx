@@ -492,16 +492,16 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
                             </div>
 
                             <div className="bg-[#151515] rounded-xl border border-white/10 overflow-hidden">
-                                <table className="w-full text-sm">
-                                    <thead className="bg-white/5 text-gray-400 uppercase text-xs font-medium">
-                                        <tr>
-                                            <th className="px-4 py-3 text-left w-16">Ord</th>
-                                            <th className="px-4 py-3 text-left">Obra</th>
-                                            <th className="px-4 py-3 text-left">Preço</th>
-                                            <th className="px-4 py-3 text-right">Ações</th>
-                                        </tr>
-                                    </thead>
-                                    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEndProducts}>
+                                <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEndProducts}>
+                                    <table className="w-full text-sm">
+                                        <thead className="bg-white/5 text-gray-400 uppercase text-xs font-medium">
+                                            <tr>
+                                                <th className="px-4 py-3 text-left w-16">Ord</th>
+                                                <th className="px-4 py-3 text-left">Obra</th>
+                                                <th className="px-4 py-3 text-left">Preço</th>
+                                                <th className="px-4 py-3 text-right">Ações</th>
+                                            </tr>
+                                        </thead>
                                         <tbody className="divide-y divide-white/5">
                                             <SortableContext items={products.map(p => p.id)} strategy={verticalListSortingStrategy}>
                                                 {products
@@ -517,8 +517,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
                                                     ))}
                                             </SortableContext>
                                         </tbody>
-                                    </DndContext>
-                                </table>
+                                    </table>
+                                </DndContext>
                                 {products.length === 0 && (
                                     <div className="p-8 text-center text-gray-500">
                                         Nenhum produto encontrado. Vá em Configurações > Seed para adicionar exemplos.
