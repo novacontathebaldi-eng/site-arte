@@ -4,7 +4,8 @@
 import { GoogleGenAI, Type, FunctionDeclaration } from "@google/genai";
 import { registerClientToBrevo } from "./registerClient";
 import { Product } from "@/types";
-import { getChatConfig, getKnowledgeBase, DEFAULT_SYSTEM_PROMPT } from "./admin";
+import { getChatConfig, getKnowledgeBase } from "./admin";
+import { DEFAULT_SYSTEM_PROMPT } from "@/lib/constants";
 import { adminDb } from "@/lib/firebase/admin";
 import { headers } from "next/headers";
 
