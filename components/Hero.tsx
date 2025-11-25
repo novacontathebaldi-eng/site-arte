@@ -20,8 +20,8 @@ export const Hero: React.FC = () => {
   const filter = useMotionTemplate`blur(${blurVal})`;
 
   return (
-    // Alterado h-screen para h-[100dvh] para suporte melhor em mobile
-    // Adicionado bg-black para evitar flash branco enquanto carrega
+    // Alterado h-screen para h-[100dvh] para suporte melhor em mobile (endereça barra de navegação)
+    // Adicionado bg-black para evitar flash branco nas bordas
     <div ref={containerRef} className="h-[100dvh] w-full relative overflow-hidden flex items-center justify-center bg-black">
       {/* Parallax Background */}
       <motion.div 

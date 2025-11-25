@@ -19,8 +19,8 @@ export const viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
-  userScalable: false, // Previne zoom manual
-  viewportFit: 'cover', // Preenche toda a tela (notches)
+  userScalable: false,
+  viewportFit: 'cover',
   themeColor: '#000000',
 };
 
@@ -31,7 +31,6 @@ export const metadata = {
   authors: [{ name: 'Melissa Pelussi' }],
   creator: 'Melissa Pelussi',
   icons: {
-    // Ícone estático para evitar "piscar" na aba do navegador
     icon: 'https://cdn-icons-png.flaticon.com/512/5352/5352161.png', 
     apple: 'https://cdn-icons-png.flaticon.com/512/5352/5352161.png',
   },
@@ -61,7 +60,7 @@ export default function RootLayout({
   return (
     <html lang="fr" className={`${inter.variable} ${playfair.variable}`} suppressHydrationWarning>
       <body 
-        className="bg-light dark:bg-primary text-primary dark:text-white transition-colors duration-300 overflow-x-hidden font-sans min-h-screen flex flex-col antialiased"
+        className="bg-light dark:bg-primary text-primary dark:text-white transition-colors duration-300 overflow-x-hidden font-sans min-h-screen flex flex-col antialiased touch-pan-y"
         suppressHydrationWarning
       >
         <Providers>

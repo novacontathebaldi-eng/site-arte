@@ -1,9 +1,9 @@
 
 import React, { useEffect, useState } from 'react';
-import { ShoppingBag, User, Search, Menu, X, Lock, Loader2 } from 'lucide-react';
+import { ShoppingBag, User, Search, Menu, X, Lock, Loader2, ChevronRight, Instagram, Mail } from 'lucide-react';
 import { useUIStore, useCartStore, useAuthStore } from '../../store';
 import { useLanguage } from '../../hooks/useLanguage';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAdmin } from '../../hooks/useAdmin';
 import dynamic from 'next/dynamic';
 
@@ -61,6 +61,14 @@ export const Header: React.FC = () => {
     }
   };
 
+  const handleNavClick = (id: string) => {
+    toggleMobileMenu();
+    const element = document.getElementById(id);
+    if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <>
     <motion.header
@@ -73,20 +81,21 @@ export const Header: React.FC = () => {
     >
       <div className="container mx-auto px-4 md:px-6 flex justify-between items-center">
         {/* Logo */}
-        <div className="flex items-center z-50 cursor-pointer flex-shrink-0" onClick={() => {
+        <div className="flex items-center z-50 cursor-pointer flex-shrink-1 overflow-hidden" onClick={() => {
             closeAllOverlays();
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }}>
-            <div className="w-8 h-8 md:w-10 md:h-10 bg-accent rounded-full flex items-center justify-center mr-2 md:mr-3">
+            <div className="w-8 h-8 md:w-10 md:h-10 bg-accent rounded-full flex items-center justify-center mr-2 md:mr-3 flex-shrink-0">
                 <span className="font-serif font-bold text-white text-lg md:text-xl">M</span>
             </div>
-            <span className={`font-serif text-lg md:text-2xl font-bold tracking-tighter ${scrolled ? 'text-primary dark:text-white' : 'text-white mix-blend-difference'}`}>
+            {/* Texto ajustado para não quebrar layout no mobile */}
+            <span className={`font-serif text-sm md:text-2xl font-bold tracking-tighter truncate ${scrolled ? 'text-primary dark:text-white' : 'text-white mix-blend-difference'}`}>
                 MELISSA PELUSSI
             </span>
         </div>
 
         {/* Icons Section (Visible on Mobile & Desktop) */}
-        <div className={`flex items-center gap-3 md:gap-6 ${contentColorClass}`}>
+        <div className={`flex items-center gap-2 md:gap-6 ${contentColorClass} flex-shrink-0 ml-2`}>
           
           {/* Admin Toggle (Desktop Only to save space) */}
           {isAdmin && (
@@ -100,29 +109,29 @@ export const Header: React.FC = () => {
           )}
 
           {/* Search Icon */}
-          <button onClick={toggleSearch} className="hover:text-accent transition-colors cursor-pointer p-1" aria-label={t('common.search')}>
-            <Search size={20} />
+          <button onClick={toggleSearch} className="hover:text-accent transition-colors cursor-pointer p-1.5 md:p-1" aria-label={t('common.search')}>
+            <Search size={20} className="md:w-5 md:h-5 w-4 h-4" />
           </button>
           
           {/* User / Login Icon */}
           <button 
             onClick={handleUserClick}
-            className="hover:text-accent transition-colors flex items-center gap-2 cursor-pointer relative p-1"
+            className="hover:text-accent transition-colors flex items-center gap-2 cursor-pointer relative p-1.5 md:p-1"
             disabled={isLoading}
           >
             {isLoading ? (
-                <Loader2 size={20} className="animate-spin opacity-50" />
+                <Loader2 size={20} className="animate-spin opacity-50 md:w-5 md:h-5 w-4 h-4" />
             ) : (
                 <>
-                    <User size={20} />
+                    <User size={20} className="md:w-5 md:h-5 w-4 h-4" />
                     {mounted && user && <span className="hidden md:inline text-xs uppercase tracking-wider font-medium">{user.displayName?.split(' ')[0]}</span>}
                 </>
             )}
           </button>
 
           {/* Cart Icon */}
-          <button id="header-cart-btn" onClick={toggleCart} className="relative hover:text-accent transition-colors cursor-pointer p-1" aria-label={t('cart.title')}>
-            <ShoppingBag size={20} />
+          <button id="header-cart-btn" onClick={toggleCart} className="relative hover:text-accent transition-colors cursor-pointer p-1.5 md:p-1" aria-label={t('cart.title')}>
+            <ShoppingBag size={20} className="md:w-5 md:h-5 w-4 h-4" />
             {mounted && items.length > 0 && (
               <span className="absolute -top-1 -right-1 md:-top-2 md:-right-2 bg-accent text-white text-[9px] md:text-[10px] font-bold w-3.5 h-3.5 md:w-4 md:h-4 rounded-full flex items-center justify-center animate-pulse">
                 {items.length}
@@ -130,14 +139,65 @@ export const Header: React.FC = () => {
             )}
           </button>
 
-          {/* Mobile Menu Toggle (Hamburger) - Apenas para links extras se houver */}
-          <button className={`md:hidden z-50 p-1 ${contentColorClass}`} onClick={toggleMobileMenu} aria-label="Menu">
+          {/* Mobile Menu Toggle (Hamburger) */}
+          <button className={`md:hidden z-50 p-1.5 ${contentColorClass}`} onClick={toggleMobileMenu} aria-label="Menu">
             {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
       </div>
     </motion.header>
     
+    {/* MOBILE MENU OVERLAY */}
+    <AnimatePresence>
+      {isMobileMenuOpen && (
+        <motion.div
+          className="fixed inset-0 z-[55] bg-black/95 backdrop-blur-xl flex flex-col pt-24 px-6 md:hidden"
+          initial={{ opacity: 0, x: '100%' }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: '100%' }}
+          transition={{ type: "spring", damping: 25, stiffness: 300 }}
+        >
+          <div className="flex flex-col gap-6 mt-8">
+            <button 
+              onClick={() => handleNavClick('catalog')} 
+              className="text-2xl font-serif text-white flex items-center justify-between border-b border-white/10 pb-4"
+            >
+              {t('nav.catalog')}
+              <ChevronRight size={20} className="text-gray-500" />
+            </button>
+            <button 
+              onClick={() => handleNavClick('about')} 
+              className="text-2xl font-serif text-white flex items-center justify-between border-b border-white/10 pb-4"
+            >
+              {t('nav.about')}
+              <ChevronRight size={20} className="text-gray-500" />
+            </button>
+            <button 
+              onClick={() => handleNavClick('newsletter')} 
+              className="text-2xl font-serif text-white flex items-center justify-between border-b border-white/10 pb-4"
+            >
+              {t('nav.contact')}
+              <ChevronRight size={20} className="text-gray-500" />
+            </button>
+          </div>
+
+          <div className="mt-auto mb-12 space-y-6">
+            <div className="flex gap-4">
+                <a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-accent transition-colors">
+                    <Instagram size={20} />
+                </a>
+                <a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-accent transition-colors">
+                    <Mail size={20} />
+                </a>
+            </div>
+            <p className="text-gray-500 text-xs uppercase tracking-widest">
+                © 2025 Melissa Pelussi
+            </p>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+
     <AdminDashboard isOpen={showAdminPanel} onClose={() => setShowAdminPanel(false)} />
     </>
   );
