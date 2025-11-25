@@ -7,7 +7,7 @@ import { auth } from '../../lib/firebase/config';
 import { updateProfile } from 'firebase/auth';
 import { cn } from '../../lib/utils';
 
-const DEFAULT_AVATAR = `https://pycvlkcxgfwsquzolkzw.supabase.co/storage/v1/object/public/${STORAGE_BUCKET}/avatars/Imagem%20Padrao%20(sem%20foto%20de%20perfil)/img_perfil.jpg`;
+const DEFAULT_AVATAR = `https://pycvlkcxgfwsquzolkzw.supabase.co/storage/v1/object/public/storage-arte/avatars/Imagem%20Padrao%20(sem%20foto%20de%20perfil)/img_perfil.jpg`;
 
 export const AvatarUploader: React.FC = () => {
   const { user, setUser } = useAuthStore();
