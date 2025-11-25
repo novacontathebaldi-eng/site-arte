@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useEffect, useRef } from 'react';
@@ -12,8 +11,8 @@ export const UserDataSync: React.FC = () => {
   const { items: wishlistItems, setItems: setWishlistItems } = useWishlistStore();
   
   // Refs for debouncing saves
-  const cartTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const wishlistTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const cartTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const wishlistTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // --- WISHLIST SYNC ---
   useEffect(() => {

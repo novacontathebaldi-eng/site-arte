@@ -1,15 +1,14 @@
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, LayoutDashboard, Package, Users, MessageSquare, Plus, Edit, Trash2, Save, Upload, Search, Filter, TrendingUp, DollarSign, RefreshCw, Lock, Globe, MoveUp, MoveDown, Check, ThumbsDown, AlertCircle, Move, Loader2, Settings, Database, AlertTriangle, ToggleLeft, ToggleRight } from 'lucide-react';
+import { X, LayoutDashboard, Package, Users, MessageSquare, Plus, Edit, Trash2, Save, Upload, Search, Filter, TrendingUp, DollarSign, RefreshCw, Lock, Globe, MoveUp, MoveDown, Check, ThumbsDown, AlertCircle, Move, Loader2, Settings, Database, AlertTriangle, ToggleLeft, ToggleRight, EyeOff } from 'lucide-react';
 import { useAuthStore } from '../store';
 import { db } from '../lib/firebase/config';
 import { deleteDocument, subscribeToCollection, updateDocument } from '../lib/firebase/firestore';
 import { collection, query, onSnapshot, where, orderBy, QuerySnapshot, DocumentData } from 'firebase/firestore';
 import { Product, ProductCategory } from '../types';
-import { getBrevoStats, getBrevoContacts, getChatConfig, updateChatConfig, getChatFeedback, resolveFeedback, syncFirestoreToBrevo } from '../app/actions/admin';
+import { getBrevoStats, getBrevoContacts, getChatConfig, updateChatConfig, getChatFeedback, resolveFeedback, syncFirestoreToBrevo, deleteFeedback } from '../app/actions/admin';
 import { seedDatabase } from '../app/actions/seed';
 import { formatPrice, cn } from '../lib/utils';
 import { AvatarUploader } from './dashboard/AvatarUploader';
@@ -336,6 +335,18 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
         setShowFeedbackModal(null);
         setFixAnswer('');
         toast("Conhecimento adicionado. O bot aprendeu!", "success");
+    };
+
+    const handleIgnoreFeedback = async (id: string) => {
+        if (!confirm("Isso removerá o feedback sem ensinar nada ao bot. Confirmar?")) return;
+        
+        const res = await deleteFeedback(id);
+        if (res.success) {
+            setFeedbackList(prev => prev.filter(f => f.id !== id));
+            toast("Feedback removido.", "info");
+        } else {
+            toast("Erro ao remover.", "error");
+        }
     };
 
     const handleSeedDatabase = async (clear: boolean) => {
@@ -668,12 +679,21 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
                                                         <span className="text-xs text-gray-500">IA respondeu:</span>
                                                         <p className="text-gray-400 text-xs italic">"{item.aiResponse}"</p>
                                                     </div>
-                                                    <button 
-                                                        onClick={() => setShowFeedbackModal(item)}
-                                                        className="w-full py-2 bg-white/5 hover:bg-white/10 text-xs uppercase tracking-wide rounded text-gray-300"
-                                                    >
-                                                        Ensinar Resposta Correta
-                                                    </button>
+                                                    <div className="flex gap-2">
+                                                        <button 
+                                                            onClick={() => setShowFeedbackModal(item)}
+                                                            className="flex-1 py-2 bg-white/5 hover:bg-white/10 text-xs uppercase tracking-wide rounded text-gray-300"
+                                                        >
+                                                            Ensinar Correção
+                                                        </button>
+                                                        <button 
+                                                            onClick={() => handleIgnoreFeedback(item.id)}
+                                                            className="px-3 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded transition-colors"
+                                                            title="Ignorar/Excluir"
+                                                        >
+                                                            <Trash2 size={16} />
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             ))
                                         )}

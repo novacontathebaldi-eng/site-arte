@@ -1,4 +1,3 @@
-
 'use server';
 
 import { BrevoContact, ChatConfig, ChatFeedback, KnowledgeBaseItem } from '../../types/admin';
@@ -203,6 +202,16 @@ export async function resolveFeedback(feedbackId: string, solution?: KnowledgeBa
     } catch (e) {
         console.error(e);
         return { success: false, error: String(e) };
+    }
+}
+
+export async function deleteFeedback(feedbackId: string) {
+    try {
+        await adminDb.collection('chat_feedback').doc(feedbackId).delete();
+        return { success: true };
+    } catch (e) {
+        console.error("Error deleting feedback", e);
+        return { success: false };
     }
 }
 
