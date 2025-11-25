@@ -8,7 +8,6 @@ import { cn, formatPrice } from '../lib/utils';
 import { updateDocument } from '../lib/firebase/firestore';
 import { auth, db } from '../lib/firebase/config';
 import { collection, query, where, orderBy, getDocs, doc, getDoc, addDoc, updateDoc, deleteDoc, DocumentData } from 'firebase/firestore';
-import { updateProfile } from 'firebase/auth';
 import { Address, Product } from '../types';
 import { useToast } from './ui/Toast';
 
@@ -194,7 +193,7 @@ export const Dashboard: React.FC = () => {
         
         try {
             if (auth.currentUser) {
-                await updateProfile(auth.currentUser, { displayName: profileForm.displayName });
+                await auth.currentUser.updateProfile({ displayName: profileForm.displayName });
             }
             await updateDocument('users', user.uid, { 
                 displayName: profileForm.displayName,

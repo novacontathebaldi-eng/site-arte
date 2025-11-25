@@ -1,5 +1,5 @@
-import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/auth';
 import { getFirestore } from 'firebase/firestore';
 
 const firebaseConfig = {
@@ -22,10 +22,13 @@ if (missingKeys.length > 0 && typeof window !== 'undefined') {
   );
 }
 
-// Singleton pattern robusto para evitar "Maximum backoff delay"
-// Garante que apenas uma instância do Firebase App seja criada
-const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
-const auth = getAuth(app);
+// Use compat app initialization
+const app = firebase.apps.length > 0 ? firebase.app() : firebase.initializeApp(firebaseConfig);
+
+// Compat Auth instance (has methods like signInWithPopup)
+const auth = firebase.auth();
+
+// Modular Firestore instance (passing compat app usually works for v9)
 const db = getFirestore(app);
 
 export { app, auth, db };
