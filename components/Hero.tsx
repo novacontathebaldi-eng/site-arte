@@ -1,6 +1,6 @@
 
 import React, { useRef } from 'react';
-import { motion, useScroll, useTransform, useMotionTemplate } from 'framer-motion';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import { useLanguage } from '../hooks/useLanguage';
 
 export const Hero: React.FC = () => {
@@ -15,9 +15,8 @@ export const Hero: React.FC = () => {
   const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
   const scale = useTransform(scrollYProgress, [0, 1], [1, 1.2]);
   
-  // Fix: Use useMotionTemplate to correctly interpolate the MotionValue into the filter string
-  const blurVal = useTransform(scrollYProgress, [0, 1], ["0px", "10px"]);
-  const filter = useMotionTemplate`blur(${blurVal})`;
+  // REMOVIDO: O filtro de Blur dinâmico (filter: blur) é extremamente pesado para a GPU de celulares.
+  // Sua remoção garante que a rolagem seja fluida (60fps) no mobile.
 
   return (
     // Alterado h-screen para h-[100dvh] para suporte melhor em mobile (endereça barra de navegação)
@@ -26,7 +25,7 @@ export const Hero: React.FC = () => {
       {/* Parallax Background */}
       <motion.div 
         className="absolute inset-0 w-full h-full z-0"
-        style={{ y, scale, filter } as any}
+        style={{ y, scale } as any}
       >
         {/* Using a high quality placeholder abstract art with eager loading */}
         <img 

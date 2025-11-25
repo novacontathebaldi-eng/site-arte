@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useEffect } from 'react';
@@ -5,6 +6,15 @@ import Lenis from '@studio-freight/lenis';
 
 export const SmoothScroll: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   useEffect(() => {
+    // DESATIVAR EM MOBILE/TABLET
+    // A rolagem nativa do iOS/Android é muito mais performática e esperada pelo usuário.
+    // O Lenis em mobile pode causar sensação de peso ou travamento.
+    const isMobileOrTablet = window.innerWidth < 1024;
+
+    if (isMobileOrTablet) {
+        return; // Não inicializa o Lenis
+    }
+
     const lenis = new Lenis({
         duration: 1.2,
         easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),

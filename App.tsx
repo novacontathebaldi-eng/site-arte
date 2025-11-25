@@ -20,9 +20,7 @@ const CartSidebar = dynamic(() => import('./components/CartSidebar').then(mod =>
 const Chatbot = dynamic(() => import('./components/Chatbot').then(mod => mod.Chatbot), { 
   ssr: false 
 });
-const AddToCartAnimation = dynamic(() => import('./components/AddToCartAnimation').then(mod => mod.AddToCartAnimation), { 
-  ssr: false 
-});
+// REMOVIDO: AddToCartAnimation (Causava efeito visual indesejado)
 const FloatingCartButton = dynamic(() => import('./components/FloatingCartButton').then(mod => mod.FloatingCartButton), { 
   ssr: false 
 });
@@ -125,7 +123,7 @@ const App: React.FC = () => {
         <CartSidebar />
         <Chatbot />
         <FloatingCartButton />
-        <AddToCartAnimation />
+        {/* AddToCartAnimation Removed */}
         
         {/* Auth & Dashboard Layers */}
         <AuthModal />

@@ -7,7 +7,7 @@ import { useLanguage } from '../hooks/useLanguage';
 import { ProductCard } from './catalog/ProductCard';
 import { ProductModal } from './catalog/ProductModal';
 import { Loader2, AlertCircle, Sparkles } from 'lucide-react';
-import { cn } from '../lib/utils';
+import { cn, throttle } from '../lib/utils';
 
 // Preferred visual order, but not exclusive.
 const PREFERRED_ORDER = [
@@ -63,7 +63,9 @@ export const Catalog: React.FC = () => {
 
     // 3. Handle Scroll Spy to update Active Tab
     useEffect(() => {
-        const handleScroll = () => {
+        // THROTTLE: Limita a execução para rodar no máximo uma vez a cada 100ms
+        // Isso evita sobrecarga da CPU durante a rolagem rápida no mobile.
+        const handleScroll = throttle(() => {
             const headerOffset = 180; // Increased offset for better trigger point
             
             for (const cat of categories) {
@@ -77,7 +79,8 @@ export const Catalog: React.FC = () => {
                     }
                 }
             }
-        };
+        }, 100);
+
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
     }, [categories]);
