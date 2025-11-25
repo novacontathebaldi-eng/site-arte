@@ -1,120 +1,111 @@
 
 'use client';
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useAuthStore, useCartStore, useWishlistStore } from '../../store';
 import { db } from '../../lib/firebase/config';
-import { doc, onSnapshot, setDoc, getDoc } from 'firebase/firestore';
-import { debounce } from '../../lib/utils';
-import { CartItem } from '../../types';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 
 export const UserDataSync: React.FC = () => {
   const { user } = useAuthStore();
-  const { 
-    items: cartItems, 
-    mergeCart, 
-    total: cartTotal, 
-    itemCount: cartCount 
-  } = useCartStore();
-  const { 
-    items: wishlistItems, 
-    setItems: setWishlistItems 
-  } = useWishlistStore();
+  const { items: cartItems, mergeCart, total: cartTotal, itemCount: cartCount } = useCartStore();
+  const { items: wishlistItems, setItems: setWishlistItems } = useWishlistStore();
+  
+  // Refs for debouncing saves
+  const cartTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const wishlistTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // --- WISHLIST SYNC ---
-  
-  // 1. Fetch Wishlist on Login
   useEffect(() => {
     if (!user) return;
 
+    // 1. Initial Fetch
     const fetchWishlist = async () => {
-        try {
-            const docRef = doc(db, 'users', user.uid, 'wishlist', 'active');
-            const docSnap = await getDoc(docRef);
-            if (docSnap.exists()) {
-                const data = docSnap.data() as { items?: string[] } | undefined;
-                // Only update if data is different to avoid loops
-                if (data?.items && JSON.stringify(data.items) !== JSON.stringify(wishlistItems)) {
-                    setWishlistItems(data.items);
-                }
-            }
-        } catch (e) {
-            console.error("[Sync] Fetch wishlist error", e);
+      try {
+        const docRef = doc(db, 'users', user.uid, 'wishlist', 'active');
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          if (data.items && Array.isArray(data.items)) {
+             const current = useWishlistStore.getState().items;
+             // Compare sorted arrays to avoid unnecessary updates
+             const sortedCurrent = [...current].sort();
+             const sortedNew = [...data.items].sort();
+             if (JSON.stringify(sortedCurrent) !== JSON.stringify(sortedNew)) {
+                setWishlistItems(data.items);
+             }
+          }
         }
+      } catch (e) {
+        console.error("[Sync] Wishlist fetch error", e);
+      }
     };
     fetchWishlist();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.uid]);
+  }, [user, setWishlistItems]);
 
-  // 2. Save Wishlist on Change (Debounced)
-  const debouncedSaveWishlist = useMemo(
-      () => debounce(async (uid: string, items: string[]) => {
-          try {
-              const docRef = doc(db, 'users', uid, 'wishlist', 'active');
-              await setDoc(docRef, { items }, { merge: true });
-          } catch (e) {
-              console.error("[Sync] Save wishlist error", e);
-          }
-      }, 2000),
-      []
-  );
-
-  useEffect(() => {
-      if (user) {
-          debouncedSaveWishlist(user.uid, wishlistItems);
-      }
-  }, [wishlistItems, user, debouncedSaveWishlist]);
-
-
-  // --- CART SYNC ---
-
-  // 1. Real-time Cart Sync & Merge
   useEffect(() => {
     if (!user) return;
 
-    const docRef = doc(db, 'users', user.uid, 'cart', 'active');
+    // 2. Debounced Save
+    if (wishlistTimeoutRef.current) clearTimeout(wishlistTimeoutRef.current);
     
-    // Listen to cloud changes
-    const unsubscribe = onSnapshot(docRef, (docSnap) => {
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        if (data.items) {
-             // Optional: Intelligent merge strategy could go here
-             // For now, we assume local changes are pushed, and we assume 
-             // this listener is mostly for cross-device sync. 
-             // To prevent loops, we could check timestamps or deep equality.
-        }
-      }
-    }, (error) => {
-        console.error("[Sync] Cart listener error", error);
-    });
+    wishlistTimeoutRef.current = setTimeout(async () => {
+        try {
+            await setDoc(doc(db, 'users', user.uid, 'wishlist', 'active'), { 
+                items: wishlistItems,
+                updatedAt: new Date().toISOString() 
+            }, { merge: true });
+        } catch(e) { console.error("[Sync] Wishlist save error", e); }
+    }, 2000);
 
-    return () => unsubscribe();
-  }, [user]);
+    return () => {
+        if (wishlistTimeoutRef.current) clearTimeout(wishlistTimeoutRef.current);
+    };
+  }, [wishlistItems, user]);
 
-  // 2. Save Cart on Change (Debounced)
-  const debouncedSaveCart = useMemo(
-      () => debounce(async (uid: string, items: CartItem[], total: number, count: number) => {
-          try {
-              const docRef = doc(db, 'users', uid, 'cart', 'active');
-              await setDoc(docRef, {
-                  items,
-                  updatedAt: new Date().toISOString(),
-                  total,
-                  itemCount: count
-              }, { merge: true });
-          } catch (error) {
-              console.error("[Sync] Failed to save cart:", error);
+  // --- CART SYNC ---
+  useEffect(() => {
+    if (!user) return;
+
+    // 1. Initial Fetch
+    const fetchCart = async () => {
+      try {
+        const docRef = doc(db, 'users', user.uid, 'cart', 'active');
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          if (data.items && Array.isArray(data.items)) {
+             mergeCart(data.items);
           }
-      }, 1500),
-      []
-  );
+        }
+      } catch (e) {
+        console.error("[Sync] Cart fetch error", e);
+      }
+    };
+    fetchCart();
+  }, [user, mergeCart]);
 
   useEffect(() => {
-    if (user) {
-        debouncedSaveCart(user.uid, cartItems, cartTotal(), cartCount());
-    }
-  }, [cartItems, user, cartTotal, cartCount, debouncedSaveCart]);
+    if (!user) return;
 
-  return null; // This component renders nothing, just handles logic
+    // 2. Debounced Save
+    if (cartTimeoutRef.current) clearTimeout(cartTimeoutRef.current);
+
+    cartTimeoutRef.current = setTimeout(async () => {
+        try {
+            await setDoc(doc(db, 'users', user.uid, 'cart', 'active'), { 
+                items: cartItems,
+                total: cartTotal(),
+                itemCount: cartCount(),
+                updatedAt: new Date().toISOString()
+            }, { merge: true });
+        } catch(e) { console.error("[Sync] Cart save error", e); }
+    }, 2000);
+
+    return () => {
+        if (cartTimeoutRef.current) clearTimeout(cartTimeoutRef.current);
+    };
+  }, [cartItems, user, cartTotal, cartCount]);
+
+  return null;
 };
