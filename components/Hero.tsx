@@ -1,6 +1,6 @@
 
 import React, { useRef } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion, useScroll, useTransform, useMotionTemplate } from 'framer-motion';
 import { useLanguage } from '../hooks/useLanguage';
 
 export const Hero: React.FC = () => {
@@ -14,14 +14,17 @@ export const Hero: React.FC = () => {
   const y = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
   const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
   const scale = useTransform(scrollYProgress, [0, 1], [1, 1.2]);
-  const blur = useTransform(scrollYProgress, [0, 1], ["0px", "10px"]);
+  
+  // Fix: Use useMotionTemplate to correctly interpolate the MotionValue into the filter string
+  const blurVal = useTransform(scrollYProgress, [0, 1], ["0px", "10px"]);
+  const filter = useMotionTemplate`blur(${blurVal})`;
 
   return (
     <div ref={containerRef} className="h-screen w-full relative overflow-hidden flex items-center justify-center">
       {/* Parallax Background */}
       <motion.div 
         className="absolute inset-0 w-full h-full z-0"
-        style={{ y, scale, filter: `blur(${blur})` } as any}
+        style={{ y, scale, filter } as any}
       >
         {/* Using a high quality placeholder abstract art with eager loading */}
         <img 
