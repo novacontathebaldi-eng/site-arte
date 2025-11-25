@@ -5,7 +5,7 @@ import { ProductCategory } from '../../types/product';
 const translationSchema = z.object({
   title: z.string().min(1, "O título é obrigatório"),
   description: z.string(),
-  material_label: z.string().optional(),
+  material_label: z.string().default(''), // Made required (with default) to match ProductTranslation interface
   seo_title: z.string().optional(),
   seo_description: z.string().optional(),
 });

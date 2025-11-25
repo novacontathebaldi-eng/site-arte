@@ -10,9 +10,9 @@ import { SuccessCheck } from './ui/SuccessCheck';
 import { useWishlist } from '../hooks/useWishlist';
 
 export const CartSidebar: React.FC = () => {
-  const { isCartOpen, toggleCart } = useUIStore();
+  const { isCartOpen, toggleCart, openAuthModal } = useUIStore();
   const { items, removeItem, updateQuantity, total, clearCart } = useCartStore();
-  const { user, login } = useAuthStore();
+  const { user } = useAuthStore();
   const { toggleWishlist, isInWishlist } = useWishlist();
   const { t, language } = useLanguage();
   const [isCheckoutSuccess, setIsCheckoutSuccess] = useState(false);
@@ -27,7 +27,7 @@ export const CartSidebar: React.FC = () => {
 
   const handleCheckout = () => {
     if (!user) {
-        login();
+        openAuthModal('login');
     } else {
         setIsCheckoutSuccess(true);
         setTimeout(() => {

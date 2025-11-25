@@ -22,8 +22,9 @@ if (missingKeys.length > 0 && typeof window !== 'undefined') {
   );
 }
 
-// Singleton pattern using Modular SDK
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+// Singleton pattern robusto para evitar "Maximum backoff delay"
+// Garante que apenas uma instância do Firebase App seja criada
+const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 

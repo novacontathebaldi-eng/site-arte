@@ -7,6 +7,7 @@ import { X, LayoutDashboard, Package, Users, MessageSquare, Plus, Edit, Trash2, 
 import { useAuthStore } from '../store';
 import { db } from '../lib/firebase/config';
 import { deleteDocument, subscribeToCollection, updateDocument } from '../lib/firebase/firestore';
+import { collection, query, onSnapshot, where, orderBy } from 'firebase/firestore';
 import { Product, ProductCategory } from '../types';
 import { getBrevoStats, getBrevoContacts, getChatConfig, updateChatConfig, getChatFeedback, resolveFeedback, syncFirestoreToBrevo } from '../app/actions/admin';
 import { seedDatabase } from '../app/actions/seed';
@@ -93,9 +94,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
     const { user } = useAuthStore();
     const { toast } = useToast();
     const [activeTab, setActiveTab] = useState<'analytics' | 'products' | 'crm' | 'chatbot' | 'settings'>('analytics');
+    
+    // Stats State
     const [stats, setStats] = useState({ 
-        salesToday: 0, salesMonth: 0, newOrders: 0, activeUsers: 0, brevoSubs: 0, brevoClients: 0 
+        salesToday: 0, 
+        salesMonth: 0, 
+        newOrders: 0, 
+        activeUsers: 0, 
+        brevoSubs: 0, 
+        brevoClients: 0 
     });
+    const [salesData, setSalesData] = useState<any[]>([]);
     
     // --- PRODUCT STATE ---
     const [products, setProducts] = useState<Product[]>([]);
@@ -140,31 +149,89 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
     }, [isOpen]);
 
     // --- DATA FETCHING ---
+    
+    // 1. Real-time Products (Always Active when Open)
     useEffect(() => {
         if (!isOpen) return;
 
-        // 1. Real-time Products
         const unsubProducts = subscribeToCollection('products', (data) => {
             const sorted = data.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
             setProducts(sorted as Product[]);
         });
 
-        // 2. Dashboard Stats
-        const fetchStats = async () => {
-            const brevo = await getBrevoStats();
-            setStats({
-                salesToday: 1250,
-                salesMonth: 15400,
-                newOrders: 3,
-                activeUsers: 45,
-                brevoSubs: brevo.subscribers,
-                brevoClients: brevo.clients
-            });
-        };
-        fetchStats();
-
         return () => unsubProducts();
     }, [isOpen]);
+
+    // 2. Dashboard Stats (Realtime Orders & Users)
+    useEffect(() => {
+        if (!isOpen || activeTab !== 'analytics') return;
+
+        // Fetch External API Stats (Brevo) once
+        getBrevoStats().then(brevo => {
+            setStats(prev => ({ ...prev, brevoSubs: brevo.subscribers, brevoClients: brevo.clients }));
+        });
+
+        // Setup Dates
+        const now = new Date();
+        const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+
+        // Orders Listener
+        const ordersQuery = query(collection(db, 'orders'));
+        const unsubOrders = onSnapshot(ordersQuery, (snapshot) => {
+            let todayTotal = 0;
+            let monthTotal = 0;
+            let pending = 0;
+            
+            // Simple Client-side aggregation for startup scale
+            const monthlyDataMap = new Map<string, number>();
+
+            snapshot.docs.forEach(doc => {
+                const data = doc.data();
+                const amount = Number(data.amount) || 0;
+                const dateStr = data.createdAt; // ISO String
+
+                if (dateStr >= startOfDay) todayTotal += amount;
+                if (dateStr >= startOfMonth) monthTotal += amount;
+                if (data.status === 'pending' || data.status === 'processing') pending++;
+
+                // Chart Data Aggregation (by Month)
+                const dateObj = new Date(dateStr);
+                const monthKey = dateObj.toLocaleString('default', { month: 'short' });
+                monthlyDataMap.set(monthKey, (monthlyDataMap.get(monthKey) || 0) + amount);
+            });
+
+            // Convert map to array for Recharts
+            const chartData = Array.from(monthlyDataMap.entries()).map(([name, value]) => ({ name, value }));
+
+            setStats(prev => ({
+                ...prev,
+                salesToday: todayTotal,
+                salesMonth: monthTotal,
+                newOrders: pending
+            }));
+            
+            if (chartData.length > 0) setSalesData(chartData);
+            else {
+                // Default placeholder data if no sales
+                 setSalesData([
+                    { name: 'Jan', value: 0 }, { name: 'Fev', value: 0 }, { name: 'Mar', value: 0 }, 
+                    { name: 'Abr', value: 0 }, { name: 'Mai', value: 0 }, { name: 'Jun', value: 0 }
+                ]);
+            }
+        });
+
+        // Users Listener
+        const usersQuery = query(collection(db, 'users'));
+        const unsubUsers = onSnapshot(usersQuery, (snapshot) => {
+            setStats(prev => ({ ...prev, activeUsers: snapshot.size }));
+        });
+
+        return () => {
+            unsubOrders();
+            unsubUsers();
+        };
+    }, [isOpen, activeTab]);
 
     // Fetch tab-specific data
     useEffect(() => {
@@ -277,12 +344,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
     };
 
     if (!isOpen) return null;
-
-    const salesData = [
-        { name: 'Jan', value: 4000 }, { name: 'Fev', value: 3000 }, { name: 'Mar', value: 2000 }, 
-        { name: 'Abr', value: 2780 }, { name: 'Mai', value: 1890 }, { name: 'Jun', value: 2390 }, 
-        { name: 'Jul', value: 3490 }
-    ];
 
     return (
         <div className="fixed inset-0 z-[100] flex bg-black/80 backdrop-blur-md overflow-hidden text-white font-sans">

@@ -6,18 +6,24 @@ import { useUIStore, useCartStore, useAuthStore } from '../store';
 import { useLanguage } from '../hooks/useLanguage';
 
 export const Cart: React.FC = () => {
-  const { isCartOpen, toggleCart } = useUIStore();
+  const { isCartOpen, toggleCart, openAuthModal } = useUIStore();
   const { items, removeItem, updateQuantity, total } = useCartStore();
-  const { user, login } = useAuthStore();
+  const { user } = useAuthStore();
   const { t, language } = useLanguage();
 
   const handleCheckout = () => {
     if (!user) {
         alert("Please login to checkout");
-        login();
+        openAuthModal('login');
     } else {
         alert("Proceeding to checkout flow (Revolut/Pix Integration)...");
     }
+  };
+
+  const getImageUrl = (img: any) => {
+    if (!img) return '';
+    if (typeof img === 'string') return img;
+    return img.url || '';
   };
 
   return (
@@ -66,7 +72,7 @@ export const Cart: React.FC = () => {
                     {...({ layout: true } as any)}
                   >
                     <img 
-                        src={item.images[0]} 
+                        src={getImageUrl(item.images[0])} 
                         alt={item.translations[language].title} 
                         className="w-20 h-20 object-cover rounded-md" 
                     />

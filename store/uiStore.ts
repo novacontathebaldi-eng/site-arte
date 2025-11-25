@@ -1,6 +1,6 @@
 
 import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
+import { persist } from 'zustand/middleware';
 import { Language } from '../types';
 
 interface UIState {
@@ -17,12 +17,19 @@ interface UIState {
   authView: 'login' | 'register';
   isDashboardOpen: boolean;
   activeModal: string | null;
+  
+  // Chat Context
+  chatInitialMessage: string | null;
 
   // Actions
   toggleCart: () => void;
   toggleChat: () => void;
+  openChatWithContext: (message: string) => void;
+  clearChatContext: () => void;
+
   toggleSearch: () => void;
   toggleMobileMenu: () => void;
+  toggleDashboard: () => void;
   
   openAuthModal: (view?: 'login' | 'register') => void;
   closeAuthModal: () => void;
@@ -49,6 +56,7 @@ export const useUIStore = create<UIState>()(
       authView: 'login',
       isDashboardOpen: false,
       activeModal: null,
+      chatInitialMessage: null,
 
       setLanguage: (language) => set({ language }),
 
@@ -71,6 +79,18 @@ export const useUIStore = create<UIState>()(
         isDashboardOpen: false 
       })),
 
+      openChatWithContext: (message) => set({
+        isChatOpen: true,
+        chatInitialMessage: message,
+        isCartOpen: false,
+        isSearchOpen: false,
+        isMobileMenuOpen: false,
+        isAuthOpen: false,
+        isDashboardOpen: false
+      }),
+
+      clearChatContext: () => set({ chatInitialMessage: null }),
+
       toggleSearch: () => set((state) => ({ 
         isSearchOpen: !state.isSearchOpen,
         isCartOpen: false,
@@ -82,6 +102,14 @@ export const useUIStore = create<UIState>()(
         isMobileMenuOpen: !state.isMobileMenuOpen,
         isCartOpen: false,
         isChatOpen: false 
+      })),
+
+      toggleDashboard: () => set((state) => ({
+        isDashboardOpen: !state.isDashboardOpen,
+        isAuthOpen: false,
+        isCartOpen: false,
+        isMobileMenuOpen: false,
+        isChatOpen: false
       })),
 
       // Explicit Actions for Auth/Dashboard

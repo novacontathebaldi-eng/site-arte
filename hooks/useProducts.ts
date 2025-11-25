@@ -76,6 +76,7 @@ export const useProducts = () => {
         setIsLoading(false);
       },
       (err) => {
+        // Prevents hard crash on backoff limit or permission errors
         console.error("Error fetching products:", err);
         setError(err);
         setIsLoading(false);

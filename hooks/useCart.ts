@@ -1,3 +1,4 @@
+
 import { useEffect, useRef } from 'react';
 import { useCartStore } from '../store/cartStore';
 import { useUIStore } from '../store/uiStore';
@@ -97,7 +98,8 @@ export const useCart = () => {
     addItem(product);
     
     if (startRect && product.images[0]) {
-        triggerFlyAnimation(startRect, product.images[0]);
+        const imageUrl = typeof product.images[0] === 'string' ? product.images[0] : product.images[0].url;
+        triggerFlyAnimation(startRect, imageUrl);
     } else {
         if (!isCartOpen) toggleCart();
     }

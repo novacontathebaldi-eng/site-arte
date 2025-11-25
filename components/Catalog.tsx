@@ -225,7 +225,8 @@ export const Catalog: React.FC = () => {
             <ProductModal 
                 product={selectedProduct} 
                 isOpen={!!selectedProduct} 
-                onClose={() => setSelectedProduct(null)} 
+                onClose={() => setSelectedProduct(null)}
+                onSelectProduct={(p) => setSelectedProduct(p)} 
             />
 
         </section>

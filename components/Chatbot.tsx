@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
@@ -24,7 +25,6 @@ const getImageUrl = (img: any) => {
 };
 
 // Typewriter Component Optimized
-// React.memo impede que ele renderize novamente se as props (text, onComplete) não mudarem
 const TypewriterText = React.memo(({ text, onComplete }: { text: string, onComplete?: () => void }) => {
     const [displayedText, setDisplayedText] = useState('');
     
@@ -34,7 +34,6 @@ const TypewriterText = React.memo(({ text, onComplete }: { text: string, onCompl
         setDisplayedText(''); // Reset visual state on new text
 
         const interval = setInterval(() => {
-            // Usando substring garante que pegamos o texto correto mesmo em closures
             const nextChar = text.substring(0, i + 1);
             setDisplayedText(nextChar);
             i++;
@@ -46,7 +45,7 @@ const TypewriterText = React.memo(({ text, onComplete }: { text: string, onCompl
         }, speed);
 
         return () => clearInterval(interval);
-    }, [text, onComplete]); // Dependências controladas
+    }, [text, onComplete]);
 
     return <p className="whitespace-pre-wrap">{displayedText}</p>;
 });
@@ -109,7 +108,7 @@ const PromptChips = ({ starters, onSelect }: { starters: ChatStarter[], onSelect
 };
 
 export const Chatbot: React.FC = () => {
-  const { isChatOpen, toggleChat } = useUIStore();
+  const { isChatOpen, toggleChat, chatInitialMessage, clearChatContext } = useUIStore();
   const { user } = useAuthStore();
   const { t, language } = useLanguage();
   
@@ -138,7 +137,7 @@ export const Chatbot: React.FC = () => {
     loadConfig();
   }, [isChatOpen]);
 
-  // Initial Welcome (Instant, no typewriter for UX on reopen)
+  // Initial Welcome
   useEffect(() => {
     if (isChatOpen && !hasInteracted && messages.length === 0) {
         setMessages([{ 
@@ -150,7 +149,15 @@ export const Chatbot: React.FC = () => {
     }
   }, [isChatOpen, hasInteracted, t, messages.length]);
 
-  // Scroll to bottom - MEMOIZED to prevent Typewriter re-renders
+  // HANDLE CONTEXT INJECTION (From Product Modal)
+  useEffect(() => {
+    if (isChatOpen && chatInitialMessage) {
+        handleSend(chatInitialMessage);
+        clearChatContext();
+    }
+  }, [isChatOpen, chatInitialMessage, clearChatContext]);
+
+  // Scroll to bottom
   const scrollToBottom = useCallback(() => {
       messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, []);
@@ -213,15 +220,11 @@ export const Chatbot: React.FC = () => {
       if (!msg.id) return;
 
       const msgIndex = messages.findIndex(m => m.id === msg.id);
-      
-      // Tenta pegar a mensagem do usuário anterior. Se for a primeira (welcome), usa um placeholder.
       const userMsg = msgIndex > 0 ? messages[msgIndex - 1] : null;
       const userText = userMsg ? userMsg.text : "[Início da Conversa / Boas-vindas]";
       
-      // Update UI Optimistically
       setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, feedback: type } : m));
 
-      // Send to Backend
       try {
         await submitChatFeedback(msg.id, userText, msg.text, type);
       } catch (e) {
@@ -293,14 +296,13 @@ export const Chatbot: React.FC = () => {
                 </button>
             </div>
 
-            {/* Messages Area - FIXED SCROLLING */}
+            {/* Messages Area */}
             <div 
                 className="flex-1 overflow-y-auto p-4 pt-20 pb-4 space-y-6 bg-gray-50/50 dark:bg-black/20 scroll-smooth overscroll-contain"
-                data-lenis-prevent // CRITICAL: Tells Smooth Scroll to ignore this container
+                data-lenis-prevent
             >
                 {messages.map((msg, idx) => {
                     const isLast = idx === messages.length - 1;
-                    // Dont type welcome message
                     const shouldType = msg.role === 'model' && isLast && !msg.products && msg.id !== 'welcome';
 
                     return (
@@ -325,19 +327,16 @@ export const Chatbot: React.FC = () => {
                                 )}
                             </div>
 
-                            {/* Bot Actions Row (Outside Bubble) */}
                             {msg.role === 'model' && (
                                 <div className="flex items-center gap-3 mt-1 ml-2 select-none">
                                     <span className="text-[10px] text-gray-400">
                                         {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                     </span>
                                     
-                                    {/* Actions - Always visible now, but subtle */}
                                     <div className="flex items-center gap-2 bg-gray-100 dark:bg-white/5 px-2 py-1 rounded-full transition-all border border-transparent hover:border-gray-200 dark:hover:border-white/10">
                                         <button 
                                             onClick={() => handleCopy(msg.text, msg.id)}
                                             className="text-gray-400 hover:text-accent transition-colors"
-                                            title="Copiar mensagem"
                                         >
                                             {copiedId === msg.id ? <Check size={12} className="text-green-500" /> : <Copy size={12}/>}
                                         </button>
@@ -345,14 +344,12 @@ export const Chatbot: React.FC = () => {
                                         <button 
                                             onClick={() => handleFeedback(msg, 'like')}
                                             className={cn("transition-colors", msg.feedback === 'like' ? "text-green-500" : "text-gray-400 hover:text-green-500")}
-                                            title="Gostei"
                                         >
                                             <ThumbsUp size={12}/>
                                         </button>
                                         <button 
                                             onClick={() => handleFeedback(msg, 'dislike')}
                                             className={cn("transition-colors", msg.feedback === 'dislike' ? "text-red-500" : "text-gray-400 hover:text-red-500")}
-                                            title="Não gostei"
                                         >
                                             <ThumbsDown size={12}/>
                                         </button>
@@ -360,14 +357,12 @@ export const Chatbot: React.FC = () => {
                                 </div>
                             )}
 
-                            {/* User Timestamp */}
                             {msg.role === 'user' && (
                                 <span className="text-[10px] text-gray-400 mt-1 mr-1">
                                     {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                 </span>
                             )}
 
-                            {/* Product Carousel */}
                             {msg.products && msg.products.length > 0 && (
                                 <ProductCarousel products={msg.products} onSelect={setSelectedProduct} />
                             )}
@@ -389,7 +384,6 @@ export const Chatbot: React.FC = () => {
 
             {/* Input Area */}
             <div className="p-4 bg-white dark:bg-[#121212] border-t border-gray-100 dark:border-white/5 relative z-20">
-                {/* Dynamic Prompt Starters */}
                 {!isLoading && messages.length < 3 && starters.length > 0 && (
                     <div className="mb-3">
                          <PromptChips starters={starters} onSelect={handleSend} />
@@ -422,7 +416,8 @@ export const Chatbot: React.FC = () => {
       <ProductModal 
         product={selectedProduct} 
         isOpen={!!selectedProduct} 
-        onClose={() => setSelectedProduct(null)} 
+        onClose={() => setSelectedProduct(null)}
+        onSelectProduct={(p) => setSelectedProduct(p)}
       />
     </>
   );

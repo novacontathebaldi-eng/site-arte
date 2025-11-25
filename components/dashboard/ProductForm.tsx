@@ -59,8 +59,9 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, onClose, 
     tags: ''
   };
 
+  // Cast resolver to any to avoid strict type mismatch between Zod inference and RHF generics
   const { register, control, handleSubmit, watch, setValue, formState: { errors } } = useForm<ProductFormValues>({
-    resolver: zodResolver(productSchema),
+    resolver: zodResolver(productSchema) as any,
     defaultValues: initialData ? {
         ...initialData,
         tags: initialData.tags?.join(', ') || ''
