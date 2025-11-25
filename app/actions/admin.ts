@@ -170,15 +170,19 @@ export async function updateChatConfig(config: ChatConfig) {
     }
 }
 
-export async function getChatFeedback(): Promise<ChatFeedback[]> {
+export async function getChatFeedback(type: 'like' | 'dislike' = 'dislike'): Promise<ChatFeedback[]> {
     try {
         const snapshot = await adminDb.collection('chat_feedback')
-            .where('feedback', '==', 'dislike')
+            .where('feedback', '==', type)
             .get();
 
         let items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ChatFeedback));
         
-        items = items.filter(i => i.resolved === false);
+        // For dislikes, we usually care about unresolved ones. For likes, mostly just viewing history.
+        if (type === 'dislike') {
+            items = items.filter(i => i.resolved === false);
+        }
+        
         items.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 
         return items;

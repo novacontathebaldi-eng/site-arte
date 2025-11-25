@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, LayoutDashboard, Package, Users, MessageSquare, Plus, Edit, Trash2, Save, Upload, Search, Filter, TrendingUp, DollarSign, RefreshCw, Lock, Globe, MoveUp, MoveDown, Check, ThumbsDown, AlertCircle, Move, Loader2, Settings, Database, AlertTriangle, ToggleLeft, ToggleRight, EyeOff } from 'lucide-react';
+import { X, LayoutDashboard, Package, Users, MessageSquare, Plus, Edit, Trash2, Save, Upload, Search, Filter, TrendingUp, DollarSign, RefreshCw, Lock, Globe, MoveUp, MoveDown, Check, ThumbsDown, AlertCircle, Move, Loader2, Settings, Database, AlertTriangle, ToggleLeft, ToggleRight, EyeOff, ThumbsUp } from 'lucide-react';
 import { useAuthStore } from '../store';
 import { db } from '../lib/firebase/config';
 import { deleteDocument, subscribeToCollection, updateDocument } from '../lib/firebase/firestore';
@@ -119,6 +119,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
     // --- AI STATE ---
     const [chatConfig, setChatConfig] = useState<ChatConfig | null>(null);
     const [feedbackList, setFeedbackList] = useState<ChatFeedback[]>([]);
+    const [positiveFeedbackList, setPositiveFeedbackList] = useState<ChatFeedback[]>([]); // NEW
     const [isSavingChat, setIsSavingChat] = useState(false);
     const [showFeedbackModal, setShowFeedbackModal] = useState<ChatFeedback | null>(null);
     const [fixAnswer, setFixAnswer] = useState('');
@@ -260,7 +261,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
         
         if (activeTab === 'chatbot') {
             getChatConfig().then(setChatConfig);
-            getChatFeedback().then(setFeedbackList);
+            getChatFeedback('dislike').then(setFeedbackList);
+            getChatFeedback('like').then(setPositiveFeedbackList);
         }
 
     }, [activeTab, isOpen]);
@@ -343,6 +345,18 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
         const res = await deleteFeedback(id);
         if (res.success) {
             setFeedbackList(prev => prev.filter(f => f.id !== id));
+            toast("Feedback removido.", "info");
+        } else {
+            toast("Erro ao remover.", "error");
+        }
+    };
+
+    const handleDeletePositive = async (id: string) => {
+        if (!confirm("Remover este registro de feedback positivo?")) return;
+        
+        const res = await deleteFeedback(id);
+        if (res.success) {
+            setPositiveFeedbackList(prev => prev.filter(f => f.id !== id));
             toast("Feedback removido.", "info");
         } else {
             toast("Erro ao remover.", "error");
@@ -658,16 +672,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
                                 </button>
                             </div>
 
-                            {/* FEEDBACK LOOP */}
+                            {/* FEEDBACK COLUMN */}
                             <div className="space-y-6">
-                                <div className="bg-[#151515] p-6 rounded-xl border border-white/10 h-full">
-                                    <h3 className="text-lg font-serif border-b border-white/10 pb-4 mb-4 flex items-center gap-2">
+                                {/* Negative Feedback */}
+                                <div className="bg-[#151515] p-6 rounded-xl border border-white/10 max-h-[500px] overflow-hidden flex flex-col">
+                                    <h3 className="text-lg font-serif border-b border-white/10 pb-4 mb-4 flex items-center gap-2 text-white">
                                         <AlertCircle size={18} className="text-red-500"/>
-                                        Feedback Negativo (Aprendizado)
+                                        Feedback Negativo (Ação Necessária)
                                     </h3>
-                                    <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2">
+                                    <div className="flex-1 overflow-y-auto pr-2 space-y-4">
                                         {feedbackList.length === 0 ? (
-                                            <p className="text-gray-500 text-sm italic">Nenhum feedback negativo pendente.</p>
+                                            <p className="text-gray-500 text-sm italic py-4">Nenhum feedback negativo pendente.</p>
                                         ) : (
                                             feedbackList.map(item => (
                                                 <div key={item.id} className="bg-black/20 p-4 rounded border border-white/5 hover:border-red-500/30 transition-colors">
@@ -692,6 +707,41 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
                                                             title="Ignorar/Excluir"
                                                         >
                                                             <Trash2 size={16} />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ))
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Positive Feedback - NEW SECTION */}
+                                <div className="bg-[#151515] p-6 rounded-xl border border-white/10 max-h-[500px] overflow-hidden flex flex-col">
+                                    <h3 className="text-lg font-serif border-b border-white/10 pb-4 mb-4 flex items-center gap-2 text-white">
+                                        <ThumbsUp size={18} className="text-green-500"/>
+                                        Feedback Positivo (Histórico)
+                                    </h3>
+                                    <div className="flex-1 overflow-y-auto pr-2 space-y-4">
+                                        {positiveFeedbackList.length === 0 ? (
+                                            <p className="text-gray-500 text-sm italic py-4">Nenhum feedback positivo registrado.</p>
+                                        ) : (
+                                            positiveFeedbackList.map(item => (
+                                                <div key={item.id} className="bg-black/20 p-4 rounded border border-white/5 hover:border-green-500/30 transition-colors relative group">
+                                                    <div className="mb-2">
+                                                        <span className="text-xs text-gray-500">Usuário perguntou:</span>
+                                                        <p className="text-white text-sm font-medium">"{item.userMessage}"</p>
+                                                    </div>
+                                                    <div className="pl-2 border-l-2 border-green-500/20">
+                                                        <span className="text-xs text-gray-500">IA respondeu:</span>
+                                                        <p className="text-gray-400 text-xs italic">"{item.aiResponse}"</p>
+                                                    </div>
+                                                    <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        <button 
+                                                            onClick={() => handleDeletePositive(item.id)}
+                                                            className="p-2 bg-white/5 hover:bg-red-500/20 text-gray-500 hover:text-red-500 rounded-full transition-colors"
+                                                            title="Remover do histórico"
+                                                        >
+                                                            <Trash2 size={14} />
                                                         </button>
                                                     </div>
                                                 </div>
