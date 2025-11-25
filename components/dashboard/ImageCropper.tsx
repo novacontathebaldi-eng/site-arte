@@ -76,9 +76,9 @@ export const ImageCropper: React.FC<ImageCropperProps> = ({ imageSrc, onCancel, 
             onCropChange={onCropChange}
             onCropComplete={onCropCompleteHandler}
             onZoomChange={onZoomChange}
-            objectFit="auto-cover"
-            restrictPosition={false}
-            minZoom={0.5}
+            objectFit="cover"
+            restrictPosition={true}
+            minZoom={1}
             classes={{
                 containerClassName: "bg-[#0a0a0a]",
                 cropAreaClassName: "border-2 border-accent shadow-[0_0_0_9999px_rgba(0,0,0,0.8)]"
@@ -97,7 +97,7 @@ export const ImageCropper: React.FC<ImageCropperProps> = ({ imageSrc, onCancel, 
                 <input
                     type="range"
                     value={zoom}
-                    min={0.5}
+                    min={1}
                     max={3}
                     step={0.1}
                     aria-labelledby="Zoom"
