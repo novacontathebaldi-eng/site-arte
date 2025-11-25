@@ -7,7 +7,7 @@ import { X, LayoutDashboard, Package, Users, MessageSquare, Plus, Edit, Trash2, 
 import { useAuthStore } from '../store';
 import { db } from '../lib/firebase/config';
 import { deleteDocument, subscribeToCollection, updateDocument } from '../lib/firebase/firestore';
-import { collection, query, onSnapshot, where, orderBy } from 'firebase/firestore';
+import { collection, query, onSnapshot, where, orderBy, QuerySnapshot, DocumentData } from 'firebase/firestore';
 import { Product, ProductCategory } from '../types';
 import { getBrevoStats, getBrevoContacts, getChatConfig, updateChatConfig, getChatFeedback, resolveFeedback, syncFirestoreToBrevo } from '../app/actions/admin';
 import { seedDatabase } from '../app/actions/seed';
@@ -154,15 +154,21 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
     useEffect(() => {
         if (!isOpen) return;
 
-        const unsubProducts = subscribeToCollection('products', (data) => {
+        // Use onSnapshot for real-time updates and proper cleanup
+        const q = query(collection(db, 'products'), orderBy('displayOrder', 'asc'));
+        const unsubscribe = onSnapshot(q, (snapshot: QuerySnapshot<DocumentData>) => {
+            const data = snapshot.docs.map(doc => ({ id: doc.id, ...(doc.data() as DocumentData) })) as Product[];
+            // Ensure sorting in client side as fail-safe
             const sorted = data.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
-            setProducts(sorted as Product[]);
+            setProducts(sorted);
+        }, (error) => {
+            console.error("Products listener error:", error);
         });
 
-        return () => unsubProducts();
+        return () => unsubscribe();
     }, [isOpen]);
 
-    // 2. Dashboard Stats (Realtime Orders & Users)
+    // 2. Dashboard Stats (Realtime Orders & Users) - CRITICAL FIX FOR KPIS
     useEffect(() => {
         if (!isOpen || activeTab !== 'analytics') return;
 
@@ -178,12 +184,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
 
         // Orders Listener
         const ordersQuery = query(collection(db, 'orders'));
-        const unsubOrders = onSnapshot(ordersQuery, (snapshot) => {
+        const unsubOrders = onSnapshot(ordersQuery, (snapshot: QuerySnapshot<DocumentData>) => {
             let todayTotal = 0;
             let monthTotal = 0;
             let pending = 0;
             
-            // Simple Client-side aggregation for startup scale
             const monthlyDataMap = new Map<string, number>();
 
             snapshot.docs.forEach(doc => {
@@ -193,12 +198,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
 
                 if (dateStr >= startOfDay) todayTotal += amount;
                 if (dateStr >= startOfMonth) monthTotal += amount;
-                if (data.status === 'pending' || data.status === 'processing') pending++;
+                // Check multiple status for pending count
+                if (['pending', 'processing', 'paid'].includes(data.status)) pending++;
 
                 // Chart Data Aggregation (by Month)
-                const dateObj = new Date(dateStr);
-                const monthKey = dateObj.toLocaleString('default', { month: 'short' });
-                monthlyDataMap.set(monthKey, (monthlyDataMap.get(monthKey) || 0) + amount);
+                if (dateStr) {
+                    const dateObj = new Date(dateStr);
+                    const monthKey = dateObj.toLocaleString('default', { month: 'short' });
+                    monthlyDataMap.set(monthKey, (monthlyDataMap.get(monthKey) || 0) + amount);
+                }
             });
 
             // Convert map to array for Recharts
@@ -211,29 +219,35 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
                 newOrders: pending
             }));
             
-            if (chartData.length > 0) setSalesData(chartData);
-            else {
-                // Default placeholder data if no sales
+            if (chartData.length > 0) {
+                 // Sort months if needed, but simple insert order usually works for recent data
+                 setSalesData(chartData);
+            } else {
                  setSalesData([
                     { name: 'Jan', value: 0 }, { name: 'Fev', value: 0 }, { name: 'Mar', value: 0 }, 
                     { name: 'Abr', value: 0 }, { name: 'Mai', value: 0 }, { name: 'Jun', value: 0 }
                 ]);
             }
+        }, (error) => {
+            console.error("Orders listener error:", error);
         });
 
         // Users Listener
         const usersQuery = query(collection(db, 'users'));
-        const unsubUsers = onSnapshot(usersQuery, (snapshot) => {
+        const unsubUsers = onSnapshot(usersQuery, (snapshot: QuerySnapshot<DocumentData>) => {
             setStats(prev => ({ ...prev, activeUsers: snapshot.size }));
+        }, (error) => {
+             console.error("Users listener error:", error);
         });
 
+        // CRITICAL: CLEANUP FUNCTION TO PREVENT BACKOFF ERROR
         return () => {
             unsubOrders();
             unsubUsers();
         };
     }, [isOpen, activeTab]);
 
-    // Fetch tab-specific data
+    // Fetch tab-specific data (One-time fetches)
     useEffect(() => {
         if (!isOpen) return;
 

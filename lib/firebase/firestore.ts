@@ -11,7 +11,9 @@ import {
   where,
   onSnapshot,
   DocumentData,
-  QueryConstraint
+  QueryConstraint,
+  QuerySnapshot,
+  DocumentSnapshot
 } from 'firebase/firestore';
 import { db } from './config';
 
@@ -29,7 +31,7 @@ export const getCollection = async (collectionName: string, ...constraints: any[
     
     return snapshot.docs.map((doc) => ({
       id: doc.id,
-      ...doc.data()
+      ...(doc.data() as DocumentData)
     }));
   } catch (error) {
     console.error(`Error fetching collection ${collectionName}:`, error);
@@ -43,7 +45,7 @@ export const getDocument = async (collectionName: string, id: string) => {
     const docRef = doc(db, collectionName, id);
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
-      return { id: docSnap.id, ...docSnap.data() };
+      return { id: docSnap.id, ...(docSnap.data() as DocumentData) };
     }
     return null;
   } catch (error) {
@@ -103,10 +105,10 @@ export const subscribeToCollection = (
 ) => {
   const colRef = collection(db, collectionName);
 
-  const unsubscribe = onSnapshot(colRef, (snapshot) => {
+  const unsubscribe = onSnapshot(colRef, (snapshot: QuerySnapshot<DocumentData>) => {
     const data = snapshot.docs.map((doc) => ({
       id: doc.id,
-      ...doc.data()
+      ...(doc.data() as DocumentData)
     }));
     callback(data);
   }, (error) => {
@@ -126,9 +128,9 @@ export const subscribeToDocument = (
 ) => {
   const docRef = doc(db, collectionName, id);
 
-  const unsubscribe = onSnapshot(docRef, (docSnap) => {
+  const unsubscribe = onSnapshot(docRef, (docSnap: DocumentSnapshot<DocumentData>) => {
     if (docSnap.exists()) {
-      callback({ id: docSnap.id, ...docSnap.data() });
+      callback({ id: docSnap.id, ...(docSnap.data() as DocumentData) });
     } else {
       callback(null);
     }

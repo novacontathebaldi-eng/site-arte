@@ -22,7 +22,8 @@ export const useAdmin = () => {
         // Double check Firestore for security
         const docRef = doc(db, 'users', user.uid);
         const docSnap = await getDoc(docRef);
-        const role = docSnap.data()?.role;
+        const data = docSnap.data();
+        const role = data?.role;
         
         if (role === 'admin') {
           setIsAdmin(true);

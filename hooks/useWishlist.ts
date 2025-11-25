@@ -18,7 +18,8 @@ export const useWishlist = () => {
             const docRef = doc(db, 'users', user.uid, 'wishlist', 'active');
             const docSnap = await getDoc(docRef);
             if (docSnap.exists()) {
-                setItems(docSnap.data()?.items || []);
+                const data = docSnap.data() as { items?: string[] } | undefined;
+                setItems(data?.items || []);
             }
         } catch (e) {
             console.error("Fetch wishlist error", e);

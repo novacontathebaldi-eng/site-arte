@@ -7,7 +7,7 @@ import { useLanguage } from '../hooks/useLanguage';
 import { cn, formatPrice } from '../lib/utils';
 import { updateDocument } from '../lib/firebase/firestore';
 import { auth, db } from '../lib/firebase/config';
-import { collection, query, where, orderBy, getDocs, doc, getDoc, addDoc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { collection, query, where, orderBy, getDocs, doc, getDoc, addDoc, updateDoc, deleteDoc, DocumentData } from 'firebase/firestore';
 import { updateProfile } from 'firebase/auth';
 import { Address, Product } from '../types';
 import { useToast } from './ui/Toast';
@@ -116,7 +116,7 @@ export const Dashboard: React.FC = () => {
                         orderBy('createdAt', 'desc')
                     );
                     const snapshot = await getDocs(q);
-                    const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    const data = snapshot.docs.map(doc => ({ id: doc.id, ...(doc.data() as DocumentData) }));
                     setOrders(data);
                 } catch (e) {
                     console.error("Error fetching orders", e);
@@ -138,7 +138,7 @@ export const Dashboard: React.FC = () => {
                     for (const id of wishlistIds) {
                         const docRef = doc(db, 'products', id);
                         const docSnap = await getDoc(docRef);
-                        if (docSnap.exists()) products.push({ id: docSnap.id, ...docSnap.data() } as Product);
+                        if (docSnap.exists()) products.push({ id: docSnap.id, ...(docSnap.data() as DocumentData) } as Product);
                     }
                     setWishlistProducts(products);
                 } catch (e) {
@@ -161,7 +161,7 @@ export const Dashboard: React.FC = () => {
                 try {
                     const colRef = collection(db, 'users', user.uid, 'addresses');
                     const snapshot = await getDocs(colRef);
-                    const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Address[];
+                    const data = snapshot.docs.map(doc => ({ id: doc.id, ...(doc.data() as DocumentData) })) as Address[];
                     setAddresses(data);
                 } catch (e) {
                     console.error(e);
@@ -230,7 +230,7 @@ export const Dashboard: React.FC = () => {
                 toast("Endereço adicionado", "success");
             }
             const snapshot = await getDocs(addressesRef);
-            setAddresses(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Address[]);
+            setAddresses(snapshot.docs.map(doc => ({ id: doc.id, ...(doc.data() as DocumentData) })) as Address[]);
             setIsAddressFormOpen(false);
             setEditingAddress(null);
             setAddressForm({ country: 'Luxembourg' });
