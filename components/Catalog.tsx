@@ -9,7 +9,7 @@ import { ProductModal } from './catalog/ProductModal';
 import { Loader2, AlertCircle, Sparkles } from 'lucide-react';
 import { cn, throttle } from '../lib/utils';
 
-// Preferred visual order, but not exclusive.
+// Preferred visual order
 const PREFERRED_ORDER = [
     ProductCategory.PAINTINGS,
     ProductCategory.SCULPTURES,
@@ -56,7 +56,6 @@ export const Catalog: React.FC = () => {
 
     // Initialize active category when data loads
     useEffect(() => {
-        // Cast activeCategory to ProductCategory to match the array type
         if (categories.length > 0 && !categories.includes(activeCategory)) {
             setActiveCategory(categories[0]);
         }
@@ -102,8 +101,9 @@ export const Catalog: React.FC = () => {
         setActiveCategory(cat);
         const element = document.getElementById(`category-${cat}`);
         if (element) {
+            // Header (80px) + Tabs (60px) + Offset
             const headerHeight = 80; // md:h-20
-            const tabsHeight = 60;   // Approx tab bar height
+            const tabsHeight = 60;   
             const offset = headerHeight + tabsHeight + 20;
             
             const elementPosition = element.getBoundingClientRect().top;

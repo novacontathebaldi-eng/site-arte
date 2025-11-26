@@ -144,6 +144,8 @@ export const Chatbot: React.FC = () => {
         setTimeout(() => {
             const el = document.getElementById(`msg-${lastMsg.id}`);
             if (el) {
+                // 'block: start' aligns element top to scroll container top
+                // We added 'scroll-mt-24' to the message div to account for the fixed header padding
                 el.scrollIntoView({ behavior: "smooth", block: "start" });
             } else {
                 // Fallback
@@ -304,7 +306,10 @@ export const Chatbot: React.FC = () => {
                                 initial: { opacity: 0, y: 10 },
                                 animate: { opacity: 1, y: 0 }
                             } as any)}
-                            className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}
+                            className={cn(
+                                "flex flex-col scroll-mt-24", // Added scroll-margin-top
+                                msg.role === 'user' ? 'items-end' : 'items-start'
+                            )}
                         >
                             <div className={cn(
                                 "max-w-[85%] p-3.5 text-sm leading-relaxed shadow-sm relative group transition-all",

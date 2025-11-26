@@ -33,7 +33,7 @@ export const Header: React.FC = () => {
   const [mounted, setMounted] = useState(false);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
 
-  // Verifica se é a Home Page
+  // Verifica se é a Home Page exata
   const isHomePage = pathname === '/';
 
   useEffect(() => {
@@ -67,8 +67,8 @@ export const Header: React.FC = () => {
       if(isMobileMenuOpen) toggleMobileMenu();
   };
 
-  // Logic to determine header style
-  // Always solid if NOT homepage OR if scrolled
+  // Lógica de Visualização:
+  // Sólido se: NÃO for Home OU se estiver rolando
   const isSolid = !isHomePage || scrolled;
 
   return (
@@ -76,9 +76,9 @@ export const Header: React.FC = () => {
     <motion.header
       className={cn(
         "fixed top-0 left-0 right-0 z-[60] transition-all duration-500 border-b flex items-center",
-        // Altura consistente
+        // Altura consistente: mobile 64px (h-16), desktop 80px (h-20)
         "h-16 md:h-20", 
-        // Estilos dinâmicos
+        // Estilos dinâmicos baseados na rota e scroll
         isSolid 
             ? "bg-white/95 dark:bg-[#1a1a1a]/95 backdrop-blur-xl shadow-sm text-primary dark:text-white border-gray-200 dark:border-white/10" 
             : "bg-transparent text-white border-transparent bg-gradient-to-b from-black/40 to-transparent"
