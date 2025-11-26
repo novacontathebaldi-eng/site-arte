@@ -65,12 +65,13 @@ export const Catalog: React.FC = () => {
     // 3. Handle Scroll Spy to update Active Tab
     useEffect(() => {
         const handleScroll = throttle(() => {
-            const headerOffset = 200; // Trigger offset
+            const headerOffset = 220; // Offset to trigger slightly before element hits top
             
             for (const cat of categories) {
                 const element = document.getElementById(`category-${cat}`);
                 if (element) {
                     const rect = element.getBoundingClientRect();
+                    // If top is near the header area or element spans the view
                     if (rect.top <= headerOffset && rect.bottom >= headerOffset) {
                         setActiveCategory(cat);
                         break;
@@ -101,9 +102,12 @@ export const Catalog: React.FC = () => {
         setActiveCategory(cat);
         const element = document.getElementById(`category-${cat}`);
         if (element) {
-            const headerOffset = 160; // Compensa Header + Sticky Tabs
+            const headerHeight = 80; // md:h-20
+            const tabsHeight = 60;   // Approx tab bar height
+            const offset = headerHeight + tabsHeight + 20;
+            
             const elementPosition = element.getBoundingClientRect().top;
-            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+            const offsetPosition = elementPosition + window.pageYOffset - offset;
 
             window.scrollTo({
                 top: offsetPosition,
@@ -160,12 +164,12 @@ export const Catalog: React.FC = () => {
                 </motion.div>
             </div>
 
-            {/* Sticky Tabs Header - Sticks exactly below the main Header */}
+            {/* Sticky Tabs Header - Sticks exactly below the main Header (top-16/top-20) */}
             <div className="sticky top-16 md:top-20 z-30 w-full bg-white/90 dark:bg-[#1e1e1e]/90 backdrop-blur-md border-b border-gray-200 dark:border-white/5 shadow-sm transition-all">
                 <div className="container mx-auto px-4">
                     <div 
                         ref={tabsRef}
-                        className="flex items-center gap-8 overflow-x-auto no-scrollbar py-4 px-2 snap-x"
+                        className="flex items-center gap-8 overflow-x-auto no-scrollbar py-4 px-2 snap-x scroll-smooth"
                     >
                         {categories.map((cat) => (
                             <button
