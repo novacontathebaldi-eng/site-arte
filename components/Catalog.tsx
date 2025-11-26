@@ -149,8 +149,8 @@ export const Catalog: React.FC = () => {
             </div>
 
             {/* Sticky Tabs Header */}
-            {/* Adjusted to top-[64px] to match Header height exactly */}
-            <div className="sticky top-[64px] z-30 w-full bg-white/80 dark:bg-[#1e1e1e]/80 backdrop-blur-md border-b border-gray-200 dark:border-white/5 shadow-sm transition-all">
+            {/* Adjusted to top-16 (64px Mobile) and md:top-20 (80px Desktop) to match Header height exactly */}
+            <div className="sticky top-16 md:top-20 z-30 w-full bg-white/80 dark:bg-[#1e1e1e]/80 backdrop-blur-md border-b border-gray-200 dark:border-white/5 shadow-sm transition-all">
                 <div className="container mx-auto px-4 overflow-x-auto no-scrollbar">
                     <div className="flex items-center justify-start md:justify-center gap-8 min-w-max py-4 px-2">
                         {categories.map((cat) => (

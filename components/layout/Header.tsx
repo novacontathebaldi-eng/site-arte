@@ -31,14 +31,19 @@ export const Header: React.FC = () => {
 
   useEffect(() => {
     setMounted(true);
-    const handleScroll = () => setScrolled(window.scrollY > 50);
-    window.addEventListener('scroll', handleScroll);
+    const handleScroll = () => {
+        // Reduced threshold to 10px for faster reaction on mobile
+        setScrolled(window.scrollY > 10);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Increased opacity to /95 to fix "transparent header" issue on mobile
+  // Used fixed heights (h-16 mobile, h-20 desktop) instead of padding to match Catalog sticky position
   const headerClasses = scrolled
-    ? 'bg-white/90 dark:bg-[#1a1a1a]/90 backdrop-blur-md shadow-sm py-3 text-primary dark:text-white border-gray-200 dark:border-white/10'
-    : 'bg-transparent py-4 md:py-6 text-white border-transparent';
+    ? 'bg-white/95 dark:bg-[#1a1a1a]/95 backdrop-blur-xl shadow-sm text-primary dark:text-white border-gray-200 dark:border-white/10'
+    : 'bg-transparent text-white border-transparent';
 
   const contentColorClass = scrolled 
     ? 'text-primary dark:text-white' 
@@ -48,15 +53,11 @@ export const Header: React.FC = () => {
     e.preventDefault();
     e.stopPropagation();
     
-    // Se estiver carregando, ignora o clique
     if (isLoading) return;
     
-    // Se estiver logado -> Abre Dashboard
     if (user) {
         openDashboard();
-    } 
-    // Se não estiver logado -> Abre Login
-    else {
+    } else {
         openAuthModal('login');
     }
   };
@@ -72,14 +73,14 @@ export const Header: React.FC = () => {
   return (
     <>
     <motion.header
-      className={`fixed top-0 w-full z-[60] transition-all duration-300 border-b ${headerClasses}`}
+      className={`fixed top-0 w-full z-[60] transition-all duration-300 border-b h-16 md:h-20 flex items-center ${headerClasses}`}
       {...({
           initial: { y: -100 },
           animate: { y: 0 },
           transition: { duration: 0.5 }
       } as any)}
     >
-      <div className="container mx-auto px-4 md:px-6 flex justify-between items-center">
+      <div className="container mx-auto px-4 md:px-6 flex justify-between items-center h-full">
         {/* Logo */}
         <div className="flex items-center z-50 cursor-pointer flex-shrink-1 overflow-hidden" onClick={() => {
             closeAllOverlays();
@@ -88,16 +89,15 @@ export const Header: React.FC = () => {
             <div className="w-8 h-8 md:w-10 md:h-10 bg-accent rounded-full flex items-center justify-center mr-2 md:mr-3 flex-shrink-0">
                 <span className="font-serif font-bold text-white text-lg md:text-xl">M</span>
             </div>
-            {/* Texto ajustado para não quebrar layout no mobile */}
             <span className={`font-serif text-sm md:text-2xl font-bold tracking-tighter truncate ${scrolled ? 'text-primary dark:text-white' : 'text-white mix-blend-difference'}`}>
                 MELISSA PELUSSI
             </span>
         </div>
 
-        {/* Icons Section (Visible on Mobile & Desktop) */}
+        {/* Icons Section */}
         <div className={`flex items-center gap-2 md:gap-6 ${contentColorClass} flex-shrink-0 ml-2`}>
           
-          {/* Admin Toggle (Desktop Only to save space) */}
+          {/* Admin Toggle */}
           {isAdmin && (
             <button 
                 onClick={() => setShowAdminPanel(true)} 
@@ -139,7 +139,7 @@ export const Header: React.FC = () => {
             )}
           </button>
 
-          {/* Mobile Menu Toggle (Hamburger) */}
+          {/* Mobile Menu Toggle */}
           <button className={`md:hidden z-50 p-1.5 ${contentColorClass}`} onClick={toggleMobileMenu} aria-label="Menu">
             {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
