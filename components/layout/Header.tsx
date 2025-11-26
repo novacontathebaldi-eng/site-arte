@@ -1,6 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { ShoppingBag, User, Search, Menu, X, Lock, Loader2, ChevronRight, Instagram, Mail } from 'lucide-react';
+import Link from 'next/link';
 import { useUIStore, useCartStore, useAuthStore } from '../../store';
 import { useLanguage } from '../../hooks/useLanguage';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -57,12 +58,8 @@ export const Header: React.FC = () => {
     }
   };
 
-  const handleNavClick = (id: string) => {
-    toggleMobileMenu();
-    const element = document.getElementById(id);
-    if (element) {
-        element.scrollIntoView({ behavior: 'smooth' });
-    }
+  const closeMobileMenu = () => {
+      if(isMobileMenuOpen) toggleMobileMenu();
   };
 
   return (
@@ -85,10 +82,7 @@ export const Header: React.FC = () => {
     >
       <div className="container mx-auto px-4 md:px-6 flex justify-between items-center h-full w-full">
         {/* Logo */}
-        <div className="flex items-center z-50 cursor-pointer flex-shrink-1 overflow-hidden" onClick={() => {
-            closeAllOverlays();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }}>
+        <Link href="/" className="flex items-center z-50 cursor-pointer flex-shrink-1 overflow-hidden" onClick={closeAllOverlays}>
             <div className="w-8 h-8 md:w-10 md:h-10 bg-accent rounded-full flex items-center justify-center mr-2 md:mr-3 flex-shrink-0">
                 <span className="font-serif font-bold text-white text-lg md:text-xl">M</span>
             </div>
@@ -98,7 +92,17 @@ export const Header: React.FC = () => {
             )}>
                 MELISSA PELUSSI
             </span>
-        </div>
+        </Link>
+
+        {/* Desktop Nav (Optional - if design calls for visible links) */}
+        <nav className="hidden md:flex gap-8 mx-8">
+            <Link href="/catalog" className={cn("text-sm font-medium uppercase tracking-widest hover:text-accent transition-colors", scrolled ? "text-primary dark:text-gray-300" : "text-white/90")}>
+                {t('nav.catalog')}
+            </Link>
+            <Link href="/#about" className={cn("text-sm font-medium uppercase tracking-widest hover:text-accent transition-colors", scrolled ? "text-primary dark:text-gray-300" : "text-white/90")}>
+                {t('nav.about')}
+            </Link>
+        </nav>
 
         {/* Icons Section */}
         <div className={cn(
@@ -171,23 +175,28 @@ export const Header: React.FC = () => {
           transition={{ type: "spring", damping: 25, stiffness: 300 }}
         >
           <div className="flex flex-col gap-6 mt-8">
-            <button 
-              onClick={() => handleNavClick('catalog')} 
+            <Link 
+              href="/catalog" 
+              onClick={closeMobileMenu}
               className="text-2xl font-serif text-white flex items-center justify-between border-b border-white/10 pb-4"
             >
               {t('nav.catalog')}
               <ChevronRight size={20} className="text-gray-500" />
-            </button>
-            <button 
-              onClick={() => handleNavClick('about')} 
+            </Link>
+            <Link 
+              href="/#about" 
+              onClick={closeMobileMenu}
               className="text-2xl font-serif text-white flex items-center justify-between border-b border-white/10 pb-4"
             >
               {t('nav.about')}
               <ChevronRight size={20} className="text-gray-500" />
-            </button>
+            </Link>
             <button 
-              onClick={() => handleNavClick('newsletter')} 
-              className="text-2xl font-serif text-white flex items-center justify-between border-b border-white/10 pb-4"
+              onClick={() => {
+                  closeMobileMenu();
+                  document.getElementById('newsletter')?.scrollIntoView({ behavior: 'smooth' });
+              }} 
+              className="text-2xl font-serif text-white flex items-center justify-between border-b border-white/10 pb-4 w-full"
             >
               {t('nav.contact')}
               <ChevronRight size={20} className="text-gray-500" />

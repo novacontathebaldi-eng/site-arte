@@ -2,6 +2,7 @@
 import React, { useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { useLanguage } from '../hooks/useLanguage';
+import Link from 'next/link';
 
 export const Hero: React.FC = () => {
   const { t } = useLanguage();
@@ -15,12 +16,7 @@ export const Hero: React.FC = () => {
   const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
   const scale = useTransform(scrollYProgress, [0, 1], [1, 1.2]);
   
-  // REMOVIDO: O filtro de Blur dinâmico (filter: blur) é extremamente pesado para a GPU de celulares.
-  // Sua remoção garante que a rolagem seja fluida (60fps) no mobile.
-
   return (
-    // Alterado h-screen para h-[100dvh] para suporte melhor em mobile (endereça barra de navegação)
-    // Adicionado bg-black para evitar flash branco nas bordas
     <div ref={containerRef} className="h-[100dvh] w-full relative overflow-hidden flex items-center justify-center bg-black">
       {/* Parallax Background */}
       <motion.div 
@@ -65,19 +61,20 @@ export const Hero: React.FC = () => {
             {t('hero.title')}
         </motion.h1>
 
-        <motion.button
-            className="px-8 py-4 border border-accent text-accent hover:bg-accent hover:text-white transition-all duration-300 uppercase tracking-widest text-sm rounded-sm"
+        <motion.div
             {...({
                 initial: { opacity: 0, y: 20 },
                 animate: { opacity: 1, y: 0 },
                 transition: { duration: 0.8, delay: 0.6 }
             } as any)}
-            onClick={() => {
-                document.getElementById('catalog')?.scrollIntoView({ behavior: 'smooth' });
-            }}
         >
-            {t('hero.cta')}
-        </motion.button>
+            <Link
+                href="/catalog"
+                className="inline-block px-8 py-4 border border-accent text-accent hover:bg-accent hover:text-white transition-all duration-300 uppercase tracking-widest text-sm rounded-sm"
+            >
+                {t('hero.cta')}
+            </Link>
+        </motion.div>
       </motion.div>
       
       {/* Scroll Indicator */}

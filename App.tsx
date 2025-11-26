@@ -7,8 +7,8 @@ import { useThemeStore, useAuthStore } from './store';
 import { Header } from './components/layout/Header';
 import { Footer } from './components/layout/Footer';
 import { Hero } from './components/Hero';
-import { Catalog } from './components/Catalog';
 import { Newsletter } from './components/Newsletter';
+import { FeaturedCollection } from './components/FeaturedCollection';
 import { Theme } from './types';
 import { useLanguage } from './hooks/useLanguage';
 import { motion } from 'framer-motion';
@@ -20,7 +20,6 @@ const CartSidebar = dynamic(() => import('./components/CartSidebar').then(mod =>
 const Chatbot = dynamic(() => import('./components/Chatbot').then(mod => mod.Chatbot), { 
   ssr: false 
 });
-// REMOVIDO: AddToCartAnimation (Causava efeito visual indesejado)
 const FloatingCartButton = dynamic(() => import('./components/FloatingCartButton').then(mod => mod.FloatingCartButton), { 
   ssr: false 
 });
@@ -61,7 +60,7 @@ const App: React.FC = () => {
             <Hero />
 
             {/* About Section (Snapshot) */}
-            <section className="min-h-[80vh] flex items-center justify-center bg-white dark:bg-[#1a1a1a] py-20 px-6">
+            <section id="about" className="min-h-[80vh] flex items-center justify-center bg-white dark:bg-[#1a1a1a] py-20 px-6">
                 <div className="container mx-auto grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
                     <motion.div 
                         className="relative"
@@ -110,11 +109,13 @@ const App: React.FC = () => {
                 </div>
             </section>
 
-            {/* Catalog Section */}
-            <Catalog />
+            {/* Featured Collection Section (Replaces full Catalog) */}
+            <FeaturedCollection />
 
             {/* Newsletter Section */}
-            <Newsletter />
+            <div id="newsletter">
+                <Newsletter />
+            </div>
         </main>
 
         <Footer />
@@ -123,7 +124,6 @@ const App: React.FC = () => {
         <CartSidebar />
         <Chatbot />
         <FloatingCartButton />
-        {/* AddToCartAnimation Removed */}
         
         {/* Auth & Dashboard Layers */}
         <AuthModal />
