@@ -129,14 +129,29 @@ export const Chatbot: React.FC = () => {
     }
   }, [isChatOpen, chatInitialMessage, clearChatContext]);
 
-  // Scroll to bottom
-  const scrollToBottom = useCallback(() => {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, []);
-  
+  // SMART SCROLL: To Start of New Message
   useEffect(() => {
-    scrollToBottom();
-  }, [messages, isChatOpen, scrollToBottom]);
+    if (!isChatOpen || messages.length === 0) return;
+
+    const lastMsg = messages[messages.length - 1];
+    
+    if (lastMsg.role === 'user') {
+        // For user messages, standard scroll to bottom is fine
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    } else {
+        // For MODEL messages (which can be long or have cards), scroll to START
+        // Using setTimeout to ensure DOM is rendered
+        setTimeout(() => {
+            const el = document.getElementById(`msg-${lastMsg.id}`);
+            if (el) {
+                el.scrollIntoView({ behavior: "smooth", block: "start" });
+            } else {
+                // Fallback
+                messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+            }
+        }, 100);
+    }
+  }, [messages, isChatOpen]);
 
   const handleSend = async (text: string = inputValue) => {
     if (!text.trim()) return;
@@ -283,7 +298,8 @@ export const Chatbot: React.FC = () => {
                 {messages.map((msg, idx) => {
                     return (
                         <motion.div 
-                            key={msg.id} 
+                            key={msg.id}
+                            id={`msg-${msg.id}`} // Important for smart scroll
                             {...({
                                 initial: { opacity: 0, y: 10 },
                                 animate: { opacity: 1, y: 0 }

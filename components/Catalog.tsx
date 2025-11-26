@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Product, ProductCategory } from '../types/product';
 import { useProducts } from '../hooks/useProducts';
@@ -23,6 +23,7 @@ export const Catalog: React.FC = () => {
     const { data: products, isLoading, error } = useProducts();
     const [activeCategory, setActiveCategory] = useState<string>(ProductCategory.PAINTINGS);
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+    const tabsRef = useRef<HTMLDivElement>(null);
     
     // 1. Extract Dynamic Categories from Data
     const categories: string[] = useMemo(() => {
@@ -63,16 +64,14 @@ export const Catalog: React.FC = () => {
 
     // 3. Handle Scroll Spy to update Active Tab
     useEffect(() => {
-        // THROTTLE: Limita a execução para rodar no máximo uma vez a cada 100ms
-        // Isso evita sobrecarga da CPU durante a rolagem rápida no mobile.
         const handleScroll = throttle(() => {
-            const headerOffset = 180; // Increased offset for better trigger point
+            const headerOffset = 220; // Offset to trigger slightly before element hits top
             
             for (const cat of categories) {
                 const element = document.getElementById(`category-${cat}`);
                 if (element) {
                     const rect = element.getBoundingClientRect();
-                    // Check if section is roughly in the upper part of the viewport
+                    // If top is near the header area or element spans the view
                     if (rect.top <= headerOffset && rect.bottom >= headerOffset) {
                         setActiveCategory(cat);
                         break;
@@ -85,13 +84,30 @@ export const Catalog: React.FC = () => {
         return () => window.removeEventListener('scroll', handleScroll);
     }, [categories]);
 
+    // 4. Auto-Scroll Active Tab to Center
+    useEffect(() => {
+        if (activeCategory && tabsRef.current) {
+            const activeTabElement = document.getElementById(`tab-${activeCategory}`);
+            if (activeTabElement) {
+                activeTabElement.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'nearest', 
+                    inline: 'center' 
+                });
+            }
+        }
+    }, [activeCategory]);
+
     const scrollToCategory = (cat: string) => {
         setActiveCategory(cat);
         const element = document.getElementById(`category-${cat}`);
         if (element) {
-            const headerOffset = 130;
+            const headerHeight = 80; // md:h-20
+            const tabsHeight = 60;   // Approx tab bar height
+            const offset = headerHeight + tabsHeight + 20;
+            
             const elementPosition = element.getBoundingClientRect().top;
-            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+            const offsetPosition = elementPosition + window.pageYOffset - offset;
 
             window.scrollTo({
                 top: offsetPosition,
@@ -124,8 +140,8 @@ export const Catalog: React.FC = () => {
     return (
         <section id="catalog" className="min-h-screen bg-light dark:bg-[#252525] relative">
             
-            {/* Catalog Header - NEW SECTION */}
-            <div className="bg-light dark:bg-[#252525] pt-24 pb-12 px-6">
+            {/* Catalog Header */}
+            <div className="bg-light dark:bg-[#252525] pt-12 pb-8 px-6">
                 <motion.div 
                     className="container mx-auto text-center"
                     {...({
@@ -148,17 +164,20 @@ export const Catalog: React.FC = () => {
                 </motion.div>
             </div>
 
-            {/* Sticky Tabs Header */}
-            {/* Adjusted to top-16 (64px Mobile) and md:top-20 (80px Desktop) to match Header height exactly */}
-            <div className="sticky top-16 md:top-20 z-30 w-full bg-white/80 dark:bg-[#1e1e1e]/80 backdrop-blur-md border-b border-gray-200 dark:border-white/5 shadow-sm transition-all">
-                <div className="container mx-auto px-4 overflow-x-auto no-scrollbar">
-                    <div className="flex items-center justify-start md:justify-center gap-8 min-w-max py-4 px-2">
+            {/* Sticky Tabs Header - Sticks exactly below the main Header (top-16/top-20) */}
+            <div className="sticky top-16 md:top-20 z-30 w-full bg-white/90 dark:bg-[#1e1e1e]/90 backdrop-blur-md border-b border-gray-200 dark:border-white/5 shadow-sm transition-all">
+                <div className="container mx-auto px-4">
+                    <div 
+                        ref={tabsRef}
+                        className="flex items-center gap-8 overflow-x-auto no-scrollbar py-4 px-2 snap-x scroll-smooth"
+                    >
                         {categories.map((cat) => (
                             <button
                                 key={cat}
+                                id={`tab-${cat}`}
                                 onClick={() => scrollToCategory(cat)}
                                 className={cn(
-                                    "relative py-2 text-xs md:text-sm uppercase tracking-widest transition-colors font-medium",
+                                    "relative py-2 text-xs md:text-sm uppercase tracking-widest transition-colors font-medium whitespace-nowrap snap-center flex-shrink-0",
                                     activeCategory === cat 
                                         ? "text-accent" 
                                         : "text-gray-500 hover:text-primary dark:text-gray-400 dark:hover:text-white"
