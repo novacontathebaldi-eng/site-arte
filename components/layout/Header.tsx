@@ -8,7 +8,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAdmin } from '../../hooks/useAdmin';
 import { cn } from '../../lib/utils';
 import dynamic from 'next/dynamic';
-import { usePathname } from 'next/navigation';
 
 // Lazy load Admin Dashboard trigger to save bundle size
 const AdminDashboard = dynamic(() => import('../AdminDashboard').then(mod => mod.AdminDashboard), { ssr: false });
@@ -27,14 +26,10 @@ export const Header: React.FC = () => {
   const { user, isLoading } = useAuthStore();
   const { isAdmin } = useAdmin();
   const { t } = useLanguage();
-  const pathname = usePathname();
   
   const [scrolled, setScrolled] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
-
-  // Verifica se é a Home Page exata
-  const isHomePage = pathname === '/';
 
   useEffect(() => {
     setMounted(true);
@@ -67,19 +62,15 @@ export const Header: React.FC = () => {
       if(isMobileMenuOpen) toggleMobileMenu();
   };
 
-  // Lógica de Visualização:
-  // Sólido se: NÃO for Home OU se estiver rolando
-  const isSolid = !isHomePage || scrolled;
-
   return (
     <>
     <motion.header
       className={cn(
         "fixed top-0 left-0 right-0 z-[60] transition-all duration-500 border-b flex items-center",
-        // Altura consistente: mobile 64px (h-16), desktop 80px (h-20)
+        // Altura consistente
         "h-16 md:h-20", 
-        // Estilos dinâmicos baseados na rota e scroll
-        isSolid 
+        // Estilos dinâmicos baseados no scroll
+        scrolled 
             ? "bg-white/95 dark:bg-[#1a1a1a]/95 backdrop-blur-xl shadow-sm text-primary dark:text-white border-gray-200 dark:border-white/10" 
             : "bg-transparent text-white border-transparent bg-gradient-to-b from-black/40 to-transparent"
       )}
@@ -97,18 +88,18 @@ export const Header: React.FC = () => {
             </div>
             <span className={cn(
                 "font-serif text-sm md:text-2xl font-bold tracking-tighter truncate transition-colors duration-300",
-                isSolid ? "text-primary dark:text-white" : "text-white mix-blend-difference"
+                scrolled ? "text-primary dark:text-white" : "text-white mix-blend-difference"
             )}>
                 MELISSA PELUSSI
             </span>
         </Link>
 
-        {/* Desktop Nav */}
+        {/* Desktop Nav (Optional - if design calls for visible links) */}
         <nav className="hidden md:flex gap-8 mx-8">
-            <Link href="/catalog" className={cn("text-sm font-medium uppercase tracking-widest hover:text-accent transition-colors", isSolid ? "text-primary dark:text-gray-300" : "text-white/90")}>
+            <Link href="/catalog" className={cn("text-sm font-medium uppercase tracking-widest hover:text-accent transition-colors", scrolled ? "text-primary dark:text-gray-300" : "text-white/90")}>
                 {t('nav.catalog')}
             </Link>
-            <Link href="/#about" className={cn("text-sm font-medium uppercase tracking-widest hover:text-accent transition-colors", isSolid ? "text-primary dark:text-gray-300" : "text-white/90")}>
+            <Link href="/#about" className={cn("text-sm font-medium uppercase tracking-widest hover:text-accent transition-colors", scrolled ? "text-primary dark:text-gray-300" : "text-white/90")}>
                 {t('nav.about')}
             </Link>
         </nav>
@@ -116,7 +107,7 @@ export const Header: React.FC = () => {
         {/* Icons Section */}
         <div className={cn(
             "flex items-center gap-2 md:gap-6 flex-shrink-0 ml-2 transition-colors duration-300",
-            isSolid ? "text-primary dark:text-white" : "text-white"
+            scrolled ? "text-primary dark:text-white" : "text-white"
         )}>
           
           {/* Admin Toggle */}
@@ -163,7 +154,7 @@ export const Header: React.FC = () => {
 
           {/* Mobile Menu Toggle */}
           <button 
-            className={cn("md:hidden z-50 p-1.5", isSolid ? "text-primary dark:text-white" : "text-white")} 
+            className={cn("md:hidden z-50 p-1.5", scrolled ? "text-primary dark:text-white" : "text-white")} 
             onClick={toggleMobileMenu} 
             aria-label="Menu"
           >

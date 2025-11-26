@@ -129,31 +129,14 @@ export const Chatbot: React.FC = () => {
     }
   }, [isChatOpen, chatInitialMessage, clearChatContext]);
 
-  // SMART SCROLL: To Start of New Message
+  // Scroll to bottom
+  const scrollToBottom = useCallback(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, []);
+  
   useEffect(() => {
-    if (!isChatOpen || messages.length === 0) return;
-
-    const lastMsg = messages[messages.length - 1];
-    
-    if (lastMsg.role === 'user') {
-        // For user messages, standard scroll to bottom is fine
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    } else {
-        // For MODEL messages (which can be long or have cards), scroll to START
-        // Using setTimeout to ensure DOM is rendered
-        setTimeout(() => {
-            const el = document.getElementById(`msg-${lastMsg.id}`);
-            if (el) {
-                // 'block: start' aligns element top to scroll container top
-                // We added 'scroll-mt-24' to the message div to account for the fixed header padding
-                el.scrollIntoView({ behavior: "smooth", block: "start" });
-            } else {
-                // Fallback
-                messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-            }
-        }, 100);
-    }
-  }, [messages, isChatOpen]);
+    scrollToBottom();
+  }, [messages, isChatOpen, scrollToBottom]);
 
   const handleSend = async (text: string = inputValue) => {
     if (!text.trim()) return;
@@ -262,7 +245,7 @@ export const Chatbot: React.FC = () => {
       <AnimatePresence>
         {isChatOpen && (
           <motion.div
-            className="fixed bottom-4 left-4 md:left-8 w-[calc(100vw-32px)] md:w-[380px] h-[650px] max-h-[80vh] bg-white/95 dark:bg-[#121212]/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 dark:border-white/10 z-[90] flex flex-col overflow-hidden"
+            className="fixed bottom-24 left-4 md:left-8 w-[calc(100vw-32px)] md:w-[380px] h-[650px] max-h-[80vh] bg-white/95 dark:bg-[#121212]/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 dark:border-white/10 z-[90] flex flex-col overflow-hidden"
             {...({
                 initial: { opacity: 0, scale: 0.9, y: 50, transformOrigin: "bottom left" },
                 animate: { opacity: 1, scale: 1, y: 0 },
@@ -300,16 +283,12 @@ export const Chatbot: React.FC = () => {
                 {messages.map((msg, idx) => {
                     return (
                         <motion.div 
-                            key={msg.id}
-                            id={`msg-${msg.id}`} // Important for smart scroll
+                            key={msg.id} 
                             {...({
                                 initial: { opacity: 0, y: 10 },
                                 animate: { opacity: 1, y: 0 }
                             } as any)}
-                            className={cn(
-                                "flex flex-col scroll-mt-24", // Added scroll-margin-top
-                                msg.role === 'user' ? 'items-end' : 'items-start'
-                            )}
+                            className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}
                         >
                             <div className={cn(
                                 "max-w-[85%] p-3.5 text-sm leading-relaxed shadow-sm relative group transition-all",
