@@ -245,7 +245,7 @@ export const Chatbot: React.FC = () => {
       <AnimatePresence>
         {isChatOpen && (
           <motion.div
-            className="fixed bottom-24 left-4 md:left-8 w-[calc(100vw-32px)] md:w-[380px] h-[650px] max-h-[80vh] bg-white/95 dark:bg-[#121212]/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 dark:border-white/10 z-[90] flex flex-col overflow-hidden"
+            className="fixed bottom-4 left-4 md:left-8 w-[calc(100vw-32px)] md:w-[380px] h-[650px] max-h-[80vh] bg-white/95 dark:bg-[#121212]/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 dark:border-white/10 z-[90] flex flex-col overflow-hidden"
             {...({
                 initial: { opacity: 0, scale: 0.9, y: 50, transformOrigin: "bottom left" },
                 animate: { opacity: 1, scale: 1, y: 0 },
