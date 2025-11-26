@@ -142,10 +142,20 @@ export const Chatbot: React.FC = () => {
             messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
         } else {
             // For MODEL messages (AI), scroll to the TOP of the message container.
-            // This ensures the user sees the text answer first, not the products/footer.
+            // IMPORTANT: We must account for the Sticky Header height (~80px).
             const messageEl = document.getElementById(`msg-${lastMsg.id}`);
-            if (messageEl) {
-                messageEl.scrollIntoView({ behavior: "smooth", block: "start" });
+            if (messageEl && messageEl.parentElement) {
+                // Header Height is roughly 80px (pt-20). We add 20px buffer = 100px offset.
+                const headerOffset = 100;
+                const container = messageEl.parentElement;
+                
+                // Calculate position relative to container
+                const targetTop = messageEl.offsetTop - headerOffset;
+
+                container.scrollTo({
+                    top: targetTop,
+                    behavior: "smooth"
+                });
             }
         }
     }, 200);

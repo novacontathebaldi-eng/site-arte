@@ -1,4 +1,6 @@
 
+'use client';
+
 import React, { useState, useMemo, useEffect } from 'react';
 import { 
   DndContext, 
@@ -456,13 +458,13 @@ export const ProductsBoard = () => {
                 </div>
                 <DragOverlay dropAnimation={{ sideEffects: defaultDropAnimationSideEffects({ styles: { active: { opacity: '0.5' } } }) }}>
                     {activeItem && (
-                        'slug' in activeItem ? (
-                             <div className="w-[300px] h-full bg-[#121212] rounded-xl border border-accent opacity-90 p-4">
-                                <span className="font-bold text-gray-300">{activeItem.slug}</span>
+                        'price' in activeItem ? (
+                             <div className="w-[280px] bg-[#1a1a1a] p-3 rounded-lg border border-accent shadow-xl">
+                                 <h4 className="text-sm font-medium text-white">{(activeItem as Product).translations?.fr?.title}</h4>
                              </div>
                         ) : (
-                             <div className="w-[280px] bg-[#1a1a1a] p-3 rounded-lg border border-accent shadow-xl">
-                                 <h4 className="text-sm font-medium text-white">{activeItem.translations?.fr?.title}</h4>
+                             <div className="w-[300px] h-full bg-[#121212] rounded-xl border border-accent opacity-90 p-4">
+                                <span className="font-bold text-gray-300">{(activeItem as Category).slug}</span>
                              </div>
                         )
                     )}
