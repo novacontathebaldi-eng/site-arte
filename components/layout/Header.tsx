@@ -5,6 +5,7 @@ import { useUIStore, useCartStore, useAuthStore } from '../../store';
 import { useLanguage } from '../../hooks/useLanguage';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAdmin } from '../../hooks/useAdmin';
+import { cn } from '../../lib/utils';
 import dynamic from 'next/dynamic';
 
 // Lazy load Admin Dashboard trigger to save bundle size
@@ -32,22 +33,16 @@ export const Header: React.FC = () => {
   useEffect(() => {
     setMounted(true);
     const handleScroll = () => {
-        // Reduced threshold to 10px for faster reaction on mobile
-        setScrolled(window.scrollY > 10);
+        const isScrolled = window.scrollY > 20;
+        setScrolled(isScrolled);
     };
+    
+    // Check initial state
+    handleScroll();
+    
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  // Increased opacity to /95 to fix "transparent header" issue on mobile
-  // Used fixed heights (h-16 mobile, h-20 desktop) instead of padding to match Catalog sticky position
-  const headerClasses = scrolled
-    ? 'bg-white/95 dark:bg-[#1a1a1a]/95 backdrop-blur-xl shadow-sm text-primary dark:text-white border-gray-200 dark:border-white/10'
-    : 'bg-transparent text-white border-transparent';
-
-  const contentColorClass = scrolled 
-    ? 'text-primary dark:text-white' 
-    : 'text-white';
 
   const handleUserClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -73,14 +68,22 @@ export const Header: React.FC = () => {
   return (
     <>
     <motion.header
-      className={`fixed top-0 w-full z-[60] transition-all duration-300 border-b h-16 md:h-20 flex items-center ${headerClasses}`}
+      className={cn(
+        "fixed top-0 left-0 right-0 z-[60] transition-all duration-500 border-b flex items-center",
+        // Altura consistente
+        "h-16 md:h-20", 
+        // Estilos dinâmicos baseados no scroll
+        scrolled 
+            ? "bg-white/95 dark:bg-[#1a1a1a]/95 backdrop-blur-xl shadow-sm text-primary dark:text-white border-gray-200 dark:border-white/10" 
+            : "bg-transparent text-white border-transparent bg-gradient-to-b from-black/40 to-transparent"
+      )}
       {...({
           initial: { y: -100 },
           animate: { y: 0 },
           transition: { duration: 0.5 }
       } as any)}
     >
-      <div className="container mx-auto px-4 md:px-6 flex justify-between items-center h-full">
+      <div className="container mx-auto px-4 md:px-6 flex justify-between items-center h-full w-full">
         {/* Logo */}
         <div className="flex items-center z-50 cursor-pointer flex-shrink-1 overflow-hidden" onClick={() => {
             closeAllOverlays();
@@ -89,13 +92,19 @@ export const Header: React.FC = () => {
             <div className="w-8 h-8 md:w-10 md:h-10 bg-accent rounded-full flex items-center justify-center mr-2 md:mr-3 flex-shrink-0">
                 <span className="font-serif font-bold text-white text-lg md:text-xl">M</span>
             </div>
-            <span className={`font-serif text-sm md:text-2xl font-bold tracking-tighter truncate ${scrolled ? 'text-primary dark:text-white' : 'text-white mix-blend-difference'}`}>
+            <span className={cn(
+                "font-serif text-sm md:text-2xl font-bold tracking-tighter truncate transition-colors duration-300",
+                scrolled ? "text-primary dark:text-white" : "text-white mix-blend-difference"
+            )}>
                 MELISSA PELUSSI
             </span>
         </div>
 
         {/* Icons Section */}
-        <div className={`flex items-center gap-2 md:gap-6 ${contentColorClass} flex-shrink-0 ml-2`}>
+        <div className={cn(
+            "flex items-center gap-2 md:gap-6 flex-shrink-0 ml-2 transition-colors duration-300",
+            scrolled ? "text-primary dark:text-white" : "text-white"
+        )}>
           
           {/* Admin Toggle */}
           {isAdmin && (
@@ -140,7 +149,11 @@ export const Header: React.FC = () => {
           </button>
 
           {/* Mobile Menu Toggle */}
-          <button className={`md:hidden z-50 p-1.5 ${contentColorClass}`} onClick={toggleMobileMenu} aria-label="Menu">
+          <button 
+            className={cn("md:hidden z-50 p-1.5", scrolled ? "text-primary dark:text-white" : "text-white")} 
+            onClick={toggleMobileMenu} 
+            aria-label="Menu"
+          >
             {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
