@@ -6,18 +6,30 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function formatPrice(price: number, currency: string = 'EUR', locale: string = 'fr-LU'): string {
+  if (price === undefined || price === null || isNaN(price)) return '—';
   return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency: currency,
   }).format(price);
 }
 
-export function formatDate(date: string | number | Date, locale: string = 'fr-LU'): string {
-  return new Intl.DateTimeFormat(locale, {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  }).format(new Date(date));
+export function formatDate(date: string | number | Date | null | undefined, locale: string = 'fr-LU'): string {
+  if (!date) return '—';
+  
+  try {
+    const d = new Date(date);
+    // Verifica se é uma data válida
+    if (isNaN(d.getTime())) return '—';
+
+    return new Intl.DateTimeFormat(locale, {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    }).format(d);
+  } catch (error) {
+    console.warn("Invalid date passed to formatDate:", date);
+    return '—';
+  }
 }
 
 export function debounce<T extends (...args: any[]) => void>(func: T, wait: number): (...args: Parameters<T>) => void {

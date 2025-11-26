@@ -31,9 +31,14 @@ export const CustomersTable: React.FC<CustomersTableProps> = ({ users, orders })
     if (activeTab === 'circle') {
         const fetchBrevo = async () => {
             setBrevoLoading(true);
-            const data = await getBrevoContacts(BREVO_LIMIT, brevoOffset);
-            setBrevoContacts(data);
-            setBrevoLoading(false);
+            try {
+                const data = await getBrevoContacts(BREVO_LIMIT, brevoOffset);
+                setBrevoContacts(data || []);
+            } catch (e) {
+                console.error("Failed to load Brevo contacts", e);
+            } finally {
+                setBrevoLoading(false);
+            }
         };
         fetchBrevo();
     }
@@ -41,22 +46,33 @@ export const CustomersTable: React.FC<CustomersTableProps> = ({ users, orders })
 
   // Aggregation Logic for Collectors
   const customers = useMemo(() => {
+    if (!users) return [];
+    
     return users.map(user => {
         const userOrders = orders.filter(o => o.userId === user.uid);
-        const sortedOrders = [...userOrders].sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-        const totalSpent = userOrders.reduce((sum, o) => sum + o.amount, 0);
+        const sortedOrders = [...userOrders].sort((a,b) => {
+            const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+            const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+            return dateB - dateA;
+        });
+        const totalSpent = userOrders.reduce((sum, o) => sum + (o.amount || 0), 0);
         const lastOrder = sortedOrders.length > 0 ? sortedOrders[0] : null;
+        
+        // Safety checks for dates
+        const userCreatedAt = user.createdAt ? new Date(user.createdAt).getTime() : 0;
+        const lastOrderCreatedAt = lastOrder?.createdAt ? new Date(lastOrder.createdAt).getTime() : 0;
         
         let status = t('admin.crm.status_regular');
         if (totalSpent > 1000) status = t('admin.crm.status_vip');
-        else if (new Date(user.createdAt).getTime() > Date.now() - 30 * 24 * 60 * 60 * 1000) status = t('admin.crm.status_new');
-        else if (!lastOrder || new Date(lastOrder.createdAt).getTime() < Date.now() - 180 * 24 * 60 * 60 * 1000) status = t('admin.crm.status_inactive');
+        else if (userCreatedAt > 0 && userCreatedAt > Date.now() - 30 * 24 * 60 * 60 * 1000) status = t('admin.crm.status_new');
+        else if (!lastOrder || lastOrderCreatedAt < Date.now() - 180 * 24 * 60 * 60 * 1000) status = t('admin.crm.status_inactive');
 
         // Extract Location from latest order
-        const location = lastOrder ? lastOrder.shippingAddress.country : '—';
+        const location = lastOrder?.shippingAddress?.country || '—';
 
         return {
             ...user,
+            createdAt: user.createdAt || new Date().toISOString(), // Fallback for display
             totalSpent,
             totalOrders: userOrders.length,
             lastOrderDate: lastOrder?.createdAt,
@@ -64,8 +80,8 @@ export const CustomersTable: React.FC<CustomersTableProps> = ({ users, orders })
             status
         };
     }).filter(u => 
-        u.displayName?.toLowerCase().includes(search.toLowerCase()) || 
-        u.email?.toLowerCase().includes(search.toLowerCase())
+        (u.displayName || '').toLowerCase().includes(search.toLowerCase()) || 
+        (u.email || '').toLowerCase().includes(search.toLowerCase())
     ).sort((a, b) => b.totalSpent - a.totalSpent);
   }, [users, orders, search, t]);
 
@@ -136,7 +152,7 @@ export const CustomersTable: React.FC<CustomersTableProps> = ({ users, orders })
                                                 {c.photoURL ? <img src={c.photoURL} className="w-full h-full object-cover" alt=""/> : <UserIcon size={18} className="text-gray-400"/>}
                                             </div>
                                             <div>
-                                                <div className="text-white font-serif font-bold tracking-wide">{c.displayName}</div>
+                                                <div className="text-white font-serif font-bold tracking-wide">{c.displayName || 'Cliente'}</div>
                                                 <div className="text-xs text-gray-500 font-mono">{c.email}</div>
                                             </div>
                                         </div>
@@ -246,7 +262,11 @@ export const CustomersTable: React.FC<CustomersTableProps> = ({ users, orders })
         {selectedCustomer && (
             <CustomerDetailsModal 
                 customer={selectedCustomer} 
-                customerOrders={orders.filter(o => o.userId === selectedCustomer.uid).sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())}
+                customerOrders={orders.filter(o => o.userId === selectedCustomer.uid).sort((a,b) => {
+                    const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+                    const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+                    return dateB - dateA;
+                })}
                 onClose={() => setSelectedCustomer(null)}
             />
         )}
