@@ -1,45 +1,87 @@
 rules_version = '2';
-
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Função auxiliar para verificar se o usuário é admin
-    // (Você precisará setar uma flag 'isAdmin' no documento do usuário ou usar Custom Claims)
+    // --- HELPERS (Funções Auxiliares) --- //
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Verifica se o usuário é admin de forma segura (checa se o doc existe primeiro)
     function isAdmin() {
-      return request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+      return isAuthenticated() &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
-    // Função para verificar se o usuário é dono do dado
+    // Verifica se o usuário logado é o dono do documento
     function isOwner(userId) {
-      return request.auth != null && request.auth.uid == userId;
+      return isAuthenticated() && request.auth.uid == userId;
     }
 
-    // Regras para Produtos (Catálogo)
-    match /products/{productId} {
-      allow read: if true; // Qualquer um pode ver produtos
-      allow write: if isAdmin(); // Apenas admin pode criar/editar
-    }
+    // --- REGRAS DE COLEÇÕES --- //
 
-    // Regras para Usuários
+    // 1. Usuários e Subcoleções (Carrinho, Wishlist, Endereços)
     match /users/{userId} {
       allow read, write: if isOwner(userId) || isAdmin();
+
+      match /cart/{document=**} {
+        allow read, write: if isOwner(userId) || isAdmin();
+      }
+      match /wishlist/{document=**} {
+        allow read, write: if isOwner(userId) || isAdmin();
+      }
+      match /addresses/{document=**} {
+        allow read, write: if isOwner(userId) || isAdmin();
+      }
     }
 
-    // Regras para Carrinho
-    match /carts/{cartId} {
-      allow read, write: if request.auth != null && (resource == null || resource.data.userId == request.auth.uid);
+    // 2. Produtos (Público pode ler, Admin pode escrever)
+    match /products/{productId} {
+      allow read: if true;
+      allow write: if isAdmin();
     }
 
-    // Regras para Pedidos
+    // 3. Categorias (ESSENCIAL PARA O NOVO BOARD)
+    match /categories/{categoryId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // 4. Pedidos
     match /orders/{orderId} {
-      allow create: if request.auth != null;
-      allow read: if request.auth != null && (resource.data.userId == request.auth.uid || isAdmin());
-      allow update, delete: if isAdmin();
+      // Qualquer autenticado pode criar um pedido
+      allow create: if isAuthenticated();
+      // Ler apenas seus próprios pedidos ou se for admin
+      allow read: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
+      // Apenas admin pode atualizar status/rastreio via Client SDK
+      // (O usuário comum não edita pedidos depois de criados, o backend faz isso)
+      allow update: if isAdmin();
+    }
+
+    // 5. Chatbot, Logs & Configurações
+    match /chat_logs/{logId} {
+      allow create: if true; // Permite logs de visitantes anônimos
+      allow read: if isAdmin();
+    }
+
+    match /chatbot_settings/{docId} {
+      allow read: if true; // Necessário para o frontend carregar configs do chat
+      allow write: if isAdmin();
+    }
+
+    match /chat_feedback/{feedbackId} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
+
+    match /chatbot_knowledge_base/{docId} {
+      allow read, write: if isAdmin();
     }
     
-    // Regra padrão para bloquear o resto
-    match /{document=**} {
-      allow read, write: if false;
+    match /admin_audit_logs/{logId} {
+       allow read, write: if isAdmin();
     }
   }
 }

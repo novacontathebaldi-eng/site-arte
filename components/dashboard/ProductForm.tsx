@@ -43,7 +43,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, onClose, 
   const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
   const [processingCrop, setProcessingCrop] = useState(false);
 
-  // Fetch Categories
+  // Fetch Categories with Error Handling
   useEffect(() => {
     const fetchCats = async () => {
         try {
@@ -51,7 +51,12 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, onClose, 
             const snap = await getDocs(q);
             const cats = snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Category));
             setCategories(cats);
-        } catch(e) { console.error(e); }
+        } catch(e: any) { 
+            console.error("Error loading categories:", e);
+            if (e.code === 'permission-denied') {
+                toast("Acesso às categorias negado.", "error");
+            }
+        }
     };
     fetchCats();
   }, []);
@@ -186,9 +191,10 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, onClose, 
             toast("Produto criado!", "success");
         }
         onSuccess();
-    } catch (error) {
+    } catch (error: any) {
         console.error(error);
-        toast("Erro ao salvar produto", "error");
+        if (error.code === 'permission-denied') toast("Erro de Permissão.", "error");
+        else toast("Erro ao salvar produto", "error");
     } finally {
         setIsSubmitting(false);
     }
