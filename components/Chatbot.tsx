@@ -129,28 +129,28 @@ export const Chatbot: React.FC = () => {
     }
   }, [isChatOpen, chatInitialMessage, clearChatContext]);
 
-  // SMART SCROLL: To Start of New Message
+  // SMART SCROLL: Focus on Start of New Message for Readability
   useEffect(() => {
     if (!isChatOpen || messages.length === 0) return;
 
     const lastMsg = messages[messages.length - 1];
     
-    if (lastMsg.role === 'user') {
-        // For user messages, standard scroll to bottom is fine
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    } else {
-        // For MODEL messages (which can be long or have cards), scroll to START
-        // Using setTimeout to ensure DOM is rendered
-        setTimeout(() => {
-            const el = document.getElementById(`msg-${lastMsg.id}`);
-            if (el) {
-                el.scrollIntoView({ behavior: "smooth", block: "start" });
-            } else {
-                // Fallback
-                messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    // Delay to ensure DOM render completion
+    const timer = setTimeout(() => {
+        if (lastMsg.role === 'user') {
+            // For user messages, strictly scroll to bottom
+            messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        } else {
+            // For MODEL messages (AI), scroll to the TOP of the message container.
+            // This ensures the user sees the text answer first, not the products/footer.
+            const messageEl = document.getElementById(`msg-${lastMsg.id}`);
+            if (messageEl) {
+                messageEl.scrollIntoView({ behavior: "smooth", block: "start" });
             }
-        }, 100);
-    }
+        }
+    }, 200);
+
+    return () => clearTimeout(timer);
   }, [messages, isChatOpen]);
 
   const handleSend = async (text: string = inputValue) => {
@@ -299,7 +299,7 @@ export const Chatbot: React.FC = () => {
                     return (
                         <motion.div 
                             key={msg.id}
-                            id={`msg-${msg.id}`} // Important for smart scroll
+                            id={`msg-${msg.id}`} // ID Important for smart scroll
                             {...({
                                 initial: { opacity: 0, y: 10 },
                                 animate: { opacity: 1, y: 0 }
