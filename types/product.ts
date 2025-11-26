@@ -8,6 +8,19 @@ export enum ProductCategory {
   PHOTOGRAPHY = 'photography'
 }
 
+export interface CategoryTranslation {
+  title: string;
+}
+
+export interface Category {
+  id: string;
+  slug: string;
+  displayOrder: number;
+  translations: {
+    [key: string]: CategoryTranslation; // 'fr' | 'en' | 'de' | 'pt'
+  };
+}
+
 export interface ProductDimensions {
   height: number;
   width: number;
@@ -38,7 +51,7 @@ export interface Product {
   // Status & Commerce
   price: number;
   stock: number;
-  category: ProductCategory;
+  category: string; // Changed from Enum to string to support dynamic categories
   status: 'active' | 'draft' | 'sold' | 'reserved';
   featured: boolean;
   displayOrder: number;

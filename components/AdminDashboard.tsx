@@ -21,32 +21,13 @@ import { useToast } from './ui/Toast';
 import { ProductForm } from './dashboard/ProductForm';
 import { OrdersKanban } from './dashboard/admin/OrdersKanban';
 import { CustomersTable } from './dashboard/admin/CustomersTable';
+import { ProductsBoard } from './dashboard/admin/ProductsBoard';
 
 interface AdminDashboardProps {
     isOpen: boolean;
     onClose: () => void;
 }
 
-// ... Sortable components remain the same ...
-interface SortableRowProps {
-  product: Product;
-  onEdit: (p: Product) => void;
-  onDelete: (id: string) => void;
-  index: number;
-}
-const SortableRow: React.FC<SortableRowProps> = ({ product, onEdit, onDelete, index }) => {
-    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: product.id });
-    const style = { transform: CSS.Transform.toString(transform), transition, zIndex: isDragging ? 10 : 1, opacity: isDragging ? 0.5 : 1 };
-    const imgUrl = product.images && product.images.length > 0 ? (typeof product.images[0] === 'string' ? product.images[0] : product.images[0].url) : '';
-    return (
-        <tr ref={setNodeRef} style={style} className="hover:bg-white/5 bg-[#151515]">
-            <td className="p-4 flex gap-2 items-center"><button {...attributes} {...listeners} className="p-1 hover:bg-white/10 rounded cursor-grab active:cursor-grabbing"><Move size={14} /></button><span className="w-6 text-center text-gray-500">{index + 1}</span></td>
-            <td className="p-4"><div className="flex items-center gap-4">{imgUrl && <img src={imgUrl} className="w-10 h-10 object-cover rounded" alt="" />}<div><span className="block">{product.translations?.fr?.title || 'Sem Título'}</span><span className="text-xs text-gray-500">{product.sku}</span></div></div></td>
-            <td className="p-4">{formatPrice(product.price)}</td>
-            <td className="p-4 text-right flex justify-end gap-2"><button onClick={() => onEdit(product)} className="p-2 bg-blue-500/10 text-blue-500 rounded hover:bg-blue-500/20"><Edit size={16}/></button><button onClick={() => onDelete(product.id)} className="p-2 bg-red-500/10 text-red-500 rounded hover:bg-red-500/20"><Trash2 size={16}/></button></td>
-        </tr>
-    );
-};
 interface SortableStarterProps { starter: ChatStarter; onChange: (s: ChatStarter) => void; onDelete: (id: string) => void; }
 const SortableStarter: React.FC<SortableStarterProps> = ({ starter, onChange, onDelete }) => {
     const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: starter.id });
@@ -66,14 +47,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
     const [salesData, setSalesData] = useState<any[]>([]);
     
     // --- GLOBAL DATA ---
-    const [products, setProducts] = useState<Product[]>([]);
-    const [orders, setOrders] = useState<Order[]>([]); // Centralized Orders
-    const [users, setUsers] = useState<any[]>([]); // Centralized Users for CRM
+    const [orders, setOrders] = useState<Order[]>([]); 
+    const [users, setUsers] = useState<any[]>([]); 
 
     // --- SUB-STATES ---
-    const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-    const [isProductModalOpen, setIsProductModalOpen] = useState(false);
-    const [productSearch, setProductSearch] = useState('');
     const [chatConfig, setChatConfig] = useState<ChatConfig | null>(null);
     const [feedbackList, setFeedbackList] = useState<ChatFeedback[]>([]);
     const [positiveFeedbackList, setPositiveFeedbackList] = useState<ChatFeedback[]>([]);
@@ -99,14 +76,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
     useEffect(() => {
         if (!isOpen) return;
 
-        // 1. Products
-        const qProd = query(collection(db, 'products'), orderBy('displayOrder', 'asc'));
-        const unsubProd = onSnapshot(qProd, (snapshot) => {
-            const data = snapshot.docs.map(doc => ({ id: doc.id, ...(doc.data() as DocumentData) })) as Product[];
-            setProducts(data.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0)));
-        });
-
-        // 2. Orders (For Analytics & Kanban)
+        // 1. Orders (For Analytics & Kanban)
         const qOrders = query(collection(db, 'orders'), orderBy('createdAt', 'desc'));
         const unsubOrders = onSnapshot(qOrders, (snapshot) => {
              const data = snapshot.docs.map(doc => ({ id: doc.id, ...(doc.data() as DocumentData) })) as Order[];
@@ -133,7 +103,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
              setSalesData(chartData.length ? chartData : [{ name: 'Jan', value: 0 }]);
         });
 
-        // 3. Users (For Stats & CRM)
+        // 2. Users (For Stats & CRM)
         const qUsers = query(collection(db, 'users'));
         const unsubUsers = onSnapshot(qUsers, (snapshot) => {
              const data = snapshot.docs.map(doc => ({ id: doc.id, ...(doc.data() as DocumentData) }));
@@ -141,33 +111,22 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
              setStats(prev => ({ ...prev, activeUsers: snapshot.size }));
         });
 
-        // 4. One-off Stats
+        // 3. One-off Stats
         if (activeTab === 'analytics') {
              getBrevoStats().then(brevo => setStats(prev => ({ ...prev, brevoSubs: brevo.subscribers, brevoClients: brevo.clients })));
         }
 
-        // 5. Chatbot
+        // 4. Chatbot
         if (activeTab === 'chatbot') {
             getChatConfig().then(setChatConfig);
             getChatFeedback('dislike').then(setFeedbackList);
             getChatFeedback('like').then(setPositiveFeedbackList);
         }
 
-        return () => { unsubProd(); unsubOrders(); unsubUsers(); };
+        return () => { unsubOrders(); unsubUsers(); };
     }, [isOpen, activeTab]);
 
-    // --- HANDLERS --- (Keeping reused logic concise)
-    const handleDeleteProduct = async (id: string) => { if(confirm("Tem certeza?")) await deleteDocument('products', id); };
-    const handleDragEndProducts = async (event: any) => {
-        const { active, over } = event;
-        if (active.id !== over.id) {
-            const oldIndex = products.findIndex(p => p.id === active.id);
-            const newIndex = products.findIndex(p => p.id === over.id);
-            const newItems = arrayMove(products, oldIndex, newIndex);
-            setProducts(newItems);
-            for (let i = 0; i < newItems.length; i++) await updateDocument('products', newItems[i].id, { displayOrder: i });
-        }
-    };
+    // --- HANDLERS ---
     const handleDragEndStarters = (event: any) => {
         if (!chatConfig) return;
         const { active, over } = event;
@@ -239,10 +198,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
                     )}
 
                     {activeTab === 'products' && (
-                        <div className="space-y-6 animate-fade-in">
-                            <div className="flex justify-between items-center"><div className="relative"><Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={16} /><input type="text" placeholder="Buscar obra..." value={productSearch} onChange={(e) => setProductSearch(e.target.value)} className="bg-[#151515] border border-white/10 rounded-full pl-10 pr-4 py-2 text-sm focus:border-accent outline-none w-64" /></div><button onClick={() => { setEditingProduct(null); setIsProductModalOpen(true); }} className="bg-accent text-white px-6 py-2 rounded-full font-bold uppercase text-xs tracking-widest hover:bg-accent/80 flex items-center gap-2"><Plus size={16} /> Nova Obra</button></div>
-                            <div className="bg-[#151515] rounded-xl border border-white/10 overflow-hidden"><DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEndProducts}><table className="w-full text-sm"><thead className="bg-white/5 text-gray-400 uppercase text-xs font-medium"><tr><th className="px-4 py-3 text-left w-16">Ord</th><th className="px-4 py-3 text-left">Obra</th><th className="px-4 py-3 text-left">Preço</th><th className="px-4 py-3 text-right">Ações</th></tr></thead><tbody className="divide-y divide-white/5"><SortableContext items={products.map(p => p.id)} strategy={verticalListSortingStrategy}>{products.filter(p => p.translations?.fr?.title?.toLowerCase().includes(productSearch.toLowerCase())).map((product, index) => (<SortableRow key={product.id} product={product} index={index} onEdit={(p) => { setEditingProduct(p); setIsProductModalOpen(true); }} onDelete={handleDeleteProduct}/>))}</SortableContext></tbody></table></DndContext></div>
-                        </div>
+                        <div className="h-full"><ProductsBoard /></div>
                     )}
 
                     {activeTab === 'chatbot' && chatConfig && (
@@ -271,7 +227,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
                 </main>
             </div>
             
-            {isProductModalOpen && <ProductForm initialData={editingProduct} onClose={() => setIsProductModalOpen(false)} onSuccess={() => { setIsProductModalOpen(false); setEditingProduct(null); }}/>}
             {showFeedbackModal && (<div className="fixed inset-0 z-[110] bg-black/80 backdrop-blur flex items-center justify-center p-4"><div className="bg-[#151515] p-8 rounded-xl max-w-lg w-full border border-white/10"><h3 className="text-xl font-serif mb-4">Corrigir IA</h3><div className="bg-black/30 p-4 rounded mb-4 text-sm text-gray-400"><p><strong>P:</strong> {showFeedbackModal.userMessage}</p><p><strong>R:</strong> {showFeedbackModal.aiResponse}</p></div><textarea value={fixAnswer} onChange={e => setFixAnswer(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded p-4 text-white outline-none mb-4" placeholder="Resposta correta..." /><div className="flex gap-4"><button onClick={() => setShowFeedbackModal(null)} className="flex-1 py-3 text-gray-400">Cancelar</button><button onClick={handleResolveFeedback} className="flex-1 py-3 bg-accent text-white font-bold rounded">Salvar</button></div></div></div>)}
         </div>
     );

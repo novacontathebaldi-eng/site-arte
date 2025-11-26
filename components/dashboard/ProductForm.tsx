@@ -3,13 +3,16 @@ import React, { useState, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { productSchema, ProductFormValues } from '../../lib/validators/product';
-import { Product, ProductCategory, ProductImage } from '../../types/product';
+import { Product, ProductImage, Category } from '../../types/product';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Save, X, Upload, Trash2, Star, Image as ImageIcon, Languages, Box, Tag, Globe, Loader2 } from 'lucide-react';
+import { Save, X, Upload, Trash2, Star, Image as ImageIcon, Languages, Box, Tag, Globe, Loader2, Link, Crop } from 'lucide-react';
 import { uploadImage, getPublicUrl, STORAGE_BUCKET } from '../../lib/supabase/storage';
 import { createDocument, updateDocument } from '../../lib/firebase/firestore';
+import { collection, getDocs, query, orderBy } from 'firebase/firestore';
+import { db } from '../../lib/firebase/config';
 import { cn } from '../../lib/utils';
 import { useToast } from '../ui/Toast';
+import { ImageCropper } from './ImageCropper';
 
 interface ProductFormProps {
   initialData?: Product | null;
@@ -31,18 +34,36 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, onClose, 
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('general');
   const [images, setImages] = useState<ProductImage[]>(initialData?.images || []);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [uploadingImg, setUploadingImg] = useState(false);
+  
+  // Image Management State
+  const [imageInputMode, setImageInputMode] = useState<'upload' | 'url'>('upload');
+  const [urlInput, setUrlInput] = useState('');
+  const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
+  const [processingCrop, setProcessingCrop] = useState(false);
+
+  // Fetch Categories
+  useEffect(() => {
+    const fetchCats = async () => {
+        try {
+            const q = query(collection(db, 'categories'), orderBy('displayOrder', 'asc'));
+            const snap = await getDocs(q);
+            const cats = snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Category));
+            setCategories(cats);
+        } catch(e) { console.error(e); }
+    };
+    fetchCats();
+  }, []);
 
   const defaultValues: any = {
     sku: '',
     slug: '',
     price: 0,
     stock: 1,
-    category: ProductCategory.PAINTINGS,
+    category: '',
     status: 'active',
     featured: false,
-    displayOrder: 0,
     dimensions: { height: 0, width: 0, depth: 0, unit: 'cm' },
     weight: 0,
     medium: '',
@@ -59,7 +80,6 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, onClose, 
     tags: ''
   };
 
-  // Cast resolver to any to avoid strict type mismatch between Zod inference and RHF generics
   const { register, control, handleSubmit, watch, setValue, formState: { errors } } = useForm<ProductFormValues>({
     resolver: zodResolver(productSchema) as any,
     defaultValues: initialData ? {
@@ -77,35 +97,52 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, onClose, 
     }
   }, [enTitle, initialData, setValue]);
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
-
-    setUploadingImg(true);
-    try {
-        const newImages: ProductImage[] = [];
-        for (let i = 0; i < files.length; i++) {
-            const file = files[i];
-            // Fix: Use correct bucket and 'products' folder
-            const fileName = `products/prod-${Date.now()}-${i}-${file.name.replace(/[^a-zA-Z0-9.]/g, '')}`;
-            const { path } = await uploadImage(STORAGE_BUCKET, file, fileName);
-            const url = getPublicUrl(STORAGE_BUCKET, path);
-            
-            newImages.push({
-                id: Math.random().toString(36).substr(2, 9),
-                url,
-                alt: file.name,
-                isThumbnail: images.length === 0 && i === 0 // First image is default thumbnail
-            });
-        }
-        setImages([...images, ...newImages]);
-        toast(`${newImages.length} imagens enviadas`, "success");
-    } catch (err) {
-        console.error(err);
-        toast("Erro ao enviar imagens", "error");
-    } finally {
-        setUploadingImg(false);
+  // Handle File Select -> Trigger Cropper
+  const onSelectFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const reader = new FileReader();
+      reader.addEventListener('load', () => setCropImageSrc(reader.result?.toString() || null));
+      reader.readAsDataURL(e.target.files[0]);
+      e.target.value = ''; // Reset
     }
+  };
+
+  const handleCropComplete = async (croppedBlob: Blob) => {
+    setProcessingCrop(true);
+    try {
+        const fileName = `products/prod-${Date.now()}-${Math.random().toString(36).substr(2, 5)}.jpg`;
+        const file = new File([croppedBlob], fileName, { type: 'image/jpeg' });
+        
+        const { path } = await uploadImage(STORAGE_BUCKET, file, fileName);
+        const url = getPublicUrl(STORAGE_BUCKET, path);
+        
+        const newImage: ProductImage = {
+            id: Math.random().toString(36).substr(2, 9),
+            url,
+            alt: 'Artwork',
+            isThumbnail: images.length === 0
+        };
+        
+        setImages([...images, newImage]);
+        setCropImageSrc(null);
+        toast("Imagem adicionada", "success");
+    } catch(e) {
+        console.error(e);
+        toast("Erro no upload", "error");
+    } finally {
+        setProcessingCrop(false);
+    }
+  };
+
+  const addImageUrl = () => {
+    if(!urlInput) return;
+    setImages([...images, {
+        id: Math.random().toString(36).substr(2, 9),
+        url: urlInput,
+        alt: 'Artwork URL',
+        isThumbnail: images.length === 0
+    }]);
+    setUrlInput('');
   };
 
   const setThumbnail = (id: string) => {
@@ -126,18 +163,24 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, onClose, 
     try {
         const payload: Partial<Product> = {
             ...data,
-            // Convert comma separated tags to array
+            category: data.category, // Now a string (slug)
             tags: (data.tags as unknown as string).split(',').map(t => t.trim()).filter(Boolean),
             images,
             updatedAt: new Date().toISOString()
         };
 
+        // Remove displayOrder logic as it is handled by the Kanban board
+        delete (payload as any).displayOrder;
+
         if (initialData?.id) {
             await updateDocument('products', initialData.id, payload);
             toast("Produto atualizado!", "success");
         } else {
+            // New products get lowest displayOrder (added to end)
+            // Ideally we fetch max order, but for now 9999 is fine, the user will reorder in Kanban
             await createDocument('products', {
                 ...payload,
+                displayOrder: 9999,
                 createdAt: new Date().toISOString()
             });
             toast("Produto criado!", "success");
@@ -225,9 +268,6 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, onClose, 
                         >
                             <tab.icon size={18} />
                             <span className="hidden md:inline">{tab.label}</span>
-                            {activeTab !== tab.id && errors?.translations?.[tab.id as keyof typeof errors.translations] && (
-                                <span className="w-2 h-2 rounded-full bg-red-500 ml-auto" />
-                            )}
                         </button>
                     ))}
                 </div>
@@ -240,12 +280,16 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, onClose, 
                             <div className="space-y-6">
                                 <h3 className="text-lg font-serif text-white border-b border-white/10 pb-2 mb-6">Informações Básicas</h3>
                                 <div className="grid grid-cols-2 gap-4">
-                                    <Input label="SKU (Código Interno)" name="sku" placeholder="ART-001" error={errors.sku} />
+                                    <Input label="SKU" name="sku" placeholder="ART-001" error={errors.sku} />
                                     <div className="mb-4">
                                         <label className="block text-xs uppercase text-gray-400 mb-1 tracking-wider">Categoria</label>
                                         <select {...register('category')} className="w-full bg-black/20 border border-white/10 rounded p-3 text-sm text-white focus:outline-none focus:border-accent">
-                                            {Object.values(ProductCategory).map(c => <option key={c} value={c}>{c}</option>)}
+                                            <option value="">Selecione...</option>
+                                            {categories.map(c => (
+                                                <option key={c.id} value={c.slug}>{c.translations.fr.title} ({c.slug})</option>
+                                            ))}
                                         </select>
+                                        {errors.category && <span className="text-red-500 text-xs">{errors.category.message}</span>}
                                     </div>
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
@@ -262,7 +306,6 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, onClose, 
                                             <option value="reserved">Reservado</option>
                                         </select>
                                     </div>
-                                    <Input label="Ordem de Exibição" name="displayOrder" type="number" />
                                 </div>
                                 <div className="flex items-center gap-3 p-4 border border-white/10 rounded bg-white/5">
                                     <input type="checkbox" {...register('featured')} className="w-4 h-4 accent-accent" />
@@ -313,31 +356,56 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, onClose, 
                         </div>
                     )}
 
-                    {/* IMAGES TAB */}
+                    {/* IMAGES TAB - ENHANCED */}
                     {activeTab === 'images' && (
                         <div className="animate-fade-in">
-                            <div className="flex justify-between items-center mb-6">
+                            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
                                 <div>
                                     <h3 className="text-lg font-serif text-white">Galeria da Obra</h3>
-                                    <p className="text-xs text-gray-500">Arraste para reordenar (Em breve). A primeira imagem com estrela é a capa.</p>
+                                    <p className="text-xs text-gray-500">Adicione URLs ou faça upload com corte.</p>
                                 </div>
-                                <label className="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded cursor-pointer flex items-center gap-2 transition-colors">
-                                    {uploadingImg ? <Loader2 className="animate-spin" size={16}/> : <Upload size={16}/>}
-                                    Adicionar Imagens
-                                    <input type="file" multiple accept="image/*" className="hidden" onChange={handleImageUpload} disabled={uploadingImg} />
-                                </label>
+                                
+                                <div className="flex gap-2 bg-[#1a1a1a] p-1 rounded-lg border border-white/10">
+                                    <button onClick={() => setImageInputMode('upload')} className={cn("px-3 py-1.5 rounded text-xs font-bold uppercase", imageInputMode === 'upload' ? "bg-white/10 text-white" : "text-gray-500 hover:text-white")}>
+                                        <Upload size={14} className="inline mr-1"/> Upload
+                                    </button>
+                                    <button onClick={() => setImageInputMode('url')} className={cn("px-3 py-1.5 rounded text-xs font-bold uppercase", imageInputMode === 'url' ? "bg-white/10 text-white" : "text-gray-500 hover:text-white")}>
+                                        <Link size={14} className="inline mr-1"/> URL
+                                    </button>
+                                </div>
                             </div>
 
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                            {/* Input Area */}
+                            <div className="bg-[#1a1a1a] p-6 rounded-xl border border-white/10 mb-8">
+                                {imageInputMode === 'upload' ? (
+                                    <div className="flex flex-col items-center justify-center border-2 border-dashed border-white/10 rounded-lg p-8 hover:bg-white/5 transition-colors cursor-pointer relative">
+                                        <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={onSelectFile} />
+                                        <Upload size={32} className="text-gray-500 mb-2" />
+                                        <p className="text-sm text-gray-400 font-medium">Clique para selecionar e cortar</p>
+                                    </div>
+                                ) : (
+                                    <div className="flex gap-2">
+                                        <input 
+                                            value={urlInput} 
+                                            onChange={e => setUrlInput(e.target.value)} 
+                                            placeholder="https://..." 
+                                            className="flex-1 bg-black/20 border border-white/10 rounded p-3 text-sm text-white"
+                                        />
+                                        <button onClick={addImageUrl} className="bg-white/10 px-4 rounded text-white hover:bg-white/20 font-bold uppercase text-xs">Adicionar</button>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
                                 {images.map((img, index) => (
-                                    <div key={img.id} className={cn("relative group aspect-square rounded-lg overflow-hidden border-2 transition-all", img.isThumbnail ? "border-accent" : "border-white/10")}>
+                                    <div key={img.id} className={cn("relative group aspect-square rounded-lg overflow-hidden border-2 transition-all bg-[#0a0a0a]", img.isThumbnail ? "border-accent" : "border-white/10")}>
                                         <img src={img.url} alt={img.alt} className="w-full h-full object-cover" />
                                         <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
                                             <button 
                                                 onClick={() => setThumbnail(img.id)}
                                                 className={cn("px-3 py-1 rounded-full text-xs font-bold uppercase", img.isThumbnail ? "bg-accent text-white" : "bg-white text-black hover:bg-accent hover:text-white")}
                                             >
-                                                {img.isThumbnail ? 'Capa Principal' : 'Definir Capa'}
+                                                {img.isThumbnail ? 'Capa' : 'Definir Capa'}
                                             </button>
                                             <button onClick={() => removeImage(img.id)} className="p-2 bg-red-500/20 text-red-500 rounded-full hover:bg-red-500 hover:text-white">
                                                 <Trash2 size={16} />
@@ -346,12 +414,6 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, onClose, 
                                         {img.isThumbnail && <div className="absolute top-2 right-2 text-accent"><Star fill="currentColor" size={20}/></div>}
                                     </div>
                                 ))}
-                                {images.length === 0 && (
-                                    <div className="col-span-full py-20 border-2 border-dashed border-white/10 rounded-lg flex flex-col items-center justify-center text-gray-500">
-                                        <ImageIcon size={48} className="mb-4 opacity-50" />
-                                        <p>Nenhuma imagem adicionada.</p>
-                                    </div>
-                                )}
                             </div>
                         </div>
                     )}
@@ -386,6 +448,26 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, onClose, 
                     )}
                 </div>
             </div>
+
+            {/* Cropper Modal */}
+            <AnimatePresence>
+                {cropImageSrc && (
+                    <ImageCropper 
+                        imageSrc={cropImageSrc}
+                        onCancel={() => setCropImageSrc(null)}
+                        onCropComplete={handleCropComplete}
+                    />
+                )}
+            </AnimatePresence>
+
+            {processingCrop && (
+                <div className="fixed inset-0 z-[150] bg-black/50 flex items-center justify-center">
+                    <div className="bg-[#1a1a1a] p-6 rounded-xl flex items-center gap-4 border border-white/10">
+                        <Loader2 className="animate-spin text-accent" />
+                        <span className="text-white font-medium">Processando imagem...</span>
+                    </div>
+                </div>
+            )}
         </motion.div>
     </div>
   );

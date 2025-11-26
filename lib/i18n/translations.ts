@@ -79,6 +79,13 @@ export const dictionaries = {
     'admin.crm.brevo_status': 'Statut Email',
     'admin.crm.pagination_prev': 'Précédent',
     'admin.crm.pagination_next': 'Suivant',
+    // Admin Catalog
+    'admin.catalog.new_category': 'Nouvelle Catégorie',
+    'admin.catalog.edit_category': 'Modifier Catégorie',
+    'admin.catalog.delete_error': 'Impossible de supprimer: La catégorie contient des produits.',
+    'admin.catalog.bulk_delete': 'Supprimer la sélection',
+    'admin.catalog.items_selected': 'éléments sélectionnés',
+    'admin.catalog.add_product': 'Ajouter un Produit',
   },
   [Language.EN]: {
     'nav.home': 'Home',
@@ -157,6 +164,13 @@ export const dictionaries = {
     'admin.crm.brevo_status': 'Email Status',
     'admin.crm.pagination_prev': 'Previous',
     'admin.crm.pagination_next': 'Next',
+    // Admin Catalog
+    'admin.catalog.new_category': 'New Category',
+    'admin.catalog.edit_category': 'Edit Category',
+    'admin.catalog.delete_error': 'Cannot delete: Category contains products.',
+    'admin.catalog.bulk_delete': 'Delete Selected',
+    'admin.catalog.items_selected': 'items selected',
+    'admin.catalog.add_product': 'Add Product',
   },
   [Language.DE]: {
     'nav.home': 'Startseite',
@@ -235,6 +249,13 @@ export const dictionaries = {
     'admin.crm.brevo_status': 'E-Mail Status',
     'admin.crm.pagination_prev': 'Vorherige',
     'admin.crm.pagination_next': 'Nächste',
+    // Admin Catalog
+    'admin.catalog.new_category': 'Neue Kategorie',
+    'admin.catalog.edit_category': 'Kategorie Bearbeiten',
+    'admin.catalog.delete_error': 'Löschen nicht möglich: Kategorie enthält Produkte.',
+    'admin.catalog.bulk_delete': 'Ausgewählte Löschen',
+    'admin.catalog.items_selected': 'Elemente ausgewählt',
+    'admin.catalog.add_product': 'Produkt Hinzufügen',
   },
   [Language.PT]: {
     'nav.home': 'Início',
@@ -313,5 +334,12 @@ export const dictionaries = {
     'admin.crm.brevo_status': 'Status Email',
     'admin.crm.pagination_prev': 'Anterior',
     'admin.crm.pagination_next': 'Próximo',
+    // Admin Catalog
+    'admin.catalog.new_category': 'Nova Categoria',
+    'admin.catalog.edit_category': 'Editar Categoria',
+    'admin.catalog.delete_error': 'Não é possível excluir: Categoria contém produtos.',
+    'admin.catalog.bulk_delete': 'Excluir Selecionados',
+    'admin.catalog.items_selected': 'itens selecionados',
+    'admin.catalog.add_product': 'Adicionar Produto',
   }
 };
