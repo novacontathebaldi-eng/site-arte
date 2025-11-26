@@ -3,7 +3,7 @@
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageCircle, X, Send, Loader2, Sparkles, ThumbsUp, ThumbsDown, Copy, Minimize2, ShoppingBag, Check } from 'lucide-react';
+import { MessageCircle, X, Send, Loader2, Sparkles, ThumbsUp, ThumbsDown, Copy, ShoppingBag, Check } from 'lucide-react';
 import { useUIStore, useAuthStore } from '../store';
 import { generateChatResponse, submitChatFeedback } from '../app/actions/chat';
 import { ChatMessage, Product } from '../types';
@@ -23,34 +23,6 @@ const getImageUrl = (img: any) => {
     if (img.src) return img.src;
     return '';
 };
-
-// Typewriter Component Optimized
-const TypewriterText = React.memo(({ text, onComplete }: { text: string, onComplete?: () => void }) => {
-    const [displayedText, setDisplayedText] = useState('');
-    
-    useEffect(() => {
-        let i = 0;
-        const speed = 15; // ms per char
-        setDisplayedText(''); // Reset visual state on new text
-
-        const interval = setInterval(() => {
-            const nextChar = text.substring(0, i + 1);
-            setDisplayedText(nextChar);
-            i++;
-
-            if (i >= text.length) {
-                clearInterval(interval);
-                if (onComplete) onComplete();
-            }
-        }, speed);
-
-        return () => clearInterval(interval);
-    }, [text, onComplete]);
-
-    return <p className="whitespace-pre-wrap">{displayedText}</p>;
-});
-
-TypewriterText.displayName = 'TypewriterText';
 
 // --- SUB-COMPONENTS ---
 
@@ -247,20 +219,27 @@ export const Chatbot: React.FC = () => {
 
   return (
     <>
-      {/* Floating Button */}
-      <motion.button
-        className="fixed bottom-8 left-8 z-[90] w-14 h-14 bg-white/80 dark:bg-black/80 backdrop-blur-md text-primary dark:text-white rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.12)] flex items-center justify-center border border-white/20 hover:scale-105 transition-transform group"
-        onClick={toggleChat}
-        {...({
-            whileHover: { scale: 1.05 },
-            whileTap: { scale: 0.95 }
-        } as any)}
-      >
-        {isChatOpen ? <Minimize2 size={24} /> : <MessageCircle size={24} className="group-hover:text-accent transition-colors" />}
-        {!isChatOpen && messages.length > 1 && (
-             <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 rounded-full animate-pulse border-2 border-white dark:border-black" />
+      {/* Floating Button - Only shows when chat is CLOSED */}
+      <AnimatePresence>
+        {!isChatOpen && (
+            <motion.button
+                className="fixed bottom-8 left-8 z-[90] w-14 h-14 bg-white/80 dark:bg-black/80 backdrop-blur-md text-primary dark:text-white rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.12)] flex items-center justify-center border border-white/20 hover:scale-105 transition-transform group"
+                onClick={toggleChat}
+                {...({
+                    initial: { scale: 0, opacity: 0 },
+                    animate: { scale: 1, opacity: 1 },
+                    exit: { scale: 0, opacity: 0 },
+                    whileHover: { scale: 1.05 },
+                    whileTap: { scale: 0.95 }
+                } as any)}
+            >
+                <MessageCircle size={24} className="group-hover:text-accent transition-colors" />
+                {messages.length > 1 && (
+                    <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 rounded-full animate-pulse border-2 border-white dark:border-black" />
+                )}
+            </motion.button>
         )}
-      </motion.button>
+      </AnimatePresence>
 
       {/* Chat Window */}
       <AnimatePresence>
@@ -302,9 +281,6 @@ export const Chatbot: React.FC = () => {
                 data-lenis-prevent
             >
                 {messages.map((msg, idx) => {
-                    const isLast = idx === messages.length - 1;
-                    const shouldType = msg.role === 'model' && isLast && !msg.products && msg.id !== 'welcome';
-
                     return (
                         <motion.div 
                             key={msg.id} 
@@ -320,11 +296,7 @@ export const Chatbot: React.FC = () => {
                                     ? "bg-primary dark:bg-white text-white dark:text-black rounded-2xl rounded-tr-sm" 
                                     : "bg-white dark:bg-[#1e1e1e] text-gray-800 dark:text-gray-200 rounded-2xl rounded-tl-sm border border-gray-100 dark:border-white/5"
                             )}>
-                                {shouldType ? (
-                                    <TypewriterText text={msg.text} onComplete={scrollToBottom} />
-                                ) : (
-                                    <p className="whitespace-pre-wrap">{msg.text}</p>
-                                )}
+                                <p className="whitespace-pre-wrap">{msg.text}</p>
                             </div>
 
                             {msg.role === 'model' && (
