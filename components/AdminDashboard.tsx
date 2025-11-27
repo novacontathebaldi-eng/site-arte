@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, LayoutDashboard, Package, Users, MessageSquare, Plus, Edit, Trash2, Save, Upload, Search, Filter, TrendingUp, DollarSign, RefreshCw, Lock, Globe, MoveUp, MoveDown, Check, ThumbsDown, AlertCircle, Move, Loader2, Settings, Database, AlertTriangle, ToggleLeft, ToggleRight, EyeOff, ThumbsUp, ShoppingCart } from 'lucide-react';
+import { X, LayoutDashboard, Package, Users, MessageSquare, Plus, Edit, Trash2, Save, Upload, Search, Filter, TrendingUp, DollarSign, RefreshCw, Lock, Globe, MoveUp, MoveDown, Check, ThumbsDown, AlertCircle, Move, Loader2, Settings, Database, AlertTriangle, ToggleLeft, ToggleRight, EyeOff, ThumbsUp, ShoppingCart, Cpu } from 'lucide-react';
 import { useAuthStore } from '../store';
 import { db } from '../lib/firebase/config';
 import { deleteDocument, updateDocument } from '../lib/firebase/firestore';
@@ -205,6 +205,23 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-fade-in">
                             <div className="bg-[#151515] p-6 rounded-xl border border-white/10 space-y-6">
                                 <h3 className="text-lg font-serif border-b border-white/10 pb-4 mb-4">Personalidade da IA</h3>
+                                
+                                {/* MODEL SELECTION */}
+                                <div className="bg-black/30 p-4 rounded border border-white/10 flex flex-col gap-2">
+                                    <label className="text-xs uppercase text-gray-500 font-bold flex items-center gap-2"><Cpu size={14}/> Modelo de IA</label>
+                                    <select
+                                        value={chatConfig.modelName}
+                                        onChange={(e) => setChatConfig({...chatConfig, modelName: e.target.value})}
+                                        className="w-full bg-[#121212] border border-white/10 rounded p-3 text-sm text-white focus:border-accent outline-none transition-colors"
+                                    >
+                                        <option value="gemini-2.5-flash">Gemini 2.5 Flash (Padrão/Rápido)</option>
+                                        <option value="gemini-2.5-flash-lite-preview-02-05">Gemini 2.5 Flash Lite (Econômico)</option>
+                                        <option value="gemini-1.5-pro">Gemini 1.5 Pro (Complexo)</option>
+                                        <option value="gemini-1.5-flash">Gemini 1.5 Flash (Legado)</option>
+                                    </select>
+                                    <p className="text-[10px] text-gray-500">Selecione o modelo que melhor se adapta ao volume de conversas.</p>
+                                </div>
+
                                 <div className="flex items-center justify-between bg-black/30 p-4 rounded border border-white/10">
                                     <div className="flex items-center gap-3">{chatConfig.useCustomPrompt ? (<ToggleRight size={32} className="text-accent cursor-pointer" onClick={() => setChatConfig({...chatConfig, useCustomPrompt: false})} />) : (<ToggleLeft size={32} className="text-gray-500 cursor-pointer" onClick={() => setChatConfig({...chatConfig, useCustomPrompt: true})} />)}<div><span className="block text-sm font-bold text-white">Prompt Personalizado</span><span className="text-xs text-gray-500">Desligado = Padrão de Fábrica.</span></div></div>
                                 </div>

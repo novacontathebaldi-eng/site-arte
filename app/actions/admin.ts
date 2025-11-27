@@ -121,6 +121,7 @@ export async function getChatConfig(): Promise<ChatConfig> {
             const data = docSnap.data() as any;
             // Validação e Fallback
             return {
+                modelName: data.modelName || 'gemini-2.5-flash',
                 useCustomPrompt: data.useCustomPrompt ?? false, // Default OFF for safety
                 systemPrompt: data.systemPrompt || DEFAULT_SYSTEM_PROMPT,
                 modelTemperature: data.modelTemperature ?? 0.7,
@@ -134,6 +135,7 @@ export async function getChatConfig(): Promise<ChatConfig> {
         
         // If config doesn't exist, create it with defaults immediately
         const defaultConfig: ChatConfig = {
+            modelName: 'gemini-2.5-flash',
             useCustomPrompt: false,
             systemPrompt: DEFAULT_SYSTEM_PROMPT,
             modelTemperature: 0.7,
@@ -151,6 +153,7 @@ export async function getChatConfig(): Promise<ChatConfig> {
     } catch (e) {
         console.error("Error fetching chat config:", e);
         return {
+            modelName: 'gemini-2.5-flash',
             useCustomPrompt: false,
             systemPrompt: DEFAULT_SYSTEM_PROMPT,
             modelTemperature: 0.7,

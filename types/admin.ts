@@ -29,6 +29,7 @@ export interface KnowledgeBaseItem {
 }
 
 export interface ChatConfig {
+  modelName: string; // Seleção dinâmica do modelo
   useCustomPrompt: boolean; // NOVO: Controle de Override
   systemPrompt: string;
   modelTemperature: number;

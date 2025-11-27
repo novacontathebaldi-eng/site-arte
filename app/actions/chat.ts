@@ -142,6 +142,7 @@ export async function generateChatResponse(
 
     // Logging de Diagnóstico
     console.log(">> Current Config:", JSON.stringify({ 
+        model: chatConfig.modelName,
         useCustom: chatConfig.useCustomPrompt, 
         temp: chatConfig.modelTemperature 
     }));
@@ -170,7 +171,7 @@ export async function generateChatResponse(
     // 3. Initialize Gemini
     const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
     const chat = ai.chats.create({
-      model: 'gemini-2.5-flash',
+      model: chatConfig.modelName || 'gemini-2.5-flash', // Dynamic Model Selection
       config: {
         systemInstruction: systemInstruction,
         temperature: chatConfig.modelTemperature,
