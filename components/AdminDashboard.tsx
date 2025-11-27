@@ -215,9 +215,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
                                         className="w-full bg-[#121212] border border-white/10 rounded p-3 text-sm text-white focus:border-accent outline-none transition-colors"
                                     >
                                         <option value="gemini-2.5-flash">Gemini 2.5 Flash (Padrão/Rápido)</option>
-                                        <option value="gemini-2.5-flash-lite-preview-02-05">Gemini 2.5 Flash Lite (Econômico)</option>
-                                        <option value="gemini-1.5-pro">Gemini 1.5 Pro (Complexo)</option>
-                                        <option value="gemini-1.5-flash">Gemini 1.5 Flash (Legado)</option>
+                                        <option value="gemini-2.0-flash-lite-preview-02-05">Gemini 2.0 Flash Lite (Econômico)</option>
+                                        <option value="gemini-2.0-pro-exp-02-05">Gemini 2.0 Pro (Raciocínio Complexo)</option>
+                                        <option value="gemini-2.0-flash">Gemini 2.0 Flash (Estável)</option>
                                     </select>
                                     <p className="text-[10px] text-gray-500">Selecione o modelo que melhor se adapta ao volume de conversas.</p>
                                 </div>
