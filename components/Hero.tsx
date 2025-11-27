@@ -36,7 +36,7 @@ export const Hero: React.FC = () => {
       {/* Content */}
       <motion.div 
         className="relative z-10 text-center px-6"
-        style={{ opacity }}
+        style={{ opacity } as any}
       >
         <motion.div
             {...({

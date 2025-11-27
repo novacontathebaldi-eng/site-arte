@@ -214,8 +214,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
                                         onChange={(e) => setChatConfig({...chatConfig, modelName: e.target.value})}
                                         className="w-full bg-[#121212] border border-white/10 rounded p-3 text-sm text-white focus:border-accent outline-none transition-colors"
                                     >
-                                        <option value="gemini-2.5-flash">Gemini 2.5 Flash (Padrão/Rápido)</option>
+                                        <option value="gemini-2.5-flash">Gemini 2.5 Flash (Padrão/Rápido/Estável)</option>
                                         <option value="gemini-2.0-flash">Gemini 2.0 Flash (Estável)</option>
+                                        <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash Lite (Econômico - Recomendado)</option>
+                                        <option value="gemini-2.0-flash-lite">Gemini 2.0 Flash Lite (Econômico)</option>
                                     </select>
                                     <p className="text-[10px] text-gray-500">Use apenas modelos estáveis para evitar erros de cota.</p>
                                 </div>
